@@ -1,2 +1,1 @@
-# COLENRIT
-Compiler Level Risc-V Encryption Tool
+# ERIC Encrpytion for RISCV with Compiler 
