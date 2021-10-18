@@ -65,7 +65,7 @@ cmake -G Ninja \
 cmake --build .
 ```
 
-#### Light Installation ####
+#### Recommended Light Installation ####
 ```bash
 git clone https://github.com/llvm/llvm-project.git && \
 cd llvm-project && \
