@@ -101,3 +101,59 @@ sudo make install && \
 sudo ldconfig
 ```
 
+# Cloning Repository #
+```bash
+git clone https://github.com/kasirgalabs/ERIC
+```
+# Building kasirga Compiler and alp Encryption Tool #
+
+**1-)** Go to kasirga-compiler-and-alp directory. Then create a build directory and change directory:
+```bash
+cd kasirga-compiler-and-alp
+mkdir build
+cd build
+```
+
+**2-)** Export your LLVM directories:
+
+```bash
+export LLVM_PROJECT_DIR={your-llvm-project-directory}
+export LLVM_BUILD_DIR={your-llvm-install-or-build-directory}
+```
+
+Example:
+```bash
+export LLVM_PROJECT_DIR=~/llvm/llvm-project
+export LLVM_BUILD_DIR=~/llvm/llvm-project/build
+```
+
+**3-)** Configure with cmake:
+
+```bash
+cmake -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
+```
+
+**4-)** Build with cmake or make:
+
+```bash
+cmake --build .
+```
+
+Alternative build with make:
+
+```bash
+make
+```
+
+If you can't build because of a compiler error, install a new compiler if does not exist, change your compiler as for example:
+
+```bash
+export CC=clang-11
+export CXX=clang++-11
+```
+
+then delete build directory and start with the first step again.
+
+You can look here for changing compiler that I answered: https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867
+
+**Now you can find your executables in /kasirga-compiler/build/bin folder as alp and kasirga variants.**
