@@ -157,7 +157,7 @@ export CXX=clang++-11
 
 then delete build directory and start with the first step again.
 
-You can look here for changing compiler that I answered: https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867
+You can look for changing compiler that I answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
 
 **Now you can find your executables in /kasirga-compiler-and-alp/build/bin folder as alp and kasirga variants.**
 
