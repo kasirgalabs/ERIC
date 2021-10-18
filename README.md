@@ -81,7 +81,7 @@ cmake --build .
 
 ### 2. wxWidgets Library Installation ###
 
-### 2.1 Necessary Tools Installation ###
+#### 2.1 Necessary Tools Installation ####
 ```bash
 sudo apt install build-essential
 ```
@@ -90,7 +90,7 @@ sudo apt install build-essential
 sudo apt install libgtk-3-dev
 ```
 
-### 2.2 wxWidgets Installation ###
+#### 2.2 wxWidgets Installation ####
 ```bash
 git clone https://github.com/wxWidgets/wxWidgets && \
 mkdir gtk-build && \
