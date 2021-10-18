@@ -107,7 +107,7 @@ git clone https://github.com/kasirgalabs/ERIC
 ```
 # Building kasirga Compiler and alp Encryption Tool #
 
-**1-)** Go to kasirga-compiler-and-alp directory. Then create a build directory and change directory:
+**1-)** Go to **kasirga-compiler-and-alp** directory. Then create a build directory and change directory:
 ```bash
 cd kasirga-compiler-and-alp
 mkdir build
