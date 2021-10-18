@@ -30,6 +30,8 @@ The thing to remember is that ERIC is a compiler with an interface developed for
 
 # Installation #
 
+### 1. LLVM Library Installation ###
 
 
+### 2. wxWidgets Library Installation ###
 
