@@ -34,12 +34,12 @@ The thing to remember is that ERIC is a compiler with an interface developed for
 
 ### 1.1 Necessary Tools Installation ###
 
-#### 1.1.1 CMake Installation ####
+#### CMake Installation ####
 ```bash
 sudo snap install cmake --classic
 ```
 
-#### 1.1.2 Ninja Installation ####
+#### Ninja Installation ####
 ```bash
 sudo apt install ninja-build
 ```
