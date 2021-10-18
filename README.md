@@ -108,7 +108,7 @@ git clone https://github.com/kasirgalabs/ERIC
 
 # Building Repository #
 
-### Building kasirga Compiler and alp Encryption Tool ###
+### 1. Building kasirga Compiler and alp Encryption Tool ###
 
 **1-)** Go to **kasirga-compiler-and-alp** directory. Then create a build directory and change directory:
 ```bash
@@ -161,7 +161,7 @@ You can look here for changing compiler that I answered: https://stackoverflow.c
 
 **Now you can find your executables in /kasirga-compiler-and-alp/build/bin folder as alp and kasirga variants.**
 
-### Building kasirgaIDE ###
+### 2. Building kasirgaIDE ###
 **1-)** Go to **kasirgaIDE** directory. Then create a build directory and change directory:
 ```bash
 cd kasirgaIDE
