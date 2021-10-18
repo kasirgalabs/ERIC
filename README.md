@@ -105,7 +105,10 @@ sudo ldconfig
 ```bash
 git clone https://github.com/kasirgalabs/ERIC
 ```
-# Building kasirga Compiler and alp Encryption Tool #
+
+# Building Repository #
+
+### Building kasirga Compiler and alp Encryption Tool ###
 
 **1-)** Go to **kasirga-compiler-and-alp** directory. Then create a build directory and change directory:
 ```bash
@@ -157,3 +160,27 @@ then delete build directory and start with the first step again.
 You can look here for changing compiler that I answered: https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867
 
 **Now you can find your executables in /kasirga-compiler-and-alp/build/bin folder as alp and kasirga variants.**
+
+### Building kasirgaIDE ###
+**1-)** Go to **kasirgaIDE** directory. Then create a build directory and change directory:
+```bash
+cd kasirgaIDE
+mkdir build
+cd build
+```
+**2-)** Configure with cmake:
+```bash
+cmake -G Ninja ..
+```
+
+**3-)** Build with cmake or make:
+
+```bash
+cmake --build .
+```
+
+Alternative build with make:
+
+```bash
+make
+```
