@@ -25,7 +25,7 @@ The thing to remember is that ERIC is a compiler with an interface developed for
 
 # Requirements #
 
-* LLVM library built for RISCV target (LLVM installation)
-* wxWidgets library built for IDE (wxWidgets installation)
+* [LLVM library](https://github.com/llvm/llvm-project) built for RISCV target (LLVM installation)
+* [wxWidgets library](https://github.com/wxWidgets/wxWidgets) built for IDE (wxWidgets installation)
 
 
