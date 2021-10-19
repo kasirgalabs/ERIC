@@ -7,11 +7,11 @@ In addition, it can be used in cases where you want the data kept in memory to r
 
 ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported:
 
-### 1. Instruction - Level Full Encryption ###
+### 1. Instruction-Level Full Encryption ###
    
    This method encrypts the instructions one by one. It provides encryption of all instructions in the program by entering a specific key.
    
-### 2. Instruction - Level Partial Encryption ###
+### 2. Instruction-Level Partial Encryption ###
  
    This method supports unlimited customization. You can choose the types of instructions you think are critical to your program and only encrypt them. You can also encrypt each instruction to correspond to different bits within itself.
  
