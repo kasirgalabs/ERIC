@@ -1,39 +1,26 @@
 /***************************************************************
- * Name:      kasirgaIDEApp.cpp
- * Purpose:   Code for Application Class
+ * Name:      kasirgaIDEApp.h
+ * Purpose:   Defines Application Class
  * Author:     ()
  * Created:   2021-10-01
  * Copyright:  ()
  * License:
  **************************************************************/
 
-#include "kasirgaIDEApp.h"
+#ifndef KASIRGAIDEAPP_H
+#define KASIRGAIDEAPP_H
 
-//(*AppHeaders
-#include "kasirgaIDEMain.h"
-#include <wx/image.h>
-//*)
-//#ifdef _DEBUG
-//wxIMPLEMENT_APP_CONSOLE(kasirgaIDEApp);
-//#else
-//wxIMPLEMENT_APP(kasirgaIDEApp);
-//#endif
-IMPLEMENT_APP(kasirgaIDEApp);
+#include <wx/app.h>
+#include <string.h>
 
-bool kasirgaIDEApp::OnInit()
+class kasirgaIDEApp : public wxApp
 {
-    //(*AppInitialize
-    bool wxsOK = true;
-    wxInitAllImageHandlers();
-    if ( wxsOK )
-    {
-    	kasirgaIDEFrame* Frame = new kasirgaIDEFrame(0);
-    	Frame->Show();
-    	SetTopWindow(Frame);
-    }
-    //*)
-    return wxsOK;
+    public:
+        virtual bool OnInit();
+        std::string compStr;
+        std::string alpStr;
+};
 
-}
+DECLARE_APP(kasirgaIDEApp);
 
-//kasirgaIDEApp::compStr = "";
+#endif // KASIRGAIDEAPP_H
