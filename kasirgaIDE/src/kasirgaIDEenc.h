@@ -37,7 +37,24 @@ class kasirgaIDEenc: public wxFrame
 		wxButton* Button1;
 		wxButton* goBckBtn;
 		wxButton* addAlp;
-		wxStaticText* lbl1;
+		//wxStaticText* lbl1;
+		wxStaticText* LBL_ienc32insts;
+        wxStaticText* LBL_menc32insts;
+        wxStaticText* LBL_aenc32insts;
+        wxStaticText* LBL_fenc32insts;
+        wxStaticText* LBL_denc32insts;
+        wxStaticText* LBL_qenc32insts;
+
+        wxStaticText* LBL_ienc64insts;
+        wxStaticText* LBL_menc64insts;
+        wxStaticText* LBL_aenc64insts;
+        wxStaticText* LBL_fenc64insts;
+        wxStaticText* LBL_denc64insts;
+        wxStaticText* LBL_qenc64insts;
+
+        wxStaticText* LBL_cencq2insts;
+        wxStaticText* LBL_cencq1insts;
+        wxStaticText* LBL_cencq0insts;
 
 		void OnButtons(wxCommandEvent& event);
 		void OnCheckBoxes(wxCommandEvent& event);
@@ -55,7 +72,24 @@ class kasirgaIDEenc: public wxFrame
 		static const long ID_BUTTON1;
 		static const long ID_BUTTON2;
 		static const long ID_BUTTON3;
-		static const long ID_STATICTEXT1;
+		//static const long ID_STATICTEXT1;
+		static const long ID_LBL_ienc32insts;
+        static const long ID_LBL_menc32insts;
+        static const long ID_LBL_aenc32insts;
+        static const long ID_LBL_fenc32insts;
+        static const long ID_LBL_denc32insts;
+        static const long ID_LBL_qenc32insts;
+
+        static const long ID_LBL_ienc64insts;
+        static const long ID_LBL_menc64insts;
+        static const long ID_LBL_aenc64insts;
+        static const long ID_LBL_fenc64insts;
+        static const long ID_LBL_denc64insts;
+        static const long ID_LBL_qenc64insts;
+
+        static const long ID_LBL_cencq2insts;
+        static const long ID_LBL_cencq1insts;
+        static const long ID_LBL_cencq0insts;
 
 
 	private:
