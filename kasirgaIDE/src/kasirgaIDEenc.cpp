@@ -13,17 +13,36 @@
 //*)
 
 //(*IdInit(kasirgaIDEenc)
+
+//*)
+
 const long kasirgaIDEenc::ID_CHECKBOX1 = wxNewId();
 const long kasirgaIDEenc::ID_CHECKBOX2 = wxNewId();
 const long kasirgaIDEenc::ID_CHECKBOX3 = wxNewId();
 const long kasirgaIDEenc::ID_CHECKBOX4 = wxNewId();
 const long kasirgaIDEenc::ID_CHECKBOX5 = wxNewId();
-//*)
 
 const long kasirgaIDEenc::ID_BUTTON1 = wxNewId();
 const long kasirgaIDEenc::ID_BUTTON2 = wxNewId();
 const long kasirgaIDEenc::ID_BUTTON3 = wxNewId();
-const long kasirgaIDEenc::ID_STATICTEXT1 = wxNewId();
+//const long kasirgaIDEenc::ID_STATICTEXT1 = wxNewId();
+const long kasirgaIDEenc::ID_LBL_ienc32insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_menc32insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_aenc32insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_fenc32insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_denc32insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_qenc32insts = wxNewId();
+
+const long kasirgaIDEenc::ID_LBL_ienc64insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_menc64insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_aenc64insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_fenc64insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_denc64insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_qenc64insts = wxNewId();
+
+const long kasirgaIDEenc::ID_LBL_cencq2insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_cencq1insts = wxNewId();
+const long kasirgaIDEenc::ID_LBL_cencq0insts = wxNewId();
 
 
 BEGIN_EVENT_TABLE(kasirgaIDEenc,wxFrame)
@@ -44,22 +63,63 @@ kasirgaIDEenc::kasirgaIDEenc(wxWindow* parent,wxWindowID id,const wxPoint& pos,c
     //kasirgaIDEFrame *mainFrame;
     //SetMainFrame(kasirgaIDEFrame *aFrame) { mainFrame = aFrame;}
 
-    CheckBox1 = new wxCheckBox(this, 350, _("rv32i"), wxPoint(264,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
+    CheckBox1 = new wxCheckBox(this, ID_CHECKBOX1, _("rv32i"), wxPoint(264,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
 	CheckBox1->SetValue(false);
-	CheckBox2 = new wxCheckBox(this, 351, _("rv32m"), wxPoint(344,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
+	CheckBox2 = new wxCheckBox(this, ID_CHECKBOX2, _("rv32m"), wxPoint(344,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
 	CheckBox2->SetValue(false);
-	CheckBox3 = new wxCheckBox(this, 352, _("rv32a"), wxPoint(416,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX3"));
+	CheckBox3 = new wxCheckBox(this, ID_CHECKBOX3, _("rv32a"), wxPoint(416,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX3"));
 	CheckBox3->SetValue(false);
-	CheckBox4 = new wxCheckBox(this, 353, _("rv32f"), wxPoint(488,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX4"));
+	CheckBox4 = new wxCheckBox(this, ID_CHECKBOX4, _("rv32f"), wxPoint(488,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX4"));
 	CheckBox4->SetValue(false);
-	CheckBox5 = new wxCheckBox(this, 354, _("rv32c"), wxPoint(560,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX5"));
+	CheckBox5 = new wxCheckBox(this, ID_CHECKBOX5, _("rv32c"), wxPoint(560,4), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX5"));
 	CheckBox5->SetValue(false);
 
     SetClientSize(wxSize(968,478));
 	goBckBtn = new wxButton(this, ID_BUTTON1, _("Go back"), wxPoint(8,8), wxSize(88,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
-	lbl1 = new wxStaticText(this, ID_STATICTEXT1, _("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"), wxPoint(192,32), wxSize(768,32), 0, _T("ID_STATICTEXT1"));
 	Button1 = new wxButton(this, ID_BUTTON2, _("Select bits"), wxPoint(104,8), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON2"));
     addAlp = new wxButton(this, ID_BUTTON3, _("Add flag"), wxPoint(826,2), wxSize(88,29), 0, wxDefaultValidator, _T("ID_BUTTON3"));
+
+    //lbl1 = new wxStaticText(this, ID_STATICTEXT1, _("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"), wxPoint(192,32), wxSize(768,32), 0, _T("ID_STATICTEXT1"));
+
+    LBL_ienc32insts = new wxStaticText(this, ID_LBL_ienc32insts, std::string(47, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_ienc32insts"));
+	LBL_menc32insts = new wxStaticText(this, ID_LBL_menc32insts, std::string(8 , '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_menc32insts"));
+	LBL_aenc32insts = new wxStaticText(this, ID_LBL_aenc32insts, std::string(11, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_aenc32insts"));
+	LBL_fenc32insts = new wxStaticText(this, ID_LBL_fenc32insts, std::string(26, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_fenc32insts"));
+	LBL_denc32insts = new wxStaticText(this, ID_LBL_denc32insts, std::string(26, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_denc32insts"));
+	LBL_qenc32insts = new wxStaticText(this, ID_LBL_qenc32insts, std::string(28, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_qenc32insts"));
+
+	LBL_ienc64insts = new wxStaticText(this, ID_LBL_ienc64insts, std::string(12, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_ienc64insts"));
+	LBL_menc64insts = new wxStaticText(this, ID_LBL_menc64insts, std::string(5 , '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_menc64insts"));
+	LBL_aenc64insts = new wxStaticText(this, ID_LBL_aenc64insts, std::string(11, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_aenc64insts"));
+	LBL_fenc64insts = new wxStaticText(this, ID_LBL_fenc64insts, std::string(4 , '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_fenc64insts"));
+	LBL_denc64insts = new wxStaticText(this, ID_LBL_denc64insts, std::string(6 , '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_denc64insts"));
+	LBL_qenc64insts = new wxStaticText(this, ID_LBL_qenc64insts, std::string(4 , '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_qenc64insts"));
+
+	LBL_cencq0insts = new wxStaticText(this, ID_LBL_cencq0insts, std::string(11, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_cencq0insts"));
+	LBL_cencq1insts = new wxStaticText(this, ID_LBL_cencq1insts, std::string(21, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_cencq1insts"));
+	LBL_cencq2insts = new wxStaticText(this, ID_LBL_cencq2insts, std::string(17, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_cencq2insts"));
+
+	LBL_ienc64insts->Show(false);
+	LBL_menc64insts->Show(false);
+	LBL_aenc64insts->Show(false);
+	LBL_fenc64insts->Show(false);
+	LBL_denc64insts->Show(false);
+	LBL_qenc64insts->Show(false);
+
+	LBL_ienc64insts->Show(false);
+	LBL_menc64insts->Show(false);
+	LBL_aenc64insts->Show(false);
+	LBL_fenc64insts->Show(false);
+	LBL_denc64insts->Show(false);
+	LBL_qenc64insts->Show(false);
+
+	LBL_cencq0insts->Show(false);
+	LBL_cencq1insts->Show(false);
+	LBL_cencq2insts->Show(false);
+
+	//Layout();
+
+	CheckBox1->SetValue(true);
 
 	Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&kasirgaIDEenc::OnSelBitsBtnClick);
 
@@ -414,8 +474,45 @@ std::vector<std::string> opcodes_rv32c { // + rv64c
 ,"c.fswsp"
 ,"c.sdsp"};
 
+std::vector<std::string> opcodes_rv32q {
+"fsq"
+,"fmadd.q"
+,"fmsub.q"
+,"fnmsub.q"
+,"fnmadd.q"
+,"fadd.q"
+,"fsub.q"
+,"fmul.q"
+,"fdiv.q"
+,"fsqrt.q"
+,"fsgnj.q"
+,"fsgnjn.q"
+,"fsgnjx.q"
+,"fmin.q"
+,"fmax.q"
+,"fcvt.s.q"
+,"fcvt.q.s"
+,"fcvt.d.q"
+,"fcvt.q.d"
+,"feq.q"
+,"flt.q"
+,"fle.q"
+,"fclass.q"
+,"fcvt.w.q"
+,"fcvt.wu.q"
+,"fcvt.q.w"
+,"fcvt.q.w"};
+
+std::vector<std::string> opcodes_rv64q {
+"fcvt.l.q"
+,"fcvt.lu.q"
+,"fcvt.q.l"
+,"fcvt.q.lu"};
+
 
 std::vector<std::string> opcodes_all{};
+
+std::vector<std::string> empty_vector{};
 
 void vectorAdd(std::vector<std::string> &vector1, std::vector<std::string> &vector2)
 {
@@ -493,7 +590,7 @@ void RemoveAllDynamicButtons(kasirgaIDEenc *thisWindow, std::vector<std::string>
 
 void kasirgaIDEenc::OnShow(wxShowEvent & event)
 {
-    opcodes_all = opcodes;
+    //opcodes_all = opcodes;
     //opcodes_all.erase( remove_if( begin(opcodes_all),end(opcodes_all),
     //[&](auto x){return find(begin(opcodes_rv32i),end(opcodes_rv32i),x)!=end(opcodes_rv32i);}), end(opcodes_all) );
 
@@ -529,7 +626,7 @@ void kasirgaIDEenc::OnButtons(wxCommandEvent & event)
     //btn->SetBackgroundColour(*wxGREEN);
     //}
 
-    wxString lbl = lbl1->GetLabel();
+    wxString lbl = LBL_aenc32insts->GetLabel();
     //wxMessageBox(lbl);
     //lbl1->SetLabel("100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 
@@ -558,7 +655,7 @@ void kasirgaIDEenc::OnButtons(wxCommandEvent & event)
         lbl.replace(index,1,"0");
         btn->SetBackgroundColour(*wxRED);
     }
-    lbl1->SetLabel(lbl);
+    LBL_aenc32insts->SetLabel(lbl);
 
     //wxMessageBox(wxString::Format(wxT("%i"),btn->GetId()));
 
@@ -576,34 +673,89 @@ void kasirgaIDEenc::OnCheckBoxes(wxCommandEvent & event)
     //for(wxInt8 i=0; i<opcodes.size(); i++){
     //    btns[i]->Unbind(wxEVT_BUTTON, &kasirgaIDEenc::OnButtons, this);
     //}
+RemoveAllDynamicButtons(this, opcodes_all);
+    if(chk->GetValue()==true){
+        if(chk->GetId() == ID_CHECKBOX1){
+            CheckBox2->SetValue(false);
+            CheckBox3->SetValue(false);
+            CheckBox4->SetValue(false);
+            CheckBox5->SetValue(false);
+            opcodes_all = opcodes_rv32i;
+        }
+        else if(chk->GetId() == ID_CHECKBOX2){
+            CheckBox1->SetValue(false);
+            CheckBox3->SetValue(false);
+            CheckBox4->SetValue(false);
+            CheckBox5->SetValue(false);
+            opcodes_all = opcodes_rv32m;
+        }
+        else if(chk->GetId() == ID_CHECKBOX3){
+            CheckBox1->SetValue(false);
+            CheckBox2->SetValue(false);
+            CheckBox4->SetValue(false);
+            CheckBox5->SetValue(false);
+            opcodes_all = opcodes_rv32a;
+        }
+        else if(chk->GetId() == ID_CHECKBOX4){
+            CheckBox1->SetValue(false);
+            CheckBox2->SetValue(false);
+            CheckBox3->SetValue(false);
+            CheckBox5->SetValue(false);
+            opcodes_all = opcodes_rv32f;
+        }
+        else if(chk->GetId() == ID_CHECKBOX5){
+            CheckBox1->SetValue(false);
+            CheckBox2->SetValue(false);
+            CheckBox3->SetValue(false);
+            CheckBox4->SetValue(false);
+            opcodes_all = opcodes_rv32c;
+        }
+    }
+
 
     if(chk->GetValue()==true){
+
+            /*
         switch(chk->GetId()){
-            case 350: vectorAdd(opcodes_all, opcodes_rv32i);
-            case 351: vectorAdd(opcodes_all, opcodes_rv32m);
-            case 352: vectorAdd(opcodes_all, opcodes_rv32a);
-            case 353: vectorAdd(opcodes_all, opcodes_rv32f);
-            case 354: vectorAdd(opcodes_all, opcodes_rv32c);
+            case ID_CHECKBOX1: opcodes_all = opcodes_rv32i; //vectorAdd(opcodes_all, opcodes_rv32i);
+            break;
+            case ID_CHECKBOX2: opcodes_all = opcodes_rv32m; //vectorAdd(opcodes_all, opcodes_rv32m);
+            break;
+            case ID_CHECKBOX3: opcodes_all = opcodes_rv32a; //vectorAdd(opcodes_all, opcodes_rv32a);
+            break;
+            case ID_CHECKBOX4: opcodes_all = opcodes_rv32f; //vectorAdd(opcodes_all, opcodes_rv32f);
+            break;
+            case ID_CHECKBOX5: opcodes_all = opcodes_rv32c; //vectorAdd(opcodes_all, opcodes_rv32c);
+            break;
             //case ID_CHECKBOX1: vectorAdd(opcodes_all, opcodes_rv32i);
             //case ID_CHECKBOX2: vectorAdd(opcodes_all, opcodes_rv32m);
             //case ID_CHECKBOX3: vectorAdd(opcodes_all, opcodes_rv32a);
             //case ID_CHECKBOX4: vectorAdd(opcodes_all, opcodes_rv32f);
             //case ID_CHECKBOX5: vectorAdd(opcodes_all, opcodes_rv32c);
-        }
+        }*/
+
         CreateDynamicButtons(this, opcodes_all);
     }
 
     else{
         RemoveAllDynamicButtons(this, opcodes_all);
+        opcodes_all = {}; //empty_vector;
+        /*
         switch(chk->GetId()){
             case 350: vectorRemove(opcodes_all, opcodes_rv32i);
+            break;
             case 351: vectorRemove(opcodes_all, opcodes_rv32m);
+            break;
             case 352: vectorRemove(opcodes_all, opcodes_rv32a);
+            break;
             case 353: vectorRemove(opcodes_all, opcodes_rv32f);
+            break;
             case 354: vectorRemove(opcodes_all, opcodes_rv32c);
-        }
+            break;
+        }*/
 
     }
+
 
 
 }
@@ -618,8 +770,8 @@ void kasirgaIDEenc::OnSelBitsBtnClick(wxCommandEvent& event)
 
 void kasirgaIDEenc::OnaddAlpBtnClick(wxCommandEvent& event)
 {
-    if(lbl1->GetLabelText() != "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"){
-        wxGetApp().alpStr = " --bits=" + lbl1->GetLabelText();
+    if(LBL_aenc32insts->GetLabelText() != "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"){
+        wxGetApp().alpStr = " --bits=" + LBL_aenc32insts->GetLabelText();
         wxMessageBox(wxGetApp().alpStr + " flag added.");
     }
     else wxGetApp().alpStr = "";
