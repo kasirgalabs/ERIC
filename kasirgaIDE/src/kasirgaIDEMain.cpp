@@ -18,10 +18,6 @@
 #include <wx/intl.h>
 //*)
 
-#ifndef wxHAS_IMAGES_IN_RESOURCES 
-#include "icon.xpm"
-#endif
-
 //std::string compStr = "";
 //((MyApp*)wxTheApp)->myvar
 //((kasirgaIDEFrame*)kasirgaIDEApp)->compStr = "";
