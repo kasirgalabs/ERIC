@@ -140,6 +140,8 @@ kasirgaIDEFrame::kasirgaIDEFrame(wxWindow* parent,wxWindowID id)
     //*)
 
     SetClientSize(wxSize(713,450));
+    //SetClientSize(wxSize(1200,600));
+
     this->CenterOnScreen();
 
     Button1 = new wxButton(this, ID_BUTTON1, _("Compile"), wxPoint(224,16), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -426,7 +428,7 @@ void kasirgaIDEFrame::OnSetRiscvPath(wxCommandEvent& event)
     riscvPath = textDlg.GetValue().ToStdString();
     setCompileString();
     }
-    wxMessageBox(wxGetApp().compStr);
+    //wxMessageBox(wxGetApp().compStr);
 }
 
 
@@ -457,7 +459,14 @@ void kasirgaIDEFrame::OnCompile(wxCommandEvent& event)
     //compStr = "~/Desktop/newk/kasirga-compiler/build/bin/kasirga /home/shc/elf2encryptedhex/ex2.c -c --target=riscv32-unknown-elf --sysroot=/home/shc/riscv-new2/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new2/_install -o /home/shc/elf2encryptedhex/ex2.o --alp=\" --b_p_lw=00001000000000010000000000000001 --b_p_add=00001000000000010000000000000001 --b_p_addi=00001000000000010000000000000000\"";
     //wxMessageBox("." + compStr + ".");
     //wxExecute(compStr);
+    wxMessageBox(wxGetApp().compStr.c_str());
     system(wxGetApp().compStr.c_str());
+    //system(wxGetApp().compStr.c_str());
+    //system(wxGetApp().compStr.c_str());
+    //system(wxGetApp().compStr.c_str());
+    //system(wxGetApp().compStr.c_str());
+    //system("/home/shc/Desktop/newkyeni/kasirga-compiler/build/bin/kasirga --target=riscv32-unknown-elf --sysroot=/home/shc/riscv-new2/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new2/_install  -c /home/shc/elf2encryptedhex/ex2.c -o /home/shc/elf2encryptedhex/ex2.o  --alp=\"  --ienc32insts=00100000000000000010000000010000000000000000000 --ienc32key=00001000000000010000000000000001 --b_p_c_addi4spn=10110010110010000000000000000000\"");
+
     //system(compStr.c_str());
     //system(compStr.c_str());
     //system(compStr.c_str());
@@ -471,7 +480,8 @@ void kasirgaIDEFrame::OnCompile(wxCommandEvent& event)
 
 void kasirgaIDEFrame::OnCheckCompStr(wxCommandEvent& event)
 {
-    wxTextEntryDialog textDlg(this, "", "Check Compiler String", wxGetApp().compStr, wxOK | wxCANCEL, wxDefaultPosition);
+    //wxTextEntryDialog textDlg(this, "", "Check Compiler String", wxGetApp().compStr, wxOK | wxCANCEL, wxDefaultPosition);
+    wxTextEntryDialog textDlg(this, "", "Check Compiler String", wxGetApp().compStr, wxTE_MULTILINE|wxOK|wxCANCEL, wxDefaultPosition);
     if(textDlg.ShowModal() == wxID_OK)
         wxGetApp().compStr = textDlg.GetValue().ToStdString();
 }
