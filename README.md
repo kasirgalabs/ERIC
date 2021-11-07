@@ -187,3 +187,19 @@ make
 
 # Usage of Tools and Compiler #
 **Work In Progress**
+
+# Screenshots #
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide1editor.png)
+
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide2menubar.png)
+
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide3menubar.png)
+
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide4enc.png)
+
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide5enc.png)
+
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide6parenc.png)
+
+![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide7parenc.png)
+
