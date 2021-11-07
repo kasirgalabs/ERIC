@@ -27,12 +27,26 @@ class kasirgaIDEenc: public wxFrame
 		virtual ~kasirgaIDEenc();
 
 		//(*Declarations(kasirgaIDEenc)
-		wxCheckBox* CheckBox1;
-		wxCheckBox* CheckBox4;
-		wxCheckBox* CheckBox2;
-		wxCheckBox* CheckBox3;
-		wxCheckBox* CheckBox5;
 		//*)
+
+		wxCheckBox* CHK_ienc32insts;
+        wxCheckBox* CHK_menc32insts;
+        wxCheckBox* CHK_aenc32insts;
+        wxCheckBox* CHK_fenc32insts;
+        wxCheckBox* CHK_denc32insts;
+        wxCheckBox* CHK_qenc32insts;
+
+        wxCheckBox* CHK_ienc64insts;
+        wxCheckBox* CHK_menc64insts;
+        wxCheckBox* CHK_aenc64insts;
+        wxCheckBox* CHK_fenc64insts;
+        wxCheckBox* CHK_denc64insts;
+        wxCheckBox* CHK_qenc64insts;
+
+        wxCheckBox* CHK_cencq2insts;
+        wxCheckBox* CHK_cencq1insts;
+        wxCheckBox* CHK_cencq0insts;
+
 
 		wxButton* Button1;
 		wxButton* goBckBtn;
@@ -56,18 +70,34 @@ class kasirgaIDEenc: public wxFrame
         wxStaticText* LBL_cencq1insts;
         wxStaticText* LBL_cencq0insts;
 
+        wxTextCtrl* key_text;
+        wxTextCtrl* keyall_text;
+
 		void OnButtons(wxCommandEvent& event);
 		void OnCheckBoxes(wxCommandEvent& event);
 
 	protected:
 
 		//(*Identifiers(kasirgaIDEenc)
-		static const long ID_CHECKBOX1;
-		static const long ID_CHECKBOX2;
-		static const long ID_CHECKBOX3;
-		static const long ID_CHECKBOX4;
-		static const long ID_CHECKBOX5;
 		//*)
+
+		static const long ID_CHK_ienc32insts;
+        static const long ID_CHK_menc32insts;
+        static const long ID_CHK_aenc32insts;
+        static const long ID_CHK_fenc32insts;
+        static const long ID_CHK_denc32insts;
+        static const long ID_CHK_qenc32insts;
+
+        static const long ID_CHK_ienc64insts;
+        static const long ID_CHK_menc64insts;
+        static const long ID_CHK_aenc64insts;
+        static const long ID_CHK_fenc64insts;
+        static const long ID_CHK_denc64insts;
+        static const long ID_CHK_qenc64insts;
+
+        static const long ID_CHK_cencq2insts;
+        static const long ID_CHK_cencq1insts;
+        static const long ID_CHK_cencq0insts;
 
 		static const long ID_BUTTON1;
 		static const long ID_BUTTON2;
@@ -90,6 +120,9 @@ class kasirgaIDEenc: public wxFrame
         static const long ID_LBL_cencq2insts;
         static const long ID_LBL_cencq1insts;
         static const long ID_LBL_cencq0insts;
+
+        static const long ID_key_text;
+        static const long ID_keyall_text;
 
 
 	private:
