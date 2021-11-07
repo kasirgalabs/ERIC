@@ -3777,7 +3777,7 @@ namespace portedDump {
                 bool encryptInstrvcq1,
                 bool encryptInstrvcq2
  ) { // n yerine string gelecek
-
+//OSS<<"        p";
 //add = false; sub = false;
   //if(!dosya.empty() && flag){ flag = false;
   //  ifstream dos(dosya);
@@ -3837,7 +3837,7 @@ namespace portedDump {
     //for(int i=0;i<strlen(hexArr);i++)
     //  OSS << hexArr[i];
 
-    if(enckeyall != ""){ // eger hepsini encrypt etmek istiyorsak diger opsiyonlari yok sayiyor asagiya alinabilir.
+    if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"){ // eger hepsini encrypt etmek istiyorsak diger opsiyonlari yok sayiyor asagiya alinabilir.
       OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyall), j),NULL,  2);
     }
 
@@ -3943,7 +3943,7 @@ namespace portedDump {
     
     else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
 
-OS << "";
+//OS << "";
   /*
     if(encrypt){
       if(key != ""){
@@ -4106,7 +4106,7 @@ for(i=cencq2instsSize-1; i>=0; i--){
 // mainde olmazsa buraya
 
 
-//NoShowRawInsn = false;
+NoShowRawInsn = false;
     if (!NoShowRawInsn) {
       //OS << ' ';
       //bool encryptInst = false;
@@ -4694,7 +4694,7 @@ else if( b_p_c_sdsp     != "" && ( MI->getOpcode() == RISCV::C_SDSP     ) ) encr
 //StringRef b = IP.getOpcodeName(MI->getOpcode());
 //OS<<MCInstPrinter::getOpcodeName(MI->getOpcode()); // ekledim
 //if(MI->getOpcode() == RISCV::ADDI)
-OS<<"\n";
+//OS<<"\n";
 //OS<<b;
 //if(MI->getOpcode() == RISCV::SW) OS<<b;//"basarili";//IP.getOpcodeName(MI->getOpcode())"";
 //if(addi && MI->getOpcode() == RISCV::C_ADDI4SPN        /*&& opcodeList[10] == opcode*/) OS<<"GIRDIaddi";//encrypt = true;   
@@ -4709,7 +4709,7 @@ OS<<"\n";
       // instruction.
       uint64_t Addr =
           Address.Address + (STI.getTargetTriple().isX86() ? Bytes.size() : 0);
-      IP.printInst(MI, Addr, "", STI, OS);
+      //IP.printInst(MI, Addr, "", STI, OS);
       //portedprint::printInstruction(MI, Addr, STI, OS);//ekledim
       //portedprint::printInst(MI, Addr, "", STI, OS, MRI); //buraya fazladan MRI parametresi
     } //else
@@ -6859,6 +6859,15 @@ g_argv = argv;
     reportCmdLineError("start address should be less than stop address");
 
   ToolName = argv[0];
+//OSS<<"        a";
+//OSS << "\n";
+for(int k = 0; k<15; k++){
+  OSS << "1";
+}
+//OSS << "10821000128047";
+//OSS << "\n";
+//if(enckeyall == "")
+//  enckeyall="00000000000000000000000000000000";
 
     if(enckeyall != ""){
 
@@ -6871,6 +6880,7 @@ g_argv = argv;
     char character;
     int mm;
 //OSS<<"b";
+
       while (read >> character){ //>> std::noskipws){
         
 
