@@ -272,11 +272,15 @@ We have 15 flags to extension specific instruction encryption:
 --fenc32insts="<your26bitrv32finstlistasbinary(use 1 to encrypt corresponding instruction)>"
 --denc32insts="<your26bitrv32dinstlistasbinary(use 1 to encrypt corresponding instruction)>"
 
+*** --qenc32insts="<your28bitrv32qinstlistasbinary(use 1 to encrypt corresponding instruction)>" ***  --> not supported yet
+
 --ienc64insts="<your15bitrv64iinstlistasbinary(use 1 to encrypt corresponding instruction)>"
 --menc64insts="<your5bitrv64minstlistasbinary(use 1 to encrypt corresponding instruction)>"
 --aenc64insts="<your11bitrv64ainstlistasbinary(use 1 to encrypt corresponding instruction)>"
 --fenc64insts="<your4bitrv64finstlistasbinary(use 1 to encrypt corresponding instruction)>"
 --denc64insts="<your6bitrv64dinstlistasbinary(use 1 to encrypt corresponding instruction)>"
+
+*** --qenc64insts="<your4bitrv64qinstlistasbinary(use 1 to encrypt corresponding instruction)>" ***  --> not supported yet
 
 --cencq0insts="<your11bitrvcq0instlistasbinary(use 1 to encrypt corresponding instruction)>"
 --cencq1insts="<your21bitrvcq1instlistasbinary(use 1 to encrypt corresponding instruction)>"
