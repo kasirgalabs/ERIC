@@ -655,6 +655,116 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> Encryptable rvc quadrant 0 Instruction List (11 instructions, most left bit is 0. most right bit is 10. instruction of --cencq0insts) </b> </summary>
+
+***0 -)*** ``` --c_addi4spn ```
+
+***1 -)*** ``` --c_fld ```
+
+***2 -)*** ``` --c_lq ```
+
+***3 -)*** ``` --c_lw ```
+
+***4 -)*** ``` --c_flw ```
+
+***5 -)*** ``` --c_ld ```
+
+***6 -)*** ``` --c_fsd ```
+
+***7 -)*** ``` --c_sq ```
+
+***8 -)*** ``` --c_sw ```
+
+***9 -)*** ``` --c_fsw ```
+
+***10-)*** ``` --c_sd ```
+
+</details>
+
+<details> <summary> <b> Encryptable rvc quadrant 1 Instruction List (21 instructions, most left bit is 0. most right bit is 20. instruction of --cencq1insts) </b> </summary>
+
+***0 -)*** ``` --c_nop ```
+
+***1 -)*** ``` --c_addi ```
+
+***2 -)*** ``` --c_jal ```
+
+***3 -)*** ``` --c_addiw ```
+
+***4 -)*** ``` --c_li ```
+
+***5 -)*** ``` --c_addi16sp ```
+
+***6 -)*** ``` --c_lui ```
+
+***7 -)*** ``` --c_srli ```
+
+***8 -)*** ``` --c_srli64 ```
+
+***9 -)*** ``` --c_srai ```
+
+***10-)*** ``` --c_srai64 ```
+
+***11-)*** ``` --c_andi ```
+
+***12-)*** ``` --c_sub ```
+
+***13-)*** ``` --c_xor ```
+
+***14-)*** ``` --c_or ```
+
+***15-)*** ``` --c_and ```
+
+***16-)*** ``` --c_subw ```
+
+***17-)*** ``` --c_addw ```
+
+***18-)*** ``` --c_j ```
+
+***19-)*** ``` --c_beqz ```
+
+***20-)*** ``` --c_bnez ```
+
+</details>
+
+<details> <summary> <b> Encryptable rvc quadrant 2 Instruction List (17 instructions, most left bit is 0. most right bit is 16. instruction of --cencq2insts) </b> </summary>
+
+***0 -)*** ``` --c_slli ```
+
+***1 -)*** ``` --c_slli64 ```
+
+***2 -)*** ``` --c_fldsp ```
+
+***3 -)*** ``` --c_lqsp ```
+
+***4 -)*** ``` --c_lwsp ```
+
+***5 -)*** ``` --c_flwsp ```
+
+***6 -)*** ``` --c_ldsp ```
+
+***7 -)*** ``` --c_jr ```
+
+***8 -)*** ``` --c_mv ```
+
+***9 -)*** ``` --c_ebreak ```
+
+***10-)*** ``` --c_jalr ```
+
+***11-)*** ``` --c_add ```
+
+***12-)*** ``` --c_fsdsp ```
+
+***13-)*** ``` --c_sqsp ```
+
+***14-)*** ``` --c_swsp ```
+
+***15-)*** ``` --c_fswsp ```
+
+***16-)*** ``` --c_sdsp ```
+
+</details>
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
