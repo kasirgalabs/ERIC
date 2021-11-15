@@ -289,11 +289,15 @@ and 15 key flags to encrypt given instructions by extension:
 --fenc32key="<your32bitkeyasbinary>"
 --denc32key="<your32bitkeyasbinary>"
 
+*** --qenc32key="<your32bitkeyasbinary>" ***  --> not supported yet
+
 --ienc64key="<your32bitkeyasbinary>"
 --menc64key="<your32bitkeyasbinary>"
 --aenc64key="<your32bitkeyasbinary>"
 --fenc64key="<your32bitkeyasbinary>"
 --denc64key="<your32bitkeyasbinary>"
+
+*** --qenc64key="<your32bitkeyasbinary>" ***  --> not supported yet
 
 --cencq0key="<your16bitkeyasbinary>"
 --cencq1key="<your16bitkeyasbinary>"
@@ -559,6 +563,70 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> <i> (Not supported yet) Encryptable rv32q Instruction List (28 instructions, most left bit is 0. most right bit is 27. instruction of --qenc32insts) </i> </b> </summary>
+
+```bash
+
+***0 -)*** ``` --flq ```  --> *** not supported yet ***
+
+***1 -)*** ``` --fsq ```  --> *** not supported yet ***
+
+***2 -)*** ``` --fmadd_q ```  --> *** not supported yet ***
+
+***3 -)*** ``` --fmsub_q ```  --> *** not supported yet ***
+
+***4 -)*** ``` --fnmsub_q ```  --> *** not supported yet ***
+
+***5 -)*** ``` --fnmadd_q ```  --> *** not supported yet ***
+
+***6 -)*** ``` --fadd_q ```  --> *** not supported yet ***
+
+***7 -)*** ``` --fsub_q ```  --> *** not supported yet ***
+
+***8 -)*** ``` --fmul_q ```  --> *** not supported yet ***
+
+***9 -)*** ``` --fdiv_q ```  --> *** not supported yet ***
+
+***10-)*** ``` --fsqrt_q ```  --> *** not supported yet ***
+
+***11-)*** ``` --fsgnj_q ```  --> *** not supported yet ***
+
+***12-)*** ``` --fsgnjn_q ```  --> *** not supported yet ***
+
+***13-)*** ``` --fsgnjx_q ```  --> *** not supported yet ***
+
+***14-)*** ``` --fmin_q ```  --> *** not supported yet ***
+
+***15-)*** ``` --fmax_q ```  --> *** not supported yet ***
+
+***16-)*** ``` --fcvt_s_q ```  --> *** not supported yet ***
+
+***17-)*** ``` --fcvt_q_s ```  --> *** not supported yet ***
+
+***18-)*** ``` --fcvt_d_q ```  --> *** not supported yet ***
+
+***19-)*** ``` --fcvt_q_d ```  --> *** not supported yet ***
+
+***20-)*** ``` --feq_q ```  --> *** not supported yet ***
+
+***21-)*** ``` --flt_q ```  --> *** not supported yet ***
+
+***22-)*** ``` --fle_q ```  --> *** not supported yet ***
+
+***23-)*** ``` --fclass_q ```  --> *** not supported yet ***
+
+***24-)*** ``` --fcvt_w_q ```  --> *** not supported yet ***
+
+***25-)*** ``` --fcvt_wu_q ```  --> *** not supported yet ***
+
+***26-)*** ``` --fcvt_q_w ```  --> *** not supported yet ***
+
+***27-)*** ``` --fcvt_q_wu ```  --> *** not supported yet ***
+
+```
+
+</details>
+
 <details> <summary> <b> Encryptable rv64i Instruction List (15 instructions, most left bit is 0. most right bit is 14. instruction of --ienc64insts) </b> </summary>
 
 ***0 -)*** ``` --lwu ```
@@ -569,11 +637,11 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 ```bash
 
-*** 3 -) *** --slli  --> *** not supported ***
+*** 3 -) *** --slli  --> *** not supported yet ***
 
-*** 4 -) *** --srli  --> *** not supported ***
+*** 4 -) *** --srli  --> *** not supported yet ***
 
-*** 5 -) *** --srai  --> *** not supported ***
+*** 5 -) *** --srai  --> *** not supported yet ***
 
 ```
 
@@ -665,6 +733,22 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> <i> (Not supported yet) Encryptable rv64q Instruction List (4 instructions, most left bit is 0. most right bit is 3. instruction of --qenc64insts) </i> </b> </summary>
+
+```bash
+
+***0 -)*** --fcvt_l_q  --> *** not supported yet ***
+
+***1 -)*** --fcvt_lu_q  --> *** not supported yet ***
+
+***2 -)*** --fcvt_q_l  --> *** not supported yet ***
+
+***3 -)*** --fcvt_q_lu  --> *** not supported yet ***
+
+```
+
+</details>
+
 <details> <summary> <b> Encryptable rvc quadrant 0 Instruction List (11 instructions, most left bit is 0. most right bit is 10. instruction of --cencq0insts) </b> </summary>
 
 ***0 -)*** ``` --c_addi4spn ```
@@ -672,7 +756,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***1 -)*** ``` --c_fld ```
 
 ```bash
-***2 -)*** ``` --c_lq ```  --> *** not supported ***
+***2 -)*** ``` --c_lq ```  --> *** not supported yet ***
 ```
 
 ***3 -)*** ``` --c_lw ```
@@ -684,7 +768,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***6 -)*** ``` --c_fsd ```
 
 ```bash
-***7 -)*** ``` --c_sq ```  --> *** not supported ***
+***7 -)*** ``` --c_sq ```  --> *** not supported yet ***
 ```
 
 ***8 -)*** ``` --c_sw ```
@@ -714,13 +798,13 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***7 -)*** ``` --c_srli ```
 
 ```bash
-***8 -)*** ``` --c_srli64 ```  --> *** not supported ***
+***8 -)*** ``` --c_srli64 ```  --> *** not supported yet ***
 ```
 
 ***9 -)*** ``` --c_srai ```
 
 ```bash
-***10-)*** ``` --c_srai64 ```  --> *** not supported ***
+***10-)*** ``` --c_srai64 ```  --> *** not supported yet ***
 ```
 
 ***11-)*** ``` --c_andi ```
@@ -750,13 +834,13 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***0 -)*** ``` --c_slli ```
 
 ```bash
-***1 -)*** ``` --c_slli64 ```  --> *** not supported ***
+***1 -)*** ``` --c_slli64 ```  --> *** not supported yet ***
 ```
 
 ***2 -)*** ``` --c_fldsp ```
 
 ```bash
-***3 -)*** ``` --c_lqsp ```  --> *** not supported ***
+***3 -)*** ``` --c_lqsp ```  --> *** not supported yet ***
 ```
 
 ***4 -)*** ``` --c_lwsp ```
@@ -778,7 +862,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***12-)*** ``` --c_fsdsp ```
 
 ```bash
-***13-)*** ``` --c_sqsp  --> *** not supported ***
+***13-)*** ``` --c_sqsp  --> *** not supported yet ***
 ```
 
 ***14-)*** ``` --c_swsp ```
