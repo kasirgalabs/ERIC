@@ -437,6 +437,118 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> Encryptable rv32f Instruction List (26 instructions, most left bit is 0. most right bit is 25. instruction of --fenc32insts) </b> </summary>
+   
+**0 -)** ``` --flw ```
+
+**1 -)** ``` --fsw ```
+
+**2 -)** ``` --fmadd_s ```
+
+**3 -)** ``` --fmsub_s ```
+
+**4 -)** ``` --fnmsub_s ```
+
+**5 -)** ``` --fnmadd_s ```
+
+**6 -)** ``` --fadd_s ```
+
+**7 -)** ``` --fsub_s ```
+
+**8 -)** ``` --fmul_s ```
+
+**9 -)** ``` --fdiv_s ```
+
+**10-)** ``` --fsqrt_s ```
+
+**11-)** ``` --fsgnj_s ```
+
+**12-)** ``` --fsgnjn_s ```
+
+**13-)** ``` --fsgnjx_s ```
+
+**14-)** ``` --fmin_s ```
+
+**15-)** ``` --fmax_s ```
+
+**16-)** ``` --fcvt_w_s ```
+
+**17-)** ``` --fcvt_wu_s ```
+
+**18-)** ``` --fmv_x_w ```
+
+**19-)** ``` --feq_s ```
+
+**20-)** ``` --flt_s ```
+
+**21-)** ``` --fle_s ```
+
+**22-)** ``` --fclass_s ```
+
+**23-)** ``` --fcvt_s_w ```
+
+**24-)** ``` --fcvt_s_wu ```
+
+**25-)** ``` --fmv_w_x ```
+
+</details>
+
+<details> <summary> <b> Encryptable rv32d Instruction List (26 instructions, most left bit is 0. most right bit is 25. instruction of --denc32insts) </b> </summary>
+   
+**0 -)** ``` --fld ```
+
+**1 -)** ``` --fsd ```
+
+**2 -)** ``` --fmadd_d ```
+
+**3 -)** ``` --fmsub_d ```
+
+**4 -)** ``` --fnmsub_d ```
+
+**5 -)** ``` --fnmadd_d ```
+
+**6 -)** ``` --fadd_d ```
+
+**7 -)** ``` --fsub_d ```
+
+**8 -)** ``` --fmul_d ```
+
+**9 -)** ``` --fdiv_d ```
+
+**10-)** ``` --fsqrt_d ```
+
+**11-)** ``` --fsgnj_d ```
+
+**12-)** ``` --fsgnjn_d ```
+
+**13-)** ``` --fsgnjx_d ```
+
+**14-)** ``` --fmin_d ```
+
+**15-)** ``` --fmax_d ```
+
+**16-)** ``` --fcvt_s_d ```
+
+**17-)** ``` --fcvt_d_s ```
+
+**18-)** ``` --feq_d ```
+
+**19-)** ``` --flt_d ```
+
+**20-)** ``` --fle_d ```
+
+**21-)** ``` --fclass_d ```
+
+**22-)** ``` --fcvt_w_d ```
+
+**23-)** ``` --fcvt_wu_d ```
+
+**24-)** ``` --fcvt_d_w ```
+
+**25-)** ``` --fcvt_d_wu ```
+
+</details>
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
