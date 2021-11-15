@@ -232,7 +232,13 @@ You can use to obfuscate any compiled object code to non-encrypted or encrypted 
 
 ### 1. Instruction-Level Full Encryption ###
 
-We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rv64i, rv64m, rv64a, rv64f, rv64d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions.
+
+### 2. Instruction-Level Partial Encryption ###
+
+
+### 3. Memory-Level Encryption ###
+
+We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rv64i, rv64m, rv64a, rv64f, rv64d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions. (Not supported RSA encryption for now.)
 
 **Usage of the flag:** 
 ```bash
@@ -243,11 +249,6 @@ We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, 
 ```bash
 /home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall=10100100101000000000001000000101 -d example.o`
 ```
-
-### 2. Instruction-Level Partial Encryption ###
-
-
-### 3. Memory-Level Encryption ###
 
 **Example usages:**
 
