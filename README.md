@@ -230,7 +230,7 @@ For --sysroot and --gcc-toolchain flags you can look here that I answered: https
 
 You can use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
-### 1. Instruction-Level Full Encryption ###
+### 1-) Instruction-Level Full Encryption ###
 
 **Example usages:**
 
