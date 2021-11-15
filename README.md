@@ -616,17 +616,17 @@ Gives output as some instructions encrypted out.hex (most left bit is 0. most ri
 
 
 # Screenshots #
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide1editor.png)
+![alt text](screenshots/ide1editor.png)
 
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide2menubar.png)
+![alt text](screenshots/ide2menubar.png)
 
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide3menubar.png)
+![alt text](screenshots/ide3menubar.png)
 
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide4enc.png)
+![alt text](screenshots/ide4enc.png)
 
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide5enc.png)
+![alt text](screenshots/ide5enc.png)
 
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide6parenc.png)
+![alt text](screenshots/ide6parenc.png)
 
-![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide7parenc.png)
+![alt text](screenshots/ide7parenc.png)
 
