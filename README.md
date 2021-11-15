@@ -748,17 +748,13 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***0 -)*** ``` --c_slli ```
 
 ```bash
-
 ***1 -)*** ``` --c_slli64 ```  --> *** not supported ***
-
 ```
 
 ***2 -)*** ``` --c_fldsp ```
 
 ```bash
-
 ***3 -)*** ``` --c_lqsp ```  --> *** not supported ***
-   
 ```
 
 ***4 -)*** ``` --c_lwsp ```
@@ -780,9 +776,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 ***12-)*** ``` --c_fsdsp ```
 
 ```bash
-
 ***13-)*** ``` --c_sqsp  --> *** not supported ***
-   
 ```
 
 ***14-)*** ``` --c_swsp ```
