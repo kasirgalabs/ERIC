@@ -262,9 +262,9 @@ Gives output as some instructions encrypted out.hex (most left bit is 0. most ri
 /home/shc/Desktop/kasirga-compiler/build/bin/alp --addi --bits=100000000000000001011001011001000001000100100100010100001010000010001111001000000000000000 -d example.o
 ```
 
-
-**Encryptable Instruction List (90 instructions, most left bit is 0. most right bit is 89. instruction):**
-
+<details>
+  <summary>**Encryptable Instruction List (90 instructions, most left bit is 0. most right bit is 89. instruction):**</summary>
+  
 **0 -)** beq
 
 **1 -)** bne
@@ -444,6 +444,12 @@ Gives output as some instructions encrypted out.hex (most left bit is 0. most ri
 **88-)** rdtimeh
 
 **89-)** rdinstreth
+  
+</details>
+
+
+
+
 
 # Screenshots #
 ![alt text](https://github.com/kasirgalabs/ERIC/blob/main/screenshots/ide1editor.png)
