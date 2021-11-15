@@ -411,6 +411,32 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> Encryptable rv32a Instruction List (11 instructions, most left bit is 0. most right bit is 10. instruction of --aenc32insts) </b> </summary>
+   
+**0 -)** ``` --lr_w ```
+
+**1 -)** ``` --sc_w ```
+
+**2 -)** ``` --amoswap_w ```
+
+**3 -)** ``` --amoadd_w ```
+
+**4 -)** ``` --amoxor_w ```
+
+**5 -)** ``` --amoand_w ```
+
+**6 -)** ``` --amoor_w ```
+
+**7 -)** ``` --amomin_w ```
+
+**8 -)** ``` --amomax_w ```
+
+**9 -)** ``` --amominu_w ```
+
+**10-)** ``` --amomaxu_w ```
+
+</details>
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
