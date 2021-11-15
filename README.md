@@ -232,7 +232,7 @@ You can use to obfuscate any compiled object code to non-encrypted or encrypted 
 
 ### 1. Instruction-Level Full Encryption ###
 
-We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions.
+We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rv64i, rv64m, rv64a, rv64f, rv64d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions.
 
 **Usage of the flag:** 
 ```bash
