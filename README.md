@@ -11,11 +11,11 @@ ERIC offers fully customizable encryption. There are currently 3 different encry
    
    This method encrypts the instructions one by one. It provides encryption of all instructions in the program by entering a specific key.
    
-### 2. Instruction-Level Partial Encryption ###
+### [2. Instruction-Level Partial Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#2-instruction-level-partial-encryption-1) ###
  
    This method supports unlimited customization. You can choose the types of instructions you think are critical to your program and only encrypt them. You can also encrypt each instruction to correspond to different bits within itself.
  
-### 3. Memory-Level Encryption ###
+### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption-1) ###
  
    In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can manually give the public and private key pairs to the system yourself, or you can ask ERIC to automatically generate a public key.
 
@@ -231,6 +231,12 @@ For --sysroot and --gcc-toolchain flags you can look here that I answered: https
 You can use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
 ### 1. Instruction-Level Full Encryption ###
+
+
+### 2. Instruction-Level Partial Encryption ###
+
+
+### 3. Memory-Level Encryption ###
 
 **Example usages:**
 
