@@ -559,11 +559,11 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 ```bash
 
-** 3 -) ** --slli  --> ** unsupported **
+** 3 -) ** --slli  --> ** not supported **
 
-** 4 -) ** --srli  --> ** unsupported **
+** 4 -) ** --srli  --> ** not supported **
 
-** 5 -) ** --srai  --> ** unsupported **
+** 5 -) ** --srai  --> ** not supported **
 
 ```
 
@@ -584,6 +584,20 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 **13-)** ``` --srlw ```
 
 **14-)** ``` --sraw ```
+
+</details>
+
+<details> <summary> <b> Encryptable rv64m Instruction List (5 instructions, most left bit is 0. most right bit is 4. instruction of --menc64insts) </b> </summary>
+
+**0 -)** ``` --mulw ```
+
+**1 -)** ``` --divw ```
+
+**2 -)** ``` --divuw ```
+
+**3 -)** ``` --remw ```
+
+**4 -)** ``` --remuw ```
 
 </details>
 
