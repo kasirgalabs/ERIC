@@ -270,6 +270,26 @@ We have 15 flags to extension specific instruction encryption:
 --cencq2insts="<your17bitrvcq2instlistasbinary(use 1 to encrypt corresponding instruction)>"
 ```
 
+and 15 key flags to encrypt given instructions by extension:
+
+```bash
+--ienc32key="<your32bitkeyasbinary>"
+--menc32key="<your32bitkeyasbinary>"
+--aenc32key="<your32bitkeyasbinary>"
+--fenc32key="<your32bitkeyasbinary>"
+--denc32key="<your32bitkeyasbinary>"
+
+--ienc64key="<your32bitkeyasbinary>"
+--menc64key="<your32bitkeyasbinary>"
+--aenc64key="<your32bitkeyasbinary>"
+--fenc64key="<your32bitkeyasbinary>"
+--denc64key="<your32bitkeyasbinary>"
+
+--cencq0key="<your16bitkeyasbinary>"
+--cencq1key="<your16bitkeyasbinary>"
+--cencq2key="<your16bitkeyasbinary>"
+```
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
