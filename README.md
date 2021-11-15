@@ -271,7 +271,7 @@ Gives output as some instructions encrypted out.hex (most left bit is 0. most ri
 ```
 
 <details>
-  <summary>**Encryptable Instruction List (90 instructions, most left bit is 0. most right bit is 89. instruction):**</summary>
+  <summary>#### Encryptable Instruction List (90 instructions, most left bit is 0. most right bit is 89. instruction): ####</summary>
   
 **0 -)** beq
 
