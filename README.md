@@ -293,7 +293,9 @@ and 15 key flags to encrypt given instructions by extension:
 Also we have instruction flags as seperately instead of instruction bit lists (they can be used interchangeably):
 
 <details> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts): </b> </summary>
+   
 ```bash
+   
 **0 -)** --lui
 
 **1 -)** --auipc
