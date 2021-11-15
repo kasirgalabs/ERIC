@@ -559,11 +559,11 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 ```bash
 
-***3 -)*** --slli
+*3 -)* --slli  --> unsupported
 
-***4 -)*** --srli
+*4 -)* --srli  --> unsupported
 
-***5 -)*** --srai 
+*5 -)* --srai  --> unsupported 
 
 ```
 
