@@ -7,7 +7,7 @@ In addition, it can be used in cases where you want the data kept in memory to r
 
 ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported:
 
-[### 1. Instruction-Level Full Encryption ###](### 1. Instruction-Level Full Encryption ###)
+[### 1. Instruction-Level Full Encryption ###](###1. Instruction-Level Full Encryption###)
    
    This method encrypts the instructions one by one. It provides encryption of all instructions in the program by entering a specific key.
    
@@ -230,7 +230,7 @@ For --sysroot and --gcc-toolchain flags you can look here that I answered: https
 
 You can use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
-### 1. Instruction-Level Full Encryption ###
+###1. Instruction-Level Full Encryption###
 
 **Example usages:**
 
