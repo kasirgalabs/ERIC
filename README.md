@@ -880,7 +880,13 @@ We can encrypt (xor) given instructions with given keys by combining them.
 
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
-For any instruction, we can encrypt each instruction with 
+For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction.
+
+<details> <summary> <b> rv32i Extension Partial Instruction Specific Encryption Options (47 instruction specific flags) </b> </summary>
+
+
+   
+</details>
 
 ### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
 
