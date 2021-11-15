@@ -557,11 +557,15 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 **2 -)** ``` --sd ```
 
-```bash ***3 -)*** --slli ```
+```bash
 
-```bash ***4 -)*** --srli ```
+***3 -)*** --slli
 
-```bash ***5 -)*** --srai ```
+***4 -)*** --srli
+
+***5 -)*** --srai 
+
+```
 
 **6 -)** ``` --addiw ```
 
