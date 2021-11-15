@@ -232,6 +232,11 @@ You can use to obfuscate any compiled object code to non-encrypted or encrypted 
 
 ### 1. Instruction-Level Full Encryption ###
 
+We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions.
+
+**Usage:**
+
+--enckeyall=\"<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)\"
 
 ### 2. Instruction-Level Partial Encryption ###
 
