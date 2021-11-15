@@ -270,8 +270,7 @@ Gives output as some instructions encrypted out.hex (most left bit is 0. most ri
 /home/shc/Desktop/kasirga-compiler/build/bin/alp --addi --bits=100000000000000001011001011001000001000100100100010100001010000010001111001000000000000000 -d example.o
 ```
 
-<details> 
-   <summary> <h5> Encryptable Instruction List (90 instructions, most left bit is 0. most right bit is 89. instruction): </h5> </summary>
+<details> <summary> <h4> Encryptable Instruction List (90 instructions, most left bit is 0. most right bit is 89. instruction): </h4> </summary>
   
 **0 -)** beq
 
