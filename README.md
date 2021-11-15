@@ -261,7 +261,7 @@ in example
 
 We have two options to encrypt hex code partially, extension specific and instruction specific. 
 
-#### 2.1. Instruction-Level Partial Extension Specific Encryption ####
+#### [2.1. Instruction-Level Partial Extension Specific Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#21-instruction-level-partial-extension-specific-encryption) ####
 
 We have 15 flags to extension specific instruction encryption:
 
@@ -878,7 +878,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 We can encrypt (xor) given instructions with given keys by combining them.
 
-#### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
+#### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
 For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction.
 
