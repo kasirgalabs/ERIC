@@ -189,7 +189,7 @@ make
 
 ## kasirga ##
 
-You can use clang-like compiler but if you compile a .c code as object code it will also run alp.
+You can use clang-like compiler but if you compile a .c code as object code it will also run alp obfuscator and give encrypted or non-encrypted hex code.
 
 **Example usages:**
 
