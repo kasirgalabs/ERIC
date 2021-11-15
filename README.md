@@ -555,7 +555,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 **1 -)** ``` --ld ```
 
-**2 -)*** ``` --sd ```
+**2 -)** ``` --sd ```
 
 ***3 -)*** ``` --slli ```
 
