@@ -639,6 +639,22 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> Encryptable rv64d Instruction List (6 instructions, most left bit is 0. most right bit is 5. instruction of --fenc64insts) </b> </summary>
+
+***0 -)*** ``` --fcvt_l_d ```
+
+***1 -)*** ``` --fcvt_lu_d ```
+
+***2 -)*** ``` --fmv_x_d ```
+
+***3 -)*** ``` --fcvt_d_l ```
+
+***4 -)*** ``` --fcvt_d_lu ```
+
+***5 -)*** ``` --fmv_d_x ```
+
+</details>
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
