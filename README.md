@@ -292,7 +292,7 @@ and 15 key flags to encrypt given instructions by extension:
 
 Also we have instruction flags as seperately instead of instruction bit lists (they can be used interchangeably):
 
-<details style="color:red"> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts): </b> </summary>
+<details> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts) </b> </summary>
    
 **0 -)** ``` --lui ```
 
@@ -388,6 +388,26 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 **46-)** ``` --csrrci ```
    
+</details>
+
+<details> <summary> <b> Encryptable rv32m Instruction List (8 instructions, most left bit is 0. most right bit is 7. instruction of --menc32insts) </b> </summary>
+   
+**0 -)** ``` --mul ```
+
+**1 -)** ``` --mulh ``` 
+
+**2 -)** ``` --mulhsu ``` 
+
+**3 -)** ``` --mulhu ``` 
+
+**4 -)** ``` --div_ ```
+
+**5 -)** ``` --divu ``` 
+
+**6 -)** ``` --rem ```
+
+**7 -)** ``` --remu ```
+
 </details>
 
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
