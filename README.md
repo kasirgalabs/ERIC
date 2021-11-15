@@ -889,7 +889,91 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 <details> <summary> <b> rv32i Extension Partial Instruction Specific Encryption Options (47 instruction specific flags) </b> </summary>
 
 
-   
+
+</details>
+
+<details> <summary> <b> rv32m Extension Partial Instruction Specific Encryption Options (8 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv32a Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv32f Extension Partial Instruction Specific Encryption Options (26 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv32d Extension Partial Instruction Specific Encryption Options (26 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> <i> (Not supported yet) rv32q Extension Partial Instruction Specific Encryption Options (28 instruction specific flags) </i> </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv64i Extension Partial Instruction Specific Encryption Options (15 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv64m Extension Partial Instruction Specific Encryption Options (5 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv64a Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv64f Extension Partial Instruction Specific Encryption Options (4 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rv64d Extension Partial Instruction Specific Encryption Options (6 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> <i> (Not supported yet) rv64q Extension Partial Instruction Specific Encryption Options (4 instruction specific flags) </i> </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rvc quadrant 0 Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rvc quadrant 1 Extension Partial Instruction Specific Encryption Options (21 instruction specific flags) </b> </summary>
+
+
+
+</details>
+
+<details> <summary> <b> rvc quadrant 2 Extension Partial Instruction Specific Encryption Options (17 instruction specific flags) </b> </summary>
+
+
+
 </details>
 
 ### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
