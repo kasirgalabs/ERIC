@@ -230,7 +230,7 @@ For --sysroot and --gcc-toolchain flags you can look here that I answered: https
 
 You can use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
-### 1. Instruction-Level Full Encryption ###
+### [1. Instruction-Level Full Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#1-instruction-level-full-encryption) ###
 
 We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rv64i, rv64m, rv64a, rv64f, rv64d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions. (Not supported RSA encryption for now.)
 
@@ -254,7 +254,7 @@ This will xor all instructions (all of hex code) with given enckeyall.
 )
 
 
-### 2. Instruction-Level Partial Encryption ###
+### [2. Instruction-Level Partial Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#2-instruction-level-partial-encryption) ###
 
 We have two options to encrypt hex code partially, extension specific and instruction specific. 
 
@@ -877,7 +877,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 For any instruction, we can encrypt with 
 
-### 3. Memory-Level Encryption ###
+### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
 
 
 
