@@ -294,102 +294,100 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 <details> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts): </b> </summary>
    
-```bash
+**0 -)** ```bash --lui ```
+
+**1 -)** ```bash --auipc ```
+
+**2 -)** ```bash --jal ```
+
+**3 -)** ```bash --jalr ```
+
+**4 -)** ```bash --beq ```
+
+**5 -)** ```bash --bne ```
+
+**6 -)** ```bash --blt ```
+
+**7 -)** ```bash --bge ```
+
+**8 -)** ```bash --bltu ```
+
+**9 -)** ```bash --bgeu ```
+
+**10-)** ```bash --lb ```
+
+**11-)** ```bash --lh ```
+
+**12-)** ```bash --lw ```
+
+**13-)** ```bash --lbu ```
+
+**14-)** ```bash --lhu ```
+
+**15-)** ```bash --sb ```
+
+**16-)** ```bash --sh ```
+
+**17-)** ```bash --sw ```
+
+**18-)** ```bash --addi ```
+
+**19-)** ```bash --slti ```
+
+**20-)** ```bash --sltiu ```
+
+**21-)** ```bash --xori ```
+
+**22-)** ```bash --ori ```
+
+**23-)** ```bash --andi ```
+
+**24-)** ```bash --slli ```
+
+**25-)** ```bash --srli ```
+
+**26-)** ```bash --srai ```
+
+**27-)** ```bash --add ```
+
+**28-)** ```bash --sub ```
+
+**29-)** ```bash --sll ```
+
+**30-)** ```bash --slt ```
+
+**31-)** ```bash --sltu ```
+
+**32-)** ```bash --xor_ ```
+
+**33-)** ```bash --srl ```
+
+**34-)** ```bash --sra ```
+
+**35-)** ```bash --or_ ```
+
+**36-)** ```bash --and_ ```
+
+**37-)** ```bash --fence ```
+
+**38-)** ```bash --fence_i ```
+
+**39-)** ```bash --ecall ```
+
+**40-)** ```bash --ebreak ```
+
+**41-)** ```bash --csrrw ```
+
+**42-)** ```bash --csrrs ```
+
+**43-)** ```bash --csrrc ```
+
+**44-)** ```bash --csrrwi ```
+
+**45-)** ```bash --csrrsi ```
+
+**46-)** ```bash -csrrci ```
    
-**0 -)** --lui
-
-**1 -)** --auipc
-
-**2 -)** --jal
-
-**3 -)** --jalr
-
-**4 -)** --beq
-
-**5 -)** --bne
-
-**6 -)** --blt
-
-**7 -)** --bge
-
-**8 -)** --bltu
-
-**9 -)** --bgeu
-
-**10-)** --lb
-
-**11-)** --lh
-
-**12-)** --lw
-
-**13-)** --lbu
-
-**14-)** --lhu
-
-**15-)** --sb
-
-**16-)** --sh
-
-**17-)** --sw
-
-**18-)** --addi
-
-**19-)** --slti
-
-**20-)** --sltiu
-
-**21-)** --xori
-
-**22-)** --ori
-
-**23-)** --andi
-
-**24-)** --slli
-
-**25-)** --srli
-
-**26-)** --srai
-
-**27-)** --add
-
-**28-)** --sub
-
-**29-)** --sll
-
-**30-)** --slt
-
-**31-)** --sltu
-
-**32-)** --xor_
-
-**33-)** --srl
-
-**34-)** --sra
-
-**35-)** --or_
-
-**36-)** --and_
-
-**37-)** --fence
-
-**38-)** --fence_i
-
-**39-)** --ecall
-
-**40-)** --ebreak
-
-**41-)** --csrrw
-
-**42-)** --csrrs
-
-**43-)** --csrrc
-
-**44-)** --csrrwi
-
-**45-)** --csrrsi
-
-**46-)** --csrrci
-```
 </details>
 
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
