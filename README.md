@@ -290,6 +290,106 @@ and 15 key flags to encrypt given instructions by extension:
 --cencq2key="<your16bitkeyasbinary>"
 ```
 
+Also we have instruction flags as seperately instead of instruction bit lists (they can be used interchangeably):
+
+<details> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts): </b> </summary>
+```bash
+**0 -)** --lui
+
+**1 -)** --auipc
+
+**2 -)** --jal
+
+**3 -)** --jalr
+
+**4 -)** --beq
+
+**5 -)** --bne
+
+**6 -)** --blt
+
+**7 -)** --bge
+
+**8 -)** --bltu
+
+**9 -)** --bgeu
+
+**10-)** --lb
+
+**11-)** --lh
+
+**12-)** --lw
+
+**13-)** --lbu
+
+**14-)** --lhu
+
+**15-)** --sb
+
+**16-)** --sh
+
+**17-)** --sw
+
+**18-)** --addi
+
+**19-)** --slti
+
+**20-)** --sltiu
+
+**21-)** --xori
+
+**22-)** --ori
+
+**23-)** --andi
+
+**24-)** --slli
+
+**25-)** --srli
+
+**26-)** --srai
+
+**27-)** --add
+
+**28-)** --sub
+
+**29-)** --sll
+
+**30-)** --slt
+
+**31-)** --sltu
+
+**32-)** --xor_
+
+**33-)** --srl
+
+**34-)** --sra
+
+**35-)** --or_
+
+**36-)** --and_
+
+**37-)** --fence
+
+**38-)** --fence_i
+
+**39-)** --ecall
+
+**40-)** --ebreak
+
+**41-)** --csrrw
+
+**42-)** --csrrs
+
+**43-)** --csrrc
+
+**44-)** --csrrwi
+
+**45-)** --csrrsi
+
+**46-)** --csrrci
+```
+</details>
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
