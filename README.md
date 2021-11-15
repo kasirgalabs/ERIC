@@ -873,9 +873,11 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+We can encrypt (xor) given instructions with given keys by combining them.
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
-For any instruction, we can encrypt with 
+For any instruction, we can encrypt each instruction with 
 
 ### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
 
