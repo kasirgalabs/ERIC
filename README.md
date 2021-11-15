@@ -234,10 +234,15 @@ You can use to obfuscate any compiled object code to non-encrypted or encrypted 
 
 We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions.
 
-**Usage of the flag:** `--enckeyall=\"<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)\"`
+**Usage of the flag:** 
+```bash
+--enckeyall=\"<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)\"`
+```
 
-**Example usage:** `/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall=10100100101000000000001000000101 -d example.o`
-
+**Example usage:** 
+```bash
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall=10100100101000000000001000000101 -d example.o`
+```
 
 ### 2. Instruction-Level Partial Encryption ###
 
