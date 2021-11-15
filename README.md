@@ -246,6 +246,31 @@ We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, 
 
 ### 2. Instruction-Level Partial Encryption ###
 
+We have two options to encrypt hex code partially, extension specific and instruction specific. 
+
+#### 2.1. Instruction-Level Partial Extension Specific Encryption ####
+
+We have 15 flags to extension specific instruction encryption:
+
+```bash
+--ienc32insts="<your47bitrv32iinstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--menc32insts="<your8bitrv32minstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--aenc32insts="<your11bitrv32ainstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--fenc32insts="<your26bitrv32finstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--denc32insts="<your26bitrv32dinstlistasbinary(use 1 to encrypt corresponding instruction)>"
+
+--ienc64insts="<your15bitrv64iinstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--menc64insts="<your5bitrv64minstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--aenc64insts="<your11bitrv64ainstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--fenc64insts="<your4bitrv64finstlistasbinary(use 1 to encrypt corresponding instruction)>"
+--denc64insts="<your6bitrv64dinstlistasbinary(use 1 to encrypt corresponding instruction)>"
+
+--cencq0insts="<your11bitrvcq0instlistasbinary(use 1 to encrypt corresponding instruction)>"
+--cencq1insts="<your21bitrvcq1instlistasbinary(use 1 to encrypt corresponding instruction)>"
+--cencq2insts="<your17bitrvcq2instlistasbinary(use 1 to encrypt corresponding instruction)>"
+```
+
+#### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
 
