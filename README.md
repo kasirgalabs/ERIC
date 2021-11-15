@@ -390,6 +390,7 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
    
 </details>
 
+
 <details> <summary> <b> Encryptable rv32m Instruction List (8 instructions, most left bit is 0. most right bit is 7. instruction of --menc32insts) </b> </summary>
    
 **0 -)** ``` --mul ```
