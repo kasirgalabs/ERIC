@@ -294,99 +294,99 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 <details> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts): </b> </summary>
    
-**0 -)** ```bash --lui ```
+**0 -)** ``` --lui ```
 
-**1 -)** ```bash --auipc ```
+**1 -)** ``` --auipc ```
 
-**2 -)** ```bash --jal ```
+**2 -)** ``` --jal ```
 
-**3 -)** ```bash --jalr ```
+**3 -)** ``` --jalr ```
 
-**4 -)** ```bash --beq ```
+**4 -)** ``` --beq ```
 
-**5 -)** ```bash --bne ```
+**5 -)** ``` --bne ```
 
-**6 -)** ```bash --blt ```
+**6 -)** ``` --blt ```
 
-**7 -)** ```bash --bge ```
+**7 -)** ``` --bge ```
 
-**8 -)** ```bash --bltu ```
+**8 -)** ``` --bltu ```
 
-**9 -)** ```bash --bgeu ```
+**9 -)** ``` --bgeu ```
 
-**10-)** ```bash --lb ```
+**10-)** ``` --lb ```
 
-**11-)** ```bash --lh ```
+**11-)** ``` --lh ```
 
-**12-)** ```bash --lw ```
+**12-)** ``` --lw ```
 
-**13-)** ```bash --lbu ```
+**13-)** ``` --lbu ```
 
-**14-)** ```bash --lhu ```
+**14-)** ``` --lhu ```
 
-**15-)** ```bash --sb ```
+**15-)** ``` --sb ```
 
-**16-)** ```bash --sh ```
+**16-)** ``` --sh ```
 
-**17-)** ```bash --sw ```
+**17-)** ``` --sw ```
 
-**18-)** ```bash --addi ```
+**18-)** ``` --addi ```
 
-**19-)** ```bash --slti ```
+**19-)** ``` --slti ```
 
-**20-)** ```bash --sltiu ```
+**20-)** ``` --sltiu ```
 
-**21-)** ```bash --xori ```
+**21-)** ``` --xori ```
 
-**22-)** ```bash --ori ```
+**22-)** ``` --ori ```
 
-**23-)** ```bash --andi ```
+**23-)** ``` --andi ```
 
-**24-)** ```bash --slli ```
+**24-)** ``` --slli ```
 
-**25-)** ```bash --srli ```
+**25-)** ``` --srli ```
 
-**26-)** ```bash --srai ```
+**26-)** ``` --srai ```
 
-**27-)** ```bash --add ```
+**27-)** ``` --add ```
 
-**28-)** ```bash --sub ```
+**28-)** ``` --sub ```
 
-**29-)** ```bash --sll ```
+**29-)** ``` --sll ```
 
-**30-)** ```bash --slt ```
+**30-)** ``` --slt ```
 
-**31-)** ```bash --sltu ```
+**31-)** ``` --sltu ```
 
-**32-)** ```bash --xor_ ```
+**32-)** ``` --xor_ ```
 
-**33-)** ```bash --srl ```
+**33-)** ``` --srl ```
 
-**34-)** ```bash --sra ```
+**34-)** ``` --sra ```
 
-**35-)** ```bash --or_ ```
+**35-)** ``` --or_ ```
 
-**36-)** ```bash --and_ ```
+**36-)** ``` --and_ ```
 
-**37-)** ```bash --fence ```
+**37-)** ``` --fence ```
 
-**38-)** ```bash --fence_i ```
+**38-)** ``` --fence_i ```
 
-**39-)** ```bash --ecall ```
+**39-)** ``` --ecall ```
 
-**40-)** ```bash --ebreak ```
+**40-)** ``` --ebreak ```
 
-**41-)** ```bash --csrrw ```
+**41-)** ``` --csrrw ```
 
-**42-)** ```bash --csrrs ```
+**42-)** ``` --csrrs ```
 
-**43-)** ```bash --csrrc ```
+**43-)** ``` --csrrc ```
 
-**44-)** ```bash --csrrwi ```
+**44-)** ``` --csrrwi ```
 
-**45-)** ```bash --csrrsi ```
+**45-)** ``` --csrrsi ```
 
-**46-)** ```bash -csrrci ```
+**46-)** ``` -csrrci ```
    
 </details>
 
