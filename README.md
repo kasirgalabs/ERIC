@@ -246,11 +246,14 @@ We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, 
 
 This will xor all instructions (all of hex code) with given enckeyall.
 
-(in example
+(
+
+in example
 
 **32 bit instructions (rv32, rv64)** xor **10100100101000000000001000000101**
 
-**16 bit instructions (rvc)** xor **1010010010100000**
+**16 bit instructions (rvc)** xor **1010010010100000** (most left 16 bit of enckeyall)
+
 )
 
 
