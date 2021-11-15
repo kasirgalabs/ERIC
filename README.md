@@ -601,6 +601,31 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> Encryptable rv64a Instruction List (11 instructions, most left bit is 0. most right bit is 10. instruction of --aenc64insts) </b> </summary>
+
+***0 -)*** ``` --lr_d ```
+
+***1 -)*** ``` --sc_d ```
+
+***2 -)*** ``` --amoswap_d ```
+
+***3 -)*** ``` --amoadd_d ```
+
+***4 -)*** ``` --amoxor_d ```
+
+***5 -)*** ``` --amoand_d ```
+
+***6 -)*** ``` --amoor_d ```
+
+***7 -)*** ``` --amomin_d ```
+
+***8 -)*** ``` --amomax_d ```
+
+***9 -)*** ``` --amominu_d ```
+
+***10-)*** ``` --amomaxu_d ```
+
+</details>
 
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
