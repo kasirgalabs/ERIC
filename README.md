@@ -280,7 +280,7 @@ We have 15 flags to extension specific instruction encryption:
 --cencq2insts="<your17bitrvcq2instlistasbinary(use 1 to encrypt corresponding instruction)>"
 ```
 
-and 15 key flags to encrypt given instructions by extension:
+and 15 key flags (+2 unsupported rvq extension flags) to encrypt given instructions by extension:
 
 ```bash
 --ienc32key="<your32bitkeyasbinary>"
