@@ -241,8 +241,18 @@ We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, 
 
 **Example usage:** 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall=10100100101000000000001000000101 -d example.o`
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall="10100100101000000000001000000101" -d example.o`
 ```
+
+This will xor all instructions (all of hex code) with given enckeyall.
+
+(in example
+
+**32 bit instruction (rv32, rv64)** xor **10100100101000000000001000000101**
+
+**16 bit instruction (rvc)** xor **1010010010100000**
+)
+
 
 ### 2. Instruction-Level Partial Encryption ###
 
@@ -780,6 +790,8 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 </details>
 
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
+
+For any instruction, we can encrypt with 
 
 ### 3. Memory-Level Encryption ###
 
