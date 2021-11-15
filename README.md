@@ -549,6 +549,41 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 </details>
 
+<details> <summary> <b> Encryptable rv64i Instruction List (15 instructions, most left bit is 0. most right bit is 14. instruction of --ienc64insts) </b> </summary>
+
+**0 -)** ``` --lwu ```
+
+**1 -)** ``` --ld ```
+
+**2 -)*** ``` --sd ```
+
+***3 -)*** ``` --slli ```
+
+***4 -)*** ``` --srli ```
+
+***5 -)*** ``` --srai ```
+
+**6 -)** ``` --addiw ```
+
+**7 -)** ``` --slliw ```
+
+**8 -)** ``` --srliw ```
+
+**9 -)** ``` --sraiw ```
+
+**10-)** ``` --addw ```
+
+**11-)** ``` --subw ```
+
+**12-)** ``` --sllw ```
+
+**13-)** ``` --srlw ```
+
+**14-)** ``` --sraw ```
+
+</details>
+
+
 #### 2.2. Instruction-Level Partial Instruction Specific Encryption ####
 
 ### 3. Memory-Level Encryption ###
