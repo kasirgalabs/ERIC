@@ -248,9 +248,9 @@ This will xor all instructions (all of hex code) with given enckeyall.
 
 (in example
 
-**32 bit instruction (rv32, rv64)** xor **10100100101000000000001000000101**
+**32 bit instructions (rv32, rv64)** xor **10100100101000000000001000000101**
 
-**16 bit instruction (rvc)** xor **1010010010100000**
+**16 bit instructions (rvc)** xor **1010010010100000**
 )
 
 
