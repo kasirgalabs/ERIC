@@ -589,15 +589,15 @@ Also we have instruction flags as seperately instead of instruction bit lists (t
 
 <details> <summary> <b> Encryptable rv64m Instruction List (5 instructions, most left bit is 0. most right bit is 4. instruction of --menc64insts) </b> </summary>
 
-**0 -)** ``` --mulw ```
+***0 -)*** ``` --mulw ```
 
-**1 -)** ``` --divw ```
+***1 -)*** ``` --divw ```
 
-**2 -)** ``` --divuw ```
+***2 -)*** ``` --divuw ```
 
-**3 -)** ``` --remw ```
+***3 -)*** ``` --remw ```
 
-**4 -)** ``` --remuw ```
+***4 -)*** ``` --remuw ```
 
 </details>
 
