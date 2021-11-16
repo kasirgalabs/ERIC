@@ -51,14 +51,10 @@ class kasirgaIDEFrame: public wxFrame
         void OnOpenFile(wxCommandEvent& event);
         void OnCompile(wxCommandEvent& event);
         void OnSetCompPath(wxCommandEvent& event);
+        void OnSetRiscvTarget(wxCommandEvent& event);
         void OnSetRiscvPath(wxCommandEvent& event);
         void OnEncrypt(wxCommandEvent& event);
         void OnCheckCompStr(wxCommandEvent& event);
-
-        void OnButton1Click(wxCommandEvent& event);
-        void OnButton2Click(wxCommandEvent& event);
-        void OnButton3Click(wxCommandEvent& event);
-        void OnButton4Click(wxCommandEvent& event);
 
         //(*Identifiers(kasirgaIDEFrame)
         static const long ID_MENUITEM1;
@@ -70,14 +66,10 @@ class kasirgaIDEFrame: public wxFrame
         static const long idOpenFile;
         static const long idComp;
         static const long idCompPath;
+        static const long idRiscvTarget;
         static const long idRiscvPath;
         static const long idEncrypt;
         static const long idCheckCompStr;
-
-        static const long ID_BUTTON1;
-        static const long ID_BUTTON2;
-        static const long ID_BUTTON3;
-        static const long ID_BUTTON4;
 
         static const long ID_CHOICE1;
         static const long ID_CHOICE2;
@@ -89,11 +81,6 @@ class kasirgaIDEFrame: public wxFrame
         //(*Declarations(kasirgaIDEFrame)
         wxStatusBar* StatusBar1;
         //*)
-
-        wxButton* Button1;
-        wxButton* Button2;
-        wxButton* Button3;
-        wxButton* Button4;
 
         wxChoice* Choice1;
         wxChoice* Choice2;
