@@ -187,9 +187,9 @@ make
 
 # Usage of Tools and Compiler #
 
-## alp ##
+## alp LLVM Based Encryptor and Hex Generator ##
 
-You can use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
+You can 'alp' use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
 ### [1. Instruction-Level Full Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#1-instruction-level-full-encryption) ###
 
@@ -1196,7 +1196,7 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 **Work In Progress**
 
-## kasirga ##
+## kasirga compiler ##
 
 You can use clang-like compiler but if you compile a .c code as object code it will also run alp obfuscator and give encrypted or non-encrypted hex code.
 
