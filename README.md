@@ -851,7 +851,7 @@ We can encrypt (xor) given instructions with given keys by combining them. Here 
 --c_addi --c_addi16sp \
 -d example.o
 ```
-This will encrypt (xor) instructions (if these instructions exist in compiled program):
+This will encrypt (xor) instructions (if these instructions exist in the compiled program):
 - Which are given as 1 in `--ienc32insts` bit list flag with `--ienc32key`. (To see corresponding instructions you can look above `Encryptable rv32i Instruction List` spoiler.)
 - Which are given as `--c_addi` and `--c_addi16sp` seperate instruction flags with `--cencq1key`.
 
@@ -869,7 +869,7 @@ ebreak  ^  11011010110100010001101001100001
 c.addi      ^  0000111010100010
 c.addi16sp  ^  0000111010100010
 ```
-
+Xoring with 1 means flipping corresponding bit. So for example above, 4. 5. 6. 8. 10. and 14. bits (assume that most left bit is first)  of `c.addi` instructions in the compiled program will flip.
 
 #### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
