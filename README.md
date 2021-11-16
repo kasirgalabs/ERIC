@@ -869,7 +869,7 @@ ebreak  ^  11011010110100010001101001100001
 c.addi      ^  0000111010100010
 c.addi16sp  ^  0000111010100010
 ```
-Xoring with 1 means flipping corresponding bit. So for example above, 4. 5. 6. 8. 10. and 14. bits (assume that most left bit is first) of `c.addi` instructions in the compiled program will flip.
+Xoring with 1 means flipping corresponding bit. So for example above, 3. 4. 5. 7. 9. and 13. bits (assume that most left bit is 0.) of `c.addi` instructions in the compiled program will flip.
 
 #### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
@@ -1237,7 +1237,7 @@ To illustrate more, these encryptions will be performed (for each corresponding 
 auipc  ^  00010001100111000001110000000101
 c.add  ^  1001000000000100
 ```
-Xoring with 1 means flipping corresponding bit. This encryption will flip 4. 8. 9. 12. 13. 14. 20. 21. 22. 30. 32. bits (assume that most left bit is first) of `auipc` instructions and 1. 4. 14. bits of `c.add` instructions in the compiled program. 
+Xoring with 1 means flipping corresponding bit. This encryption will flip 3. 7. 8. 11. 12. 13. 19. 20. 21. 29. 31. bits (assume that most left bit is 0.) of `auipc` instructions and 0. 3. 13. bits of `c.add` instructions in the compiled program. 
 
 ### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
 
@@ -1301,20 +1301,20 @@ To illustrate more, this encryption will be performed (for each corresponding in
 ```bash
 lw  ^  10100100101000000000001000000100
 ```
-Xoring with 1 means flipping corresponding bit. This encryption will flip 1. 3. 6. 9. 11. 23. 30. bits (assume that most left bit is first) of `lw` instructions in the compiled program. 
+Xoring with 1 means flipping corresponding bit. This encryption will flip 0. 2. 5. 8. 10. 22. 29. bits (assume that most left bit is 0.) of `lw` instructions in the compiled program.
 
 # Screenshots #
-![alt text](screenshots/ide1editor.png)
+![image](screenshots/ide1editor.png)
 
-![alt text](screenshots/ide2menubar.png)
+![image](screenshots/ide2menubar.png)
 
-![alt text](screenshots/ide3menubar.png)
+![image](screenshots/ide3menubar.png)
 
-![alt text](screenshots/ide4enc.png)
+![image](screenshots/ide4enc.png)
 
-![alt text](screenshots/ide5enc.png)
+![image](screenshots/ide5enc.png)
 
-![alt text](screenshots/ide6parenc.png)
+![image](screenshots/ide6parenc.png)
 
-![alt text](screenshots/ide7parenc.png)
+![image](screenshots/ide7parenc.png)
 
