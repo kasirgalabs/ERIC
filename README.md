@@ -852,8 +852,8 @@ We can encrypt (xor) given instructions with given keys by combining them. Here 
 -d example.o
 ```
 This will encrypt (xor) instructions (if these instructions exist in the compiled program):
-- Which are given as 1 in `--ienc32insts` bit list flag with `--ienc32key`. (To see corresponding instructions you can look above `Encryptable rv32i Instruction List` spoiler.)
-- Which are given as `--c_addi` and `--c_addi16sp` seperate instruction flags with `--cencq1key`.
+- which are given as 1 in `--ienc32insts` bit list flag with `--ienc32key`. (To see corresponding instructions you can look above `Encryptable rv32i Instruction List` spoiler.)
+- which are given as `--c_addi` and `--c_addi16sp` seperate instruction flags with `--cencq1key`.
 
 To illustrate more, these encryptions will be performed (for each corresponding instruction):
 ```bash
@@ -869,7 +869,7 @@ ebreak  ^  11011010110100010001101001100001
 c.addi      ^  0000111010100010
 c.addi16sp  ^  0000111010100010
 ```
-Xoring with 1 means flipping corresponding bit. So for example above, 4. 5. 6. 8. 10. and 14. bits (assume that most left bit is first)  of `c.addi` instructions in the compiled program will flip.
+Xoring with 1 means flipping corresponding bit. So for example above, 4. 5. 6. 8. 10. and 14. bits (assume that most left bit is first) of `c.addi` instructions in the compiled program will flip.
 
 #### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
@@ -1219,6 +1219,25 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 ```
 
 </details>
+   
+We can partially encrypt (xor) given instructions with given keys. Here is an example:
+
+```bash
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp \
+--b_p_auipc=00010001100111000001110000000101 \
+--b_p_c_add=1001000000000100 \
+-d example.o
+```
+This will encrypt (xor) instructions (if these instructions exist in the compiled program):
+- which is given as `--b_p_auipc` with direct given key.
+- which is given as `--b_p_c_add` with direct given key.
+
+To illustrate more, these encryptions will be performed (for each corresponding instruction):
+```bash
+auipc  ^  00010001100111000001110000000101
+c.add  ^  1001000000000100
+```
+Xoring with 1 means flipping corresponding bit. This encryption will flip 4. 8. 9. 12. 13. 14. 20. 21. 22. 30. 32. bits (assume that most left bit is first) of `auipc` instructions and 1. 4. 14. bits of `c.add` instructions in the compiled program. 
 
 ### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
 
@@ -1226,7 +1245,7 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 ## kasirga LLVM Based Compiler ##
 
-You can use clang-like compiler but if you compile a .c code as object code it will also run alp obfuscator and give encrypted or non-encrypted hex code.
+You can use kasirga as clang-like compiler. If you compile a .c code to object code and give `--alp="<your-alp-encryption options>"` flag it will also run alp obfuscator and give encrypted or non-encrypted hex code.
 
 **Example usages:**
 
