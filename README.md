@@ -189,7 +189,7 @@ make
 
 ## alp LLVM Based Encryptor and Hex Generator ##
 
-You can 'alp' use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
+You can use 'alp' to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
 ### [1. Instruction-Level Full Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#1-instruction-level-full-encryption) ###
 
@@ -841,11 +841,39 @@ Also we have instruction flags as seperately instead of instruction bit lists. (
 
 </details>
 
-We can encrypt (xor) given instructions with given keys by combining them.
+We can encrypt (xor) given instructions with given keys by combining them. Here is an example:
+
+```bash
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp \
+--ienc32key=11011010110100010001101001100001 \
+--ienc32insts=10000010000001100000010000000000100100001000000 \
+--cencq1key=0000111010100010 \
+--c_addi --c_addi16sp \
+-d example.o
+```
+This will encrypt (xor) instructions (if these instructions exist in compiled program):
+- Which are given as 1 in `--ienc32insts` bit list flag with `--ienc32key`. (To see corresponding instructions you can look above `Encryptable rv32i Instruction List` spoiler.)
+- Which are given as `--c_addi` and `--c_addi16sp` seperate instruction flags with `--cencq1key`.
+
+To illustrate more, these encryptions will be performed (for each corresponding instruction):
+```bash
+lui     ^  11011010110100010001101001100001  
+blt     ^  11011010110100010001101001100001
+lbu     ^  11011010110100010001101001100001
+lhu     ^  11011010110100010001101001100001
+xori    ^  11011010110100010001101001100001
+xor     ^  11011010110100010001101001100001
+or      ^  11011010110100010001101001100001
+ebreak  ^  11011010110100010001101001100001
+
+c.addi      ^  0000111010100010
+c.addi16sp  ^  0000111010100010
+```
+
 
 #### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
-For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction. Instruction partial encryption flags can be seen as spoilers below. Every flag has ```b_p_``` prefix that means ```bits partial```
+For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction. Instruction partial encryption flags can be seen as spoilers below. Every flag has ```b_p_``` prefix that means ```bits partial```.
 
 <details> <summary> <b> rv32i Extension Partial Instruction Specific Encryption Options (47 instruction specific flags) </b> </summary>
 
