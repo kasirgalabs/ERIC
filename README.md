@@ -1233,7 +1233,7 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 ### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
 
-
+**Work In Progress**
 
 
 
