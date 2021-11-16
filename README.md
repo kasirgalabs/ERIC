@@ -263,7 +263,7 @@ We have two options to encrypt hex code partially, extension specific and instru
 
 #### [2.1. Instruction-Level Partial Extension Specific Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#21-instruction-level-partial-extension-specific-encryption) ####
 
-We have 15 flags to extension specific instruction encryption:
+We have 15 flags (+2 unsupported rvq extension flags) to extension specific instruction encryption:
 
 ```bash
 --ienc32insts="<your47bitrv32iinstlistasbinary(use 1 to encrypt corresponding instruction)>"
