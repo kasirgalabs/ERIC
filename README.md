@@ -185,7 +185,7 @@ Alternative build with make:
 make
 ```
 
-# Usage of Tools and Compiler #
+# Usage of Tools, Compiler and IDE #
 
 ## alp LLVM Based Encryptor and Hex Generator ##
 
@@ -1302,6 +1302,9 @@ To illustrate more, this encryption will be performed (for each corresponding in
 lw  ^  10100100101000000000001000000100
 ```
 Xoring with 1 means flipping corresponding bit. This encryption will flip 0. 2. 5. 8. 10. 22. 29. bits (assume that most left bit is 0.) of `lw` instructions in the compiled program.
+
+## kasirgaIDE wxWidgets Based User Interface For kasirga-compiler ##   
+**Work In Progress**
 
 # Screenshots #
 ![image](screenshots/ide1editor.png)
