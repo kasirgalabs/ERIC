@@ -248,7 +248,7 @@ This will xor all instructions (all of hex code) with given enckeyall.
 
 (
 
-in example
+In example
 
 **32 bit instructions (rv32, rv64)** xor **10100100101000000000001000000101**
 
