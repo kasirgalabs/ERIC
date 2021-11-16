@@ -942,85 +942,207 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 <details> <summary> <b> rv32m Extension Partial Instruction Specific Encryption Options (8 instruction specific flags) </b> </summary>
 
-
+```bash
+--b_p_mul="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt mul instruction with the given key         
+--b_p_mulh="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt mulh instruction with the given key  
+--b_p_mulhsu="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt mulhsu instruction with the given key    
+--b_p_mulhu="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt mulhu instruction with the given key   
+--b_p_div_="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt div instruction with the given key  
+--b_p_divu="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt divu instruction with the given key  
+--b_p_rem="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt rem instruction with the given key 
+--b_p_remu="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt remu instruction with the given key
+```
 
 </details>
 
 <details> <summary> <b> rv32a Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
 
-
+```bash
+--b_p_lr_w="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt lr_w instruction with the given key         
+--b_p_sc_w="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt sc_w instruction with the given key
+--b_p_amoswap_w="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt amoswap_w instruction with the given key     
+--b_p_amoadd_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt amoadd_w instruction with the given key    
+--b_p_amoxor_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt amoxor_w instruction with the given key    
+--b_p_amoand_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt amoand_w instruction with the given key    
+--b_p_amoor_w="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt amoor_w instruction with the given key   
+--b_p_amomin_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt amomin_w instruction with the given key    
+--b_p_amomax_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt amomax_w instruction with the given key    
+--b_p_amominu_w="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt amominu_w instruction with the given key     
+--b_p_amomaxu_w="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt amomaxu_w instruction with the given key
+```
 
 </details>
 
 <details> <summary> <b> rv32f Extension Partial Instruction Specific Encryption Options (26 instruction specific flags) </b> </summary>
 
-
+```bash
+--b_p_flw="<your32bitkeyasbinary>"        -->  partial encryption option to encrypt flw instruction with the given key          
+--b_p_fsw="<your32bitkeyasbinary>"        -->  partial encryption option to encrypt fsw instruction with the given key  
+--b_p_fmadd_s="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fmadd_s instruction with the given key      
+--b_p_fmsub_s="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fmsub_s instruction with the given key      
+--b_p_fnmsub_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fnmsub_s instruction with the given key       
+--b_p_fnmadd_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fnmadd_s instruction with the given key       
+--b_p_fadd_s="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fadd_s instruction with the given key     
+--b_p_fsub_s="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fsub_s instruction with the given key     
+--b_p_fmul_s="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fmul_s instruction with the given key     
+--b_p_fdiv_s="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fdiv_s instruction with the given key     
+--b_p_fsqrt_s="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fsqrt_s instruction with the given key      
+--b_p_fsgnj_s="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fsgnj_s instruction with the given key      
+--b_p_fsgnjn_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fsgnjn_s instruction with the given key       
+--b_p_fsgnjx_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fsgnjx_s instruction with the given key       
+--b_p_fmin_s="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fmin_s instruction with the given key     
+--b_p_fmax_s="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fmax_s instruction with the given key     
+--b_p_fcvt_w_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fcvt_w_s instruction with the given key       
+--b_p_fcvt_wu_s="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt fcvt_wu_s instruction with the given key        
+--b_p_fmv_x_w="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fmv_x_w instruction with the given key      
+--b_p_feq_s="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt feq_s instruction with the given key    
+--b_p_flt_s="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt flt_s instruction with the given key    
+--b_p_fle_s="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt fle_s instruction with the given key    
+--b_p_fclass_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fclass_s instruction with the given key       
+--b_p_fcvt_s_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fcvt_s_w instruction with the given key       
+--b_p_fcvt_s_wu="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt fcvt_s_wu instruction with the given key        
+--b_p_fmv_w_x="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fmv_w_x instruction with the given key
+```
 
 </details>
 
 <details> <summary> <b> rv32d Extension Partial Instruction Specific Encryption Options (26 instruction specific flags) </b> </summary>
 
-
+```bash
+--b_p_fld="<your32bitkeyasbinary>"        -->  partial encryption option to encrypt fld instruction with the given key           
+--b_p_fsd="<your32bitkeyasbinary>"        -->  partial encryption option to encrypt fsd instruction with the given key  
+--b_p_fmadd_d="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fmadd_d instruction with the given key      
+--b_p_fmsub_d="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fmsub_d instruction with the given key      
+--b_p_fnmsub_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fnmsub_d instruction with the given key       
+--b_p_fnmadd_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fnmadd_d instruction with the given key       
+--b_p_fadd_d="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fadd_d instruction with the given key     
+--b_p_fsub_d="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fsub_d instruction with the given key     
+--b_p_fmul_d="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fmul_d instruction with the given key     
+--b_p_fdiv_d="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fdiv_d instruction with the given key     
+--b_p_fsqrt_d="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fsqrt_d instruction with the given key      
+--b_p_fsgnj_d="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fsgnj_d instruction with the given key      
+--b_p_fsgnjn_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fsgnjn_d instruction with the given key       
+--b_p_fsgnjx_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fsgnjx_d instruction with the given key       
+--b_p_fmin_d="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fmin_d instruction with the given key     
+--b_p_fmax_d="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt fmax_d instruction with the given key     
+--b_p_fcvt_s_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fcvt_s_d instruction with the given key       
+--b_p_fcvt_d_s="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fcvt_d_s instruction with the given key       
+--b_p_feq_d="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt feq_d instruction with the given key    
+--b_p_flt_d="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt flt_d instruction with the given key    
+--b_p_fle_d="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt fle_d instruction with the given key    
+--b_p_fclass_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fclass_d instruction with the given key       
+--b_p_fcvt_w_d="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fcvt_w_d instruction with the given key       
+--b_p_fcvt_wu_d="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt fcvt_wu_d instruction with the given key        
+--b_p_fcvt_d_w="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt fcvt_d_w instruction with the given key       
+--b_p_fcvt_d_wu="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt fcvt_d_wu instruction with the given key
+```
 
 </details>
 
 <details> <summary> <b> <i> (Not supported yet) rv32q Extension Partial Instruction Specific Encryption Options (28 instruction specific flags) </i> </b> </summary>
 
-
+```bash
+*** --b_p_flq=\"<your32bitkeyasbinary>\"       ***  -->  partial encryption option to encrypt flq instruction with the given key        --> *** not supported yet ***           
+*** --b_p_fsq=\"<your32bitkeyasbinary>\"       ***  -->  partial encryption option to encrypt fsq instruction with the given key        --> *** not supported yet *** 
+*** --b_p_fmadd_q=\"<your32bitkeyasbinary>\"   ***  -->  partial encryption option to encrypt fmadd_q instruction with the given key    --> *** not supported yet ***         
+*** --b_p_fmsub_q=\"<your32bitkeyasbinary>\"   ***  -->  partial encryption option to encrypt fmsub_q instruction with the given key    --> *** not supported yet ***         
+*** --b_p_fnmsub_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fnmsub_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fnmadd_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fnmadd_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fadd_q=\"<your32bitkeyasbinary>\"    ***  -->  partial encryption option to encrypt fadd_q instruction with the given key     --> *** not supported yet ***       
+*** --b_p_fsub_q=\"<your32bitkeyasbinary>\"    ***  -->  partial encryption option to encrypt fsub_q instruction with the given key     --> *** not supported yet ***       
+*** --b_p_fmul_q=\"<your32bitkeyasbinary>\"    ***  -->  partial encryption option to encrypt fmul_q instruction with the given key     --> *** not supported yet ***       
+*** --b_p_fdiv_q=\"<your32bitkeyasbinary>\"    ***  -->  partial encryption option to encrypt fdiv_q instruction with the given key     --> *** not supported yet ***       
+*** --b_p_fsqrt_q=\"<your32bitkeyasbinary>\"   ***  -->  partial encryption option to encrypt fsqrt_q instruction with the given key    --> *** not supported yet ***         
+*** --b_p_fsgnj_q=\"<your32bitkeyasbinary>\"   ***  -->  partial encryption option to encrypt fsgnj_q instruction with the given key    --> *** not supported yet ***         
+*** --b_p_fsgnjn_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fsgnjn_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fsgnjx_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fsgnjx_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fmin_q=\"<your32bitkeyasbinary>\"    ***  -->  partial encryption option to encrypt fmin_q instruction with the given key     --> *** not supported yet ***       
+*** --b_p_fmax_q=\"<your32bitkeyasbinary>\"    ***  -->  partial encryption option to encrypt fmax_q instruction with the given key     --> *** not supported yet ***       
+*** --b_p_fcvt_s_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fcvt_s_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fcvt_q_s=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fcvt_q_s instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fcvt_d_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fcvt_d_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fcvt_q_d=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fcvt_q_d instruction with the given key   --> *** not supported yet ***           
+*** --b_p_feq_q=\"<your32bitkeyasbinary>\"     ***  -->  partial encryption option to encrypt feq_q instruction with the given key      --> *** not supported yet ***     
+*** --b_p_flt_q=\"<your32bitkeyasbinary>\"     ***  -->  partial encryption option to encrypt flt_q instruction with the given key      --> *** not supported yet ***     
+*** --b_p_fle_q=\"<your32bitkeyasbinary>\"     ***  -->  partial encryption option to encrypt fle_q instruction with the given key      --> *** not supported yet ***     
+*** --b_p_fclass_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fclass_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fcvt_w_q=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fcvt_w_q instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fcvt_wu_q=\"<your32bitkeyasbinary>\" ***  -->  partial encryption option to encrypt fcvt_wu_q instruction with the given key  --> *** not supported yet ***
+*** --b_p_fcvt_q_w=\"<your32bitkeyasbinary>\"  ***  -->  partial encryption option to encrypt fcvt_q_w instruction with the given key   --> *** not supported yet ***           
+*** --b_p_fcvt_q_wu=\"<your32bitkeyasbinary>\" ***  -->  partial encryption option to encrypt fcvt_q_wu instruction with the given key  --> *** not supported yet ***
+```
 
 </details>
 
 <details> <summary> <b> rv64i Extension Partial Instruction Specific Encryption Options (15 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rv64m Extension Partial Instruction Specific Encryption Options (5 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rv64a Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rv64f Extension Partial Instruction Specific Encryption Options (4 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rv64d Extension Partial Instruction Specific Encryption Options (6 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> <i> (Not supported yet) rv64q Extension Partial Instruction Specific Encryption Options (4 instruction specific flags) </i> </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rvc quadrant 0 Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rvc quadrant 1 Extension Partial Instruction Specific Encryption Options (21 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
 <details> <summary> <b> rvc quadrant 2 Extension Partial Instruction Specific Encryption Options (17 instruction specific flags) </b> </summary>
 
+```bash
 
+```
 
 </details>
 
