@@ -1285,7 +1285,7 @@ riscv32 object code:
 ```
 
 I am using --sysroot and --gcc-toolchain flags to compile for riscv. You need to have riscv-gnu-toolchain pre installed.
-For --sysroot and --gcc-toolchain flags you can look here that I answered: https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v
+For --sysroot and --gcc-toolchain flags you can look here that I answered on [stackoverflow](https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v).
 
 riscv32 object code (also `--alp="<alp-encryption options>"` flag given, so driver will run alp obfuscator and also give .hex file output):
 
