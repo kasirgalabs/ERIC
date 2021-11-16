@@ -311,7 +311,7 @@ and 15 key flags (+2 unsupported rvq extension flags) to encrypt given instructi
 --cencq2key="<your16bitkeyasbinary>"
 ```
 
-Also we have instruction flags as seperately instead of instruction bit lists (they can be used interchangeably):
+Also we have instruction flags as seperately instead of instruction bit lists. (They can be used interchangeably.) Instruction encryption flags can be seen as spoilers below. (Dots are converted to underscores in instructions which containing dots.)
 
 <details> <summary> <b> Encryptable rv32i Instruction List (47 instructions, most left bit is 0. most right bit is 46. instruction of --ienc32insts) </b> </summary>
    
@@ -884,7 +884,7 @@ We can encrypt (xor) given instructions with given keys by combining them.
 
 #### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
-For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction.
+For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction. Instruction partial encryption flags can be seen as spoilers below. Every flag has ```b_p_``` prefix that means ```bits partial```
 
 <details> <summary> <b> rv32i Extension Partial Instruction Specific Encryption Options (47 instruction specific flags) </b> </summary>
 
