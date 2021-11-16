@@ -855,7 +855,7 @@ This will encrypt (xor) instructions (if these instructions exist in the compile
 - which are given as 1 in `--ienc32insts` bit list flag with `--ienc32key`. (To see corresponding instructions you can look above `Encryptable rv32i Instruction List` spoiler.)
 - which are given as `--c_addi` and `--c_addi16sp` seperate instruction flags with `--cencq1key`.
 
-To illustrate more, these encryptions will be performed (for each corresponding instruction):
+To illustrate more, these encryptions will be performed (for each corresponding instruction in the compiled program):
 ```bash
 lui     ^  11011010110100010001101001100001  
 blt     ^  11011010110100010001101001100001
@@ -1232,7 +1232,7 @@ This will encrypt (xor) instructions (if these instructions exist in the compile
 - which is given as `--b_p_auipc` with direct given key.
 - which is given as `--b_p_c_add` with direct given key.
 
-To illustrate more, these encryptions will be performed (for each corresponding instruction):
+To illustrate more, these encryptions will be performed (for each corresponding instruction in the compiled program):
 ```bash
 auipc  ^  00010001100111000001110000000101
 c.add  ^  1001000000000100
@@ -1245,35 +1245,35 @@ Xoring with 1 means flipping corresponding bit. This encryption will flip 4. 8. 
 
 ## kasirga LLVM Based Compiler ##
 
-You can use kasirga as clang-like compiler. If you compile a .c code to object code and give `--alp="<your-alp-encryption options>"` flag it will also run alp obfuscator and give encrypted or non-encrypted hex code.
+You can use kasirga as clang-like compiler. If you compile a .c code to object code and give `--alp="<alp-encryption options>"` flag it will also run alp obfuscator and give encrypted or non-encrypted hex code.
 
 **Example usages:**
 
-Host pc executable:
+Host pc executable (when `kasirga` is in path):
 
 ```bash
 kasirga example.c -o example
 ```
 
-Host pc assembly code:
+Host pc assembly code (when in /home/shc/ERIC/kasirga-compiler-and-alp/build/bin directory):
 
 ```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -S example.c -o example.s 
+./kasirga -S example.c -o example.s 
 ```
 
 Host pc llvm ir code:
 
 ```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -S -emit-llvm example.c -o example.ll 
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/kasirga -S -emit-llvm example.c -o example.ll 
 ```
 
 Host pc object code:
 
 ```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c example.c -o example.o
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/kasirga -c example.c -o example.o
 ```
 
-Riscv32 object code (also runs alp):
+riscv32 object code:
 
 ```bash
 /home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c -target riscv32-unknown-elf --sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new/_install/ example.c -o example.o
@@ -1282,7 +1282,26 @@ Riscv32 object code (also runs alp):
 I am using --sysroot and --gcc-toolchain flags to compile for riscv. You need to have riscv-gnu-toolchain pre installed.
 For --sysroot and --gcc-toolchain flags you can look here that I answered: https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v
 
+riscv32 object code (also `--alp="<alp-encryption options>"` flag given, so runs alp obfuscator and also gives .hex file output):
 
+```bash
+/home/shc/Desktop/kasirga-compiler/build/bin/kasirga \
+-c \
+-target riscv32-unknown-elf \
+--sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf \
+--gcc-toolchain=/home/shc/riscv-new/_install/ \
+example.c -o example.o \
+--alp=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
+```
+
+As seen above, `kasirga` compiler driver compiles `example.c` code to `example.o` object code, then drives `alp` obfuscator with the given encryption options and gives encrypted .hex code.
+This will **not** encrypt all instructions because there is no `1` in the given `--enckeyall` bits but will encrypt `lw` instructions in the compiled program with the given key.
+
+To illustrate more, this encryption will be performed (for each corresponding instruction in the compiled program):
+```bash
+lw  ^  10100100101000000000001000000100
+```
+Xoring with 1 means flipping corresponding bit. This encryption will flip 1. 3. 6. 9. 11. 23. 30. bits (assume that most left bit is first) of `lw` instructions in the compiled program. 
 
 # Screenshots #
 ![alt text](screenshots/ide1editor.png)
