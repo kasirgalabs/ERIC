@@ -187,45 +187,6 @@ make
 
 # Usage of Tools and Compiler #
 
-## kasirga ##
-
-You can use clang-like compiler but if you compile a .c code as object code it will also run alp obfuscator and give encrypted or non-encrypted hex code.
-
-**Example usages:**
-
-Host pc executable:
-
-```bash
-kasirga example.c -o example
-```
-
-Host pc assembly code:
-
-```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -S example.c -o example.s 
-```
-
-Host pc llvm ir code:
-
-```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -S -emit-llvm example.c -o example.ll 
-```
-
-Host pc object code:
-
-```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c example.c -o example.o
-```
-
-Riscv32 object code (also runs alp):
-
-```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c -target riscv32-unknown-elf --sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new/_install/ example.c -o example.o
-```
-
-I am using --sysroot and --gcc-toolchain flags to compile for riscv. You need to have riscv-gnu-toolchain pre installed.
-For --sysroot and --gcc-toolchain flags you can look here that I answered: https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v
-
 ## alp ##
 
 You can use to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
@@ -1235,7 +1196,44 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 **Work In Progress**
 
+## kasirga ##
 
+You can use clang-like compiler but if you compile a .c code as object code it will also run alp obfuscator and give encrypted or non-encrypted hex code.
+
+**Example usages:**
+
+Host pc executable:
+
+```bash
+kasirga example.c -o example
+```
+
+Host pc assembly code:
+
+```bash
+/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -S example.c -o example.s 
+```
+
+Host pc llvm ir code:
+
+```bash
+/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -S -emit-llvm example.c -o example.ll 
+```
+
+Host pc object code:
+
+```bash
+/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c example.c -o example.o
+```
+
+Riscv32 object code (also runs alp):
+
+```bash
+/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c -target riscv32-unknown-elf --sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new/_install/ example.c -o example.o
+```
+
+I am using --sysroot and --gcc-toolchain flags to compile for riscv. You need to have riscv-gnu-toolchain pre installed.
+For --sysroot and --gcc-toolchain flags you can look here that I answered: https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v
 
 
 
