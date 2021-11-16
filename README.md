@@ -1164,7 +1164,17 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 <details> <summary> <b> rvc quadrant 0 Extension Partial Instruction Specific Encryption Options (11 instruction specific flags) </b> </summary>
 
 ```bash
-
+--b_p_c_addi4spn="<your16bitkeyasbinary>"  -->  partial encryption option to encrypt c_addi4spn instruction with the given key      
+--b_p_c_fld="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_fld instruction with the given key 
+*** --b_p_c_lq="<your16bitkeyasbinary>" ***  -->  partial encryption option to encrypt c_lq instruction with the given key  --> *** not supported yet ***
+--b_p_c_lw="<your16bitkeyasbinary>"        -->  partial encryption option to encrypt c_lw instruction with the given key
+--b_p_c_flw="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_flw instruction with the given key 
+--b_p_c_ld="<your16bitkeyasbinary>"        -->  partial encryption option to encrypt c_ld instruction with the given key
+--b_p_c_fsd="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_fsd instruction with the given key 
+*** --b_p_c_sq="<your16bitkeyasbinary>" ***  -->  partial encryption option to encrypt c_sq instruction with the given key  --> *** not supported yet ***
+--b_p_c_sw="<your16bitkeyasbinary>"        -->  partial encryption option to encrypt c_sw instruction with the given key
+--b_p_c_fsw="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_fsw instruction with the given key 
+--b_p_c_sd="<your16bitkeyasbinary>"        -->  partial encryption option to encrypt c_sd instruction with the given key
 ```
 
 </details>
@@ -1172,7 +1182,27 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 <details> <summary> <b> rvc quadrant 1 Extension Partial Instruction Specific Encryption Options (21 instruction specific flags) </b> </summary>
 
 ```bash
-
+--b_p_c_nop="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_nop instruction with the given key       
+--b_p_c_addi="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_addi instruction with the given key  
+--b_p_c_jal="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_jal instruction with the given key 
+--b_p_c_addiw="<your16bitkeyasbinary>"     -->  partial encryption option to encrypt c_addiw instruction with the given key   
+--b_p_c_li="<your16bitkeyasbinary>"        -->  partial encryption option to encrypt c_li instruction with the given key
+--b_p_c_addi16sp="<your16bitkeyasbinary>"  -->  partial encryption option to encrypt c_addi16sp instruction with the given key      
+--b_p_c_lui="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_lui instruction with the given key 
+--b_p_c_srli="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_srli instruction with the given key  
+*** --b_p_c_srli64="<your16bitkeyasbinary>" ***  -->  partial encryption option to encrypt c_srli64 instruction with the given key  --> *** not supported yet ***   
+--b_p_c_srai="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_srai instruction with the given key  
+*** --b_p_c_srai64="<your16bitkeyasbinary>" ***  -->  partial encryption option to encrypt c_srai64 instruction with the given key  --> *** not supported yet ***   
+--b_p_c_andi="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_andi instruction with the given key  
+--b_p_c_sub="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_sub instruction with the given key 
+--b_p_c_xor="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_xor instruction with the given key 
+--b_p_c_or="<your16bitkeyasbinary>"        -->  partial encryption option to encrypt c_or instruction with the given key
+--b_p_c_and="<your16bitkeyasbinary>"       -->  partial encryption option to encrypt c_and instruction with the given key 
+--b_p_c_subw="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_subw instruction with the given key  
+--b_p_c_addw="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_addw instruction with the given key  
+--b_p_c_j="<your16bitkeyasbinary>"         -->  partial encryption option to encrypt c_j instruction with the given key
+--b_p_c_beqz="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_beqz instruction with the given key  
+--b_p_c_bnez="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_bnez instruction with the given key
 ```
 
 </details>
@@ -1180,7 +1210,23 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 <details> <summary> <b> rvc quadrant 2 Extension Partial Instruction Specific Encryption Options (17 instruction specific flags) </b> </summary>
 
 ```bash
-
+--b_p_c_slli="<your16bitkeyasbinary>"    -->  partial encryption option to encrypt c_slli instruction with the given key       
+*** --b_p_c_slli64="<your16bitkeyasbinary>" ***  -->  partial encryption option to encrypt c_slli64 instruction with the given key  --> *** not supported yet ***    
+--b_p_c_fldsp="<your16bitkeyasbinary>"   -->  partial encryption option to encrypt c_fldsp instruction with the given key   
+*** --b_p_c_lqsp="<your16bitkeyasbinary>" ***    -->  partial encryption option to encrypt c_lqsp instruction with the given key    --> *** not supported yet ***
+--b_p_c_lwsp="<your16bitkeyasbinary>"    -->  partial encryption option to encrypt c_lwsp instruction with the given key  
+--b_p_c_flwsp="<your16bitkeyasbinary>"   -->  partial encryption option to encrypt c_flwsp instruction with the given key   
+--b_p_c_ldsp="<your16bitkeyasbinary>"    -->  partial encryption option to encrypt c_ldsp instruction with the given key  
+--b_p_c_jr="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_jr instruction with the given key
+--b_p_c_mv="<your16bitkeyasbinary>"      -->  partial encryption option to encrypt c_mv instruction with the given key
+--b_p_c_ebreak="<your16bitkeyasbinary>"  -->  partial encryption option to encrypt c_ebreak instruction with the given key    
+--b_p_c_jalr="<your16bitkeyasbinary>"    -->  partial encryption option to encrypt c_jalr instruction with the given key  
+--b_p_c_add="<your16bitkeyasbinary>"     -->  partial encryption option to encrypt c_add instruction with the given key 
+--b_p_c_fsdsp="<your16bitkeyasbinary>"   -->  partial encryption option to encrypt c_fsdsp instruction with the given key   
+*** --b_p_c_sqsp="<your16bitkeyasbinary>" ***    -->  partial encryption option to encrypt c_sqsp instruction with the given key    --> *** not supported yet ***  
+--b_p_c_swsp="<your16bitkeyasbinary>"    -->  partial encryption option to encrypt c_swsp instruction with the given key  
+--b_p_c_fswsp="<your16bitkeyasbinary>"   -->  partial encryption option to encrypt c_fswsp instruction with the given key   
+--b_p_c_sdsp="<your16bitkeyasbinary>"    -->  partial encryption option to encrypt c_sdsp instruction with the given key
 ```
 
 </details>
