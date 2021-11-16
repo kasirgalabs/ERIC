@@ -156,8 +156,13 @@ export CXX=clang++-11
 ```
 
 then delete build directory and start with the first step again.
+Even if this does not change your compiler, you can try set your compilers at 3. step (while configuring with cmake) with `-DCMAKE_C_COMPILER={your-c-compiler}` and `-DCMAKE_CXX_COMPILER={your-c++-compiler}` flags. Try either with `gcc` or `clang`. Here is an example configuration:
 
-You can look for changing compiler that I answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
+```bash
+cmake -DCMAKE_C_COMPILER=gcc and -DCMAKE_CXX_COMPILER=g++ -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
+```
+
+Further information, you can look for changing compiler that I answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
 
 **Now you can find your executables in /kasirga-compiler-and-alp/build/bin folder as alp and kasirga variants.**
 
