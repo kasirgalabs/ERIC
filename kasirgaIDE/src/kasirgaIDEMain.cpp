@@ -24,6 +24,7 @@
 //DECLARE_APP(kasirgaIDEApp);
 //wxGetApp().compStr = "";
 std::string compPath = "";
+std::string riscvTarget = "";
 std::string riscvPath = "";
 std::string fileName = "";
 
@@ -83,14 +84,10 @@ const long kasirgaIDEFrame::idSaveFile = wxNewId();
 const long kasirgaIDEFrame::idOpenFile = wxNewId();
 const long kasirgaIDEFrame::idComp = wxNewId();
 const long kasirgaIDEFrame::idCompPath = wxNewId();
+const long kasirgaIDEFrame::idRiscvTarget = wxNewId();
 const long kasirgaIDEFrame::idRiscvPath = wxNewId();
 const long kasirgaIDEFrame::idEncrypt = wxNewId();
 const long kasirgaIDEFrame::idCheckCompStr = wxNewId();
-
-const long kasirgaIDEFrame::ID_BUTTON1 = wxNewId();
-const long kasirgaIDEFrame::ID_BUTTON2 = wxNewId();
-const long kasirgaIDEFrame::ID_BUTTON3 = wxNewId();
-const long kasirgaIDEFrame::ID_BUTTON4 = wxNewId();
 
 const long kasirgaIDEFrame::ID_CHOICE1 = wxNewId();
 const long kasirgaIDEFrame::ID_CHOICE2 = wxNewId();
@@ -143,11 +140,6 @@ kasirgaIDEFrame::kasirgaIDEFrame(wxWindow* parent,wxWindowID id)
     //SetClientSize(wxSize(1200,600));
 
     this->CenterOnScreen();
-
-    Button1 = new wxButton(this, ID_BUTTON1, _("Compile"), wxPoint(224,16), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
-    Button2 = new wxButton(this, ID_BUTTON2, _("Encrypt"), wxPoint(568,16), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON2"));
-    Button3 = new wxButton(this, ID_BUTTON3, _("Set Compiler Path"), wxPoint(8,16), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON3"));
-    Button4 = new wxButton(this, ID_BUTTON4, _("Save"), wxPoint(144,16), wxSize(72,29), 0, wxDefaultValidator, _T("ID_BUTTON4"));
 
     Choice1 = new wxChoice(this, ID_CHOICE1, wxPoint(320,16), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
     Choice2 = new wxChoice(this, ID_CHOICE2, wxPoint(440,16), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE2"));
@@ -259,6 +251,12 @@ kasirgaIDEFrame::kasirgaIDEFrame(wxWindow* parent,wxWindowID id)
 
     Connect(idCompPath,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&kasirgaIDEFrame::OnSetCompPath);
 
+    wxMenuItem* RiscvTarget;
+    RiscvTarget = new wxMenuItem(Menu3, idRiscvTarget, _("Set RISCV Target\tCtrl-T"), _("Set RISCV Target"), wxITEM_NORMAL);
+    Menu3->Append(RiscvTarget);
+
+    Connect(idRiscvTarget,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&kasirgaIDEFrame::OnSetRiscvTarget);
+
     wxMenuItem* RiscvPath;
     RiscvPath = new wxMenuItem(Menu3, idRiscvPath, _("Set RISCV Path\tCtrl-R"), _("Set RISCV Path"), wxITEM_NORMAL);
     Menu3->Append(RiscvPath);
@@ -280,12 +278,6 @@ kasirgaIDEFrame::kasirgaIDEFrame(wxWindow* parent,wxWindowID id)
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(StyledTextCtrl1, 1, wxEXPAND);
     this->SetSizerAndFit(sizer);
-
-    Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&kasirgaIDEFrame::OnButton1Click);
-    Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&kasirgaIDEFrame::OnButton2Click);
-    Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&kasirgaIDEFrame::OnButton3Click);
-    Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&kasirgaIDEFrame::OnButton4Click);
-
 }
 
 kasirgaIDEFrame::~kasirgaIDEFrame()
@@ -306,27 +298,11 @@ void kasirgaIDEFrame::OnAbout(wxCommandEvent& event)
 }
 
 void setCompileString(){
-    wxGetApp().compStr = compPath + " " + riscvPath + " ";
+    wxGetApp().compStr = compPath + " " + riscvTarget + " " + riscvPath + " ";
 
     if(fileName != "")
         wxGetApp().compStr += " -c " + fileName + " -o " + replaceStr(fileName, ".c", ".o ");
        // compStr += fileName + " -o " + replaceStr(fileName, ".c", " ");
-}
-
-void kasirgaIDEFrame::OnButton1Click(wxCommandEvent& event)
-{
-}
-
-void kasirgaIDEFrame::OnButton2Click(wxCommandEvent& event)
-{
-}
-
-void kasirgaIDEFrame::OnButton3Click(wxCommandEvent& event)
-{
-}
-
-void kasirgaIDEFrame::OnButton4Click(wxCommandEvent& event)
-{
 }
 
 void kasirgaIDEFrame::OnSave(wxCommandEvent& event)
@@ -414,6 +390,15 @@ void kasirgaIDEFrame::OnSetCompPath(wxCommandEvent& event)
     //    replaceStr(compStr, compPath, textDlg.GetValue().ToStdString());
     compPath = textDlg.GetValue().ToStdString();
     setCompileString();
+    }
+}
+
+void kasirgaIDEFrame::OnSetRiscvTarget(wxCommandEvent& event)
+{
+    wxTextEntryDialog textDlg(this, "", "Give RISCV Target", "", wxOK | wxCANCEL, wxDefaultPosition);
+    if(textDlg.ShowModal() == wxID_OK){
+        riscvTarget = textDlg.GetValue().ToStdString();
+        setCompileString();
     }
 }
 
