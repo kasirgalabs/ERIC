@@ -888,7 +888,55 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 <details> <summary> <b> rv32i Extension Partial Instruction Specific Encryption Options (47 instruction specific flags) </b> </summary>
 
-
+```bash
+--b_p_lui="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt lui instruction with the given key          
+--b_p_auipc="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt auipc instruction with the given key      
+--b_p_jal="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt jal instruction with the given key    
+--b_p_jalr="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt jalr instruction with the given key     
+--b_p_beq="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt beq instruction with the given key    
+--b_p_bne="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt bne instruction with the given key    
+--b_p_blt="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt blt instruction with the given key    
+--b_p_bge="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt bge instruction with the given key    
+--b_p_bltu="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt bltu instruction with the given key     
+--b_p_bgeu="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt bgeu instruction with the given key     
+--b_p_lb="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt lb instruction with the given key   
+--b_p_lh="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt lh instruction with the given key   
+--b_p_lw="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt lw instruction with the given key   
+--b_p_lbu="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt lbu instruction with the given key    
+--b_p_lhu="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt lhu instruction with the given key    
+--b_p_sb="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt sb instruction with the given key   
+--b_p_sh="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt sh instruction with the given key   
+--b_p_sw="<your32bitkeyasbinary>"       -->  partial encryption option to encrypt sw instruction with the given key   
+--b_p_addi="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt addi instruction with the given key     
+--b_p_slti="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt slti instruction with the given key     
+--b_p_sltiu="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt sltiu instruction with the given key      
+--b_p_xori="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt xori instruction with the given key     
+--b_p_ori="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt ori instruction with the given key    
+--b_p_andi="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt andi instruction with the given key     
+--b_p_slli="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt slli instruction with the given key     
+--b_p_srli="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt srli instruction with the given key     
+--b_p_srai="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt srai instruction with the given key     
+--b_p_add="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt add instruction with the given key    
+--b_p_sub="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt sub instruction with the given key    
+--b_p_sll="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt sll instruction with the given key    
+--b_p_slt="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt slt instruction with the given key    
+--b_p_sltu="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt sltu instruction with the given key     
+--b_p_xor_="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt xor instruction with the given key     
+--b_p_srl="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt srl instruction with the given key    
+--b_p_sra="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt sra instruction with the given key    
+--b_p_or_="<your32bitkeyasbinary>"      -->  partial encryption option to encrypt or instruction with the given key    
+--b_p_and_="<your32bitkeyasbinary>"     -->  partial encryption option to encrypt and instruction with the given key     
+--b_p_fence="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt fence instruction with the given key      
+--b_p_fence_i="<your32bitkeyasbinary>"  -->  partial encryption option to encrypt fence_i instruction with the given key        
+--b_p_ecall="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt ecall instruction with the given key      
+--b_p_ebreak="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt ebreak instruction with the given key       
+--b_p_csrrw="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt csrrw instruction with the given key      
+--b_p_csrrs="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt csrrs instruction with the given key      
+--b_p_csrrc="<your32bitkeyasbinary>"    -->  partial encryption option to encrypt csrrc instruction with the given key      
+--b_p_csrrwi="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt csrrwi instruction with the given key       
+--b_p_csrrsi="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt csrrsi instruction with the given key       
+--b_p_csrrci="<your32bitkeyasbinary>"   -->  partial encryption option to encrypt csrrci instruction with the given key
+```
 
 </details>
 
