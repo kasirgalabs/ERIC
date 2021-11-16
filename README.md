@@ -1196,7 +1196,7 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 
 **Work In Progress**
 
-## kasirga compiler ##
+## kasirga LLVM Based Compiler ##
 
 You can use clang-like compiler but if you compile a .c code as object code it will also run alp obfuscator and give encrypted or non-encrypted hex code.
 
