@@ -202,12 +202,12 @@ We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, 
 
 **Usage of the flag:** 
 ```bash
---enckeyall="<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)"`
+--enckeyall="<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)"
 ```
 
 **Example usage:** 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall="10100100101000000000001000000101" -d example.o`
+/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall="10100100101000000000001000000101" -d example.o
 ```
 
 This will xor all instructions (all of hex code) with given enckeyall.
