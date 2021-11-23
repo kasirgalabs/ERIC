@@ -540,59 +540,59 @@ Also we have instruction flags as seperately instead of instruction bit lists. (
 
 ```bash
 
-***0 -)*** ``` --flq ```  --> *** not supported yet ***
+***0 -)*** ``` --flq ```        --> *** not supported yet ***               
 
-***1 -)*** ``` --fsq ```  --> *** not supported yet ***
+***1 -)*** ``` --fsq ```        --> *** not supported yet ***     
 
-***2 -)*** ``` --fmadd_q ```  --> *** not supported yet ***
+***2 -)*** ``` --fmadd_q ```    --> *** not supported yet ***         
 
-***3 -)*** ``` --fmsub_q ```  --> *** not supported yet ***
+***3 -)*** ``` --fmsub_q ```    --> *** not supported yet ***         
 
-***4 -)*** ``` --fnmsub_q ```  --> *** not supported yet ***
+***4 -)*** ``` --fnmsub_q ```   --> *** not supported yet ***          
 
-***5 -)*** ``` --fnmadd_q ```  --> *** not supported yet ***
+***5 -)*** ``` --fnmadd_q ```   --> *** not supported yet ***          
 
-***6 -)*** ``` --fadd_q ```  --> *** not supported yet ***
+***6 -)*** ``` --fadd_q ```     --> *** not supported yet ***        
 
-***7 -)*** ``` --fsub_q ```  --> *** not supported yet ***
+***7 -)*** ``` --fsub_q ```     --> *** not supported yet ***        
 
-***8 -)*** ``` --fmul_q ```  --> *** not supported yet ***
+***8 -)*** ``` --fmul_q ```     --> *** not supported yet ***        
 
-***9 -)*** ``` --fdiv_q ```  --> *** not supported yet ***
+***9 -)*** ``` --fdiv_q ```     --> *** not supported yet ***        
 
-***10-)*** ``` --fsqrt_q ```  --> *** not supported yet ***
+***10-)*** ``` --fsqrt_q ```    --> *** not supported yet ***         
 
-***11-)*** ``` --fsgnj_q ```  --> *** not supported yet ***
+***11-)*** ``` --fsgnj_q ```    --> *** not supported yet ***         
 
-***12-)*** ``` --fsgnjn_q ```  --> *** not supported yet ***
+***12-)*** ``` --fsgnjn_q ```   --> *** not supported yet ***          
 
-***13-)*** ``` --fsgnjx_q ```  --> *** not supported yet ***
+***13-)*** ``` --fsgnjx_q ```   --> *** not supported yet ***          
 
-***14-)*** ``` --fmin_q ```  --> *** not supported yet ***
+***14-)*** ``` --fmin_q ```     --> *** not supported yet ***        
 
-***15-)*** ``` --fmax_q ```  --> *** not supported yet ***
+***15-)*** ``` --fmax_q ```     --> *** not supported yet ***        
 
-***16-)*** ``` --fcvt_s_q ```  --> *** not supported yet ***
+***16-)*** ``` --fcvt_s_q ```   --> *** not supported yet ***          
 
-***17-)*** ``` --fcvt_q_s ```  --> *** not supported yet ***
+***17-)*** ``` --fcvt_q_s ```   --> *** not supported yet ***          
 
-***18-)*** ``` --fcvt_d_q ```  --> *** not supported yet ***
+***18-)*** ``` --fcvt_d_q ```   --> *** not supported yet ***          
 
-***19-)*** ``` --fcvt_q_d ```  --> *** not supported yet ***
+***19-)*** ``` --fcvt_q_d ```   --> *** not supported yet ***          
 
-***20-)*** ``` --feq_q ```  --> *** not supported yet ***
+***20-)*** ``` --feq_q ```      --> *** not supported yet ***       
 
-***21-)*** ``` --flt_q ```  --> *** not supported yet ***
+***21-)*** ``` --flt_q ```      --> *** not supported yet ***       
 
-***22-)*** ``` --fle_q ```  --> *** not supported yet ***
+***22-)*** ``` --fle_q ```      --> *** not supported yet ***       
 
-***23-)*** ``` --fclass_q ```  --> *** not supported yet ***
+***23-)*** ``` --fclass_q ```   --> *** not supported yet ***          
 
-***24-)*** ``` --fcvt_w_q ```  --> *** not supported yet ***
+***24-)*** ``` --fcvt_w_q ```   --> *** not supported yet ***          
 
-***25-)*** ``` --fcvt_wu_q ```  --> *** not supported yet ***
+***25-)*** ``` --fcvt_wu_q ```  --> *** not supported yet ***           
 
-***26-)*** ``` --fcvt_q_w ```  --> *** not supported yet ***
+***26-)*** ``` --fcvt_q_w ```   --> *** not supported yet ***          
 
 ***27-)*** ``` --fcvt_q_wu ```  --> *** not supported yet ***
 
@@ -710,11 +710,11 @@ Also we have instruction flags as seperately instead of instruction bit lists. (
 
 ```bash
 
-***0 -)*** --fcvt_l_q  --> *** not supported yet ***
+***0 -)*** --fcvt_l_q   --> *** not supported yet ***
 
 ***1 -)*** --fcvt_lu_q  --> *** not supported yet ***
 
-***2 -)*** --fcvt_q_l  --> *** not supported yet ***
+***2 -)*** --fcvt_q_l   --> *** not supported yet ***
 
 ***3 -)*** --fcvt_q_lu  --> *** not supported yet ***
 
@@ -813,7 +813,7 @@ Also we have instruction flags as seperately instead of instruction bit lists. (
 ***2 -)*** ``` --c_fldsp ```
 
 ```bash
-***3 -)*** ``` --c_lqsp ```  --> *** not supported yet ***
+***3 -)*** ``` --c_lqsp ```    --> *** not supported yet ***
 ```
 
 ***4 -)*** ``` --c_lwsp ```
@@ -835,7 +835,7 @@ Also we have instruction flags as seperately instead of instruction bit lists. (
 ***12-)*** ``` --c_fsdsp ```
 
 ```bash
-***13-)*** ``` --c_sqsp  --> *** not supported yet ***
+***13-)*** ``` --c_sqsp        --> *** not supported yet ***
 ```
 
 ***14-)*** ``` --c_swsp ```
