@@ -133,7 +133,7 @@ export LLVM_BUILD_DIR=~/llvm/llvm-project/build
 **3-)** Configure with cmake:
 
 ```bash
-cmake -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
+cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
 ```
 
 **4-)** Build with cmake or make:
