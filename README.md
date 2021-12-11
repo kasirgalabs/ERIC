@@ -1,5 +1,5 @@
 # ERIC - Encryption tool for RISCV with Compiler #
-ERIC is an LLVM-based compiler that provides many encryption options for riscv-based systems.
+ERIC has an LLVM-based compiler that provides many encryption options for riscv-based systems.
 
 By using ERIC, you can make the programs you compile run on authorized hardware. For this, you need to have a key or password synthesized in your user processor.
 
@@ -14,10 +14,6 @@ ERIC offers fully customizable encryption. There are currently 3 different encry
 ### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#2-instruction-level-partial-encryption-1) ###
  
    This method supports unlimited customization. You can choose the types of instructions you think are critical to your program and only encrypt them. You can also encrypt each instruction to correspond to different bits within itself.
- 
-### [3. Memory-Level Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#3-memory-level-encryption-1) ###
- 
-   In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can manually give the public and private key pairs to the system yourself, or you can ask ERIC to automatically generate a public key.
 
 
 The thing to remember is that ERIC is a compiler with an interface developed for encryption. In order to run the encrypted programs you have compiled here, you need at least some hardware that does decryption. We will soon publish our hardware module that can work in integration with ERIC.
@@ -1243,10 +1239,6 @@ auipc  ^  00010001100111000001110000000101
 c.add  ^  1001000000000100
 ```
 Xoring with 1 means flipping corresponding bit. This encryption will flip 3. 7. 8. 11. 12. 13. 19. 20. 21. 29. 31. bits (assume that most left bit is 0.) of `auipc` instructions and 0. 3. 13. bits of `c.add` instructions in the compiled program. 
-
-### [3. Memory-Level Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#3-memory-level-encryption) ###
-
-**Work In Progress**
 
 ## clangport LLVM Based Compiler ##
 
