@@ -158,7 +158,7 @@ Even if this does not change your compiler, you can try set your compilers at 3.
 cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
 ```
 
-Further information, you can look for changing compiler that I answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
+Further information, you can look for changing compiler that answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
 
 **Now you can find your executables in /clangport-and-elf2encryptedhex/build/bin folder as elf2encryptedhex and clangport variants.**
 
@@ -1277,7 +1277,7 @@ riscv32 object code:
 ```
 
 I am using --sysroot and --gcc-toolchain flags to compile for riscv. You need to have riscv-gnu-toolchain pre installed.
-For --sysroot and --gcc-toolchain flags you can look here that I answered on [stackoverflow](https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v).
+For --sysroot and --gcc-toolchain flags you can look here that answered on [stackoverflow](https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v).
 
 riscv32 object code (also `--elf2encryptedhex="<elf2encryptedhex-encryption options>"` flag given, so driver will run elf2encryptedhex obfuscator and also give .hex file output):
 
