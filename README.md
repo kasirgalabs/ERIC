@@ -1341,6 +1341,8 @@ example.c -o example.o \
 We think that we can fix by cmake in the future for not giving include flag in every compilation.
    
 # Future Work #
+
+We think that we will add RSA encryption method to hex obfuscator in the future, so new desired encryption methods can be add here: https://github.com/Celuk/ERIC/blob/main/clangport-and-elf2encryptedhex/src/elf2encryptedhex/elf2encryptedhex.cpp#L3397
    
 ## encIDE wxWidgets Based User Interface For clangport ##   
 
