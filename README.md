@@ -1251,7 +1251,7 @@ Xoring with 1 means flipping corresponding bit. This encryption will flip 3. 7. 
 ## clangport LLVM Based Compiler ##
 
 You can use clangport as clang-like compiler. If you compile a .c code to object code and give `--elf2encryptedhex="<elf2encryptedhex-encryption options>"` flag it will also run elf2encryptedhex obfuscator and give encrypted or non-encrypted hex code.
-
+   
 **Example usages:**
 
 Host pc executable (when `clangport` is in path):
@@ -1307,7 +1307,39 @@ To illustrate more, this encryption will be performed (for each corresponding in
 lw  ^  10100100101000000000001000000100
 ```
 Xoring with 1 means flipping corresponding bit. This encryption will flip 0. 2. 5. 8. 10. 22. 29. bits (assume that most left bit is 0.) of `lw` instructions in the compiled program.
+   
+   
+**Attention:** For using standard headers export your build path
 
+```bash
+export LLVM_BUILD_DIR={your-llvm-install-or-build-directory}
+```
+
+and give this path in every compilation:
+   
+```bash
+-I${LLVM_BUILD_DIR}/lib/clang/11.1.0/include
+```
+
+For example:
+   
+```bash
+export LLVM_BUILD_DIR=/home/shc/llvm/llvm-project/build
+```
+
+```bash
+/home/shc/Desktop/clangport/build/bin/clangport \
+-c \
+-I${LLVM_BUILD_DIR}/lib/clang/11.1.0/include \
+-target riscv32-unknown-elf \
+--sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf \
+--gcc-toolchain=/home/shc/riscv-new/_install/ \
+example.c -o example.o \
+--elf2encryptedhex=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
+```
+
+We think that we can fix by cmake in the future for not giving include flag in every compilation.
+   
 # Future Work #
    
 ## encIDE wxWidgets Based User Interface For clangport ##   
