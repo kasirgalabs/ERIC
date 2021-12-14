@@ -1,4 +1,5 @@
-//===-- driver.cpp - clangport GCC-Compatible Driver --------------------------===//
+//===------------- driver.cpp - clangport GCC-Compatible Driver -------------===//
+//===------------------ Ported From Clang Compiler Driver -------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -354,6 +355,7 @@ int main(int argc_, const char **argv_) {
   SmallVector<const char *, 256> argv(argv_, argv_ + argc_);
 
   std::string elf2encryptedhex = "";
+  bool isC = false;
 
   for(int i=0; i<argv.size(); i++){
     if(StringRef(argv[i]).endswith("clangport") || StringRef(argv[i]).endswith("clangport++")){
@@ -364,9 +366,8 @@ int main(int argc_, const char **argv_) {
     if(StringRef(argv[i]).startswith("--elf2encryptedhex=")){
       elf2encryptedhex = elf2encryptedhex + std::string(StringRef(argv[i]).ltrim("--elf2encryptedhex=\"").rtrim('"'));
       argv[i] = "";
+      isC = true;
     }
-
-
   }
   
 
@@ -582,24 +583,23 @@ int main(int argc_, const char **argv_) {
     Res = 1;
 #endif
 
-std::string fileName = "";
-bool isC = false;
-
-for(int i=0; i<argv.size(); i++){
-  if(StringRef(argv[i]).startswith("-c"))
-    isC = true;
-
-  if(StringRef(argv[i]).endswith(".c"))
-    fileName = std::string(StringRef(argv[i]).rtrim('c').rtrim('.'));
-}
-
-if(isC){
-  std::string command = std::string(" ") + elf2encryptedhex + " " + fileName + ".o" + std::string(" ");
-  system(command.c_str());
+  std::string fileName = "";
   
-  std::string ofile = fileName + ".o";
-  std::remove(ofile.c_str());
-}
+  for(int i=0; i<argv.size(); i++){
+    if(!StringRef(argv[i]).startswith("-c"))
+      isC = false;
+  
+    if(StringRef(argv[i]).endswith(".c"))
+      fileName = std::string(StringRef(argv[i]).rtrim('c').rtrim('.'));
+  }
+  
+  if(isC){
+    std::string command = std::string(" ") + elf2encryptedhex + " " + fileName + ".o" + std::string(" ");
+    system(command.c_str());
+  
+    std::string oFile = fileName + ".o";
+    std::remove(oFile.c_str());
+  }
 
   // If we have multiple failing commands, we return the result of the first
   // failing command.
