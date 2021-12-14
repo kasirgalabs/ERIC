@@ -1308,6 +1308,8 @@ lw  ^  10100100101000000000001000000100
 ```
 Xoring with 1 means flipping corresponding bit. This encryption will flip 0. 2. 5. 8. 10. 22. 29. bits (assume that most left bit is 0.) of `lw` instructions in the compiled program.
 
+# Future Work #
+   
 ## encIDE wxWidgets Based User Interface For clangport ##   
 
 
