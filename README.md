@@ -5,7 +5,7 @@ By using ERIC, you can make the programs you compile run on authorized hardware.
 
 In addition, it can be used in cases where you want the data kept in memory to remain encrypted or depending on the needs such as keeping the program securely.
 
-ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported:
+ERIC offers fully customizable encryption. There are currently 2 different encryption methods supported:
 
 ### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#1-instruction-level-full-encryption-1) ###
    
