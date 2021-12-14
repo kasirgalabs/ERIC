@@ -3375,339 +3375,249 @@ namespace portedDump {
                 bool encryptInstrvcq0,
                 bool encryptInstrvcq1,
                 bool encryptInstrvcq2
- ) { // n yerine string gelecek
-//OSS<<"        p";
-//add = false; sub = false;
-  //if(!dosya.empty() && flag){ flag = false;
-  //  ifstream dos(dosya);
-  //  string option = "";
-  //  char character;
-  //  if (dos.is_open()){
-  //    while(dos >> std::noskipws >> character){
-  //      //if(character='a') add = true;
-  //      if(character != ' ' || character != '\n')
-  //        option += string(1,character);
-  //      else {
-  //        if( option == "add"                ){ add = true; option = ""; } //else sub=true;
-  //        if( option == "sub"                ){ sub = true; option = ""; }
-  //      }
-  //    }
-  //  }
-  //}
-//int bite = atoi(bits.c_str());
-//int array[2];
-//for (int i = 1; i >= 0; i--) {
-//    array[i] = bite % 10;
-//    bite /= 10;
-//}
+ ) {
 
-//if(array[0] == 1) add = true;
-//if(array[1] == 1) sub = true;
-OSS.clear();
-   int j = 0;
-   char hexArr[(bytes.size()) / 8]; // 4 bayt geliyor 8e bolmek lazim
+  OSS.clear();
+  int j = 0;
+  char hexArr[(bytes.size()) / 8];
+  static const char hex_rep[] = "0123456789abcdef";
 
-   static const char hex_rep[] = "0123456789abcdef";
-   //bool First = true;
-   for (char i: r_wrap(bytes)) { //OS<<hex_rep[(i & 0xF0) >> 4]<<"\n"; if(!dosya.empty()) OS<<dosya; //OS<<hex_rep[i & 0xF]<<"\n"; //ekledim
-     //if (First)
-     //  First = false;
-     //else
-     //  OSS << ' '; //i = i xor 255;
-
-    
-/////////////ek
-//if(add && sub && flag) { i = i xor 125; flag = false;}
-//     if(add && flag) { i = i xor 255; flag = false;} //ff 
-//     if(sub && flag) { i = i xor 170; flag = false;} //aa
-     
-
-     //if(encrypt) i = i xor 170;
-     //if(add) { i = i xor 255;} //ff 
-     //if(sub) { i = i xor 170;} //aa
+  for (char i: r_wrap(bytes)){
      hexArr[2*j] = hex_rep[(i & 0xF0) >> 4];
      hexArr[2*j + 1] = hex_rep[i & 0xF];
      j++;
-   }
-    // j 16 bitte 2, 32 bitte 4 cikiyor
+  }
 
-   std::string binArr = "";
-    for(int i=0;i<strlen(hexArr);i++)
-      binArr += hex_char_to_bin(hexArr[i]);
-      //OSS << hex_char_to_bin(hexArr[i]);
-    //for(int i=0;i<strlen(hexArr);i++)
-    //  OSS << hexArr[i];
+  std::string binArr = "";
+  for(int i=0;i<strlen(hexArr);i++)
+    binArr += hex_char_to_bin(hexArr[i]);
 
+  counter++;
 
-    
-    
-
-counter++;
-
-
-if(instnum != ""){
-    if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"  && (counter <= num)){ // eger hepsini encrypt etmek istiyorsak diger opsiyonlari yok sayiyor asagiya alinabilir.
-      std::stringstream enckeyallaligned;
-      enckeyallaligned << setfill('0') << setw(32) << enckeyall; // setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
-
-      OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
-    }
-
-    else if(encryptInstParKey != ""){ // eger encrypt varsa partiali hic yapmiyor, once encrypt sonra partial yapmasi saglanabilir //bi dahakine keyi opcode kismindan ver ki bura kalabalik olmasin. //oyle oldu
-    // eger partial varsa encrypti hic yapmamasini istersek ilk iften sonra bu gelmeli
-    // partiali once koydum, eger partial varsa o instruction icin key encrypt yapmiyor.
-      OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2); //long long integer cunku 16, 32 bitlik bir sayi int icin fazla
-    }
-
-    else if(encryptInstrv32i){
-      if(ienc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
+  if(instnum != ""){
+      if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"  && (counter <= num)){
+        std::stringstream enckeyallaligned;
+        enckeyallaligned << setfill('0') << setw(32) << enckeyall; // setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
+  
+        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
       }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32m){
-      if(menc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
+  
+      else if(encryptInstParKey != ""){
+        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2);
       }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32a){
-      if(aenc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32f){
-      if(fenc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32d){
-      if(denc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32q){
-      if(qenc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-
-    else if(encryptInstrv64i){
-      if(ienc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64m){
-      if(menc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64a){
-      if(aenc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64f){
-      if(fenc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64d){
-      if(denc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64q){
-      if(qenc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-
-    else if(encryptInstrvcq0){
-      if(cencq0key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrvcq1){
-      if(cencq1key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrvcq2){
-      if(cencq2key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    
-    
-    else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-}
-else {
-   if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"){ // eger hepsini encrypt etmek istiyorsak diger opsiyonlari yok sayiyor asagiya alinabilir.
-      std::stringstream enckeyallaligned;
-      enckeyallaligned << setfill('0') << setw(32) << enckeyall; // setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
-
-      OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
-    }
-
-    else if(encryptInstParKey != ""){ // eger encrypt varsa partiali hic yapmiyor, once encrypt sonra partial yapmasi saglanabilir //bi dahakine keyi opcode kismindan ver ki bura kalabalik olmasin. //oyle oldu
-    // eger partial varsa encrypti hic yapmamasini istersek ilk iften sonra bu gelmeli
-    // partiali once koydum, eger partial varsa o instruction icin key encrypt yapmiyor.
-      OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2); //long long integer cunku 16, 32 bitlik bir sayi int icin fazla
-    }
-
-    else if(encryptInstrv32i){
-      if(ienc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32m){
-      if(menc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32a){
-      if(aenc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32f){
-      if(fenc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32d){
-      if(denc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv32q){
-      if(qenc32key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-
-    else if(encryptInstrv64i){
-      if(ienc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64m){
-      if(menc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64a){
-      if(aenc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64f){
-      if(fenc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64d){
-      if(denc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrv64q){
-      if(qenc64key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-
-    else if(encryptInstrvcq0){
-      if(cencq0key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrvcq1){
-      if(cencq1key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    else if(encryptInstrvcq2){
-      if(cencq2key != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
-      }
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-    }
-    
-    
-    else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-
-}
-
-
-//OS << "";
-  /*
-    if(encrypt){
-      if(key != ""){
-        if(j == 2){
-          std::bitset<16> b_partial (std::string(key));
-          std::bitset<16> b_binArr (std::string(binArr));
-          //std::bitset<16> b_result = (b_binArr ^ b_partial);
-          //b_partial ^= b_binArr;
-          //OSS << b_partial;
+  
+      else if(encryptInstrv32i){
+        if(ienc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
         }
-        else if(j == 4){
-          std::bitset<32> b_partial (std::string(key));
-          std::bitset<32> b_binArr (std::string(binArr));
-          //std::bitset<32> b_result = (b_binArr ^ b_partial);
-          //b_partial ^= b_binArr;
-          //OSS << b_partial;
-          //OSS << b_result;
-        }
-        //if(j == 2){
-          //OSS << (b_binArr xor b_partial)
-        //}
-
-        //else if(j == 4){}
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
       }
-      //else i = i xor 0;
-
-    }*/
-
-//for(int i=0;i<bits.length();i++){
-//  bitArr[i] = bits[i] - '0';
-//}
-
- }
-}
+      else if(encryptInstrv32m){
+        if(menc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32a){
+        if(aenc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32f){
+        if(fenc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32d){
+        if(denc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32q){
+        if(qenc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+  
+      else if(encryptInstrv64i){
+        if(ienc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64m){
+        if(menc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64a){
+        if(aenc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64f){
+        if(fenc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64d){
+        if(denc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64q){
+        if(qenc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+  
+      else if(encryptInstrvcq0){
+        if(cencq0key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrvcq1){
+        if(cencq1key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrvcq2){
+        if(cencq2key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      
+      
+      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+  }
+  else {
+     if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"){
+        std::stringstream enckeyallaligned;
+        enckeyallaligned << setfill('0') << setw(32) << enckeyall; // setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
+  
+        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
+      }
+  
+      else if(encryptInstParKey != ""){
+        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2);
+      }
+  
+      else if(encryptInstrv32i){
+        if(ienc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32m){
+        if(menc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32a){
+        if(aenc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32f){
+        if(fenc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32d){
+        if(denc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv32q){
+        if(qenc32key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+  
+      else if(encryptInstrv64i){
+        if(ienc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64m){
+        if(menc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64a){
+        if(aenc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64f){
+        if(fenc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64d){
+        if(denc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrv64q){
+        if(qenc64key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+  
+      else if(encryptInstrvcq0){
+        if(cencq0key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrvcq1){
+        if(cencq1key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      else if(encryptInstrvcq2){
+        if(cencq2key != ""){
+          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
+        }
+        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+      }
+      
+      
+      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
+  
+  }
+ } // end of dumpBytes function
+} // end of namespace portedDump
 
 class PrettyPrinter {
 public:
   virtual ~PrettyPrinter() = default;
-  virtual void // bu printinste giriyor.
+  virtual void
   printInst(MCInstPrinter &IP, const MCInst *MI, ArrayRef<uint8_t> Bytes,
             object::SectionedAddress Address, formatted_raw_ostream &OS,
             StringRef Annot, MCSubtargetInfo const &STI, SourcePrinter *SP,
