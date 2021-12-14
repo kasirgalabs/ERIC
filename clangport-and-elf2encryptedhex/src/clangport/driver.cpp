@@ -1,5 +1,5 @@
-//===------------- driver.cpp - clangport GCC-Compatible Driver -------------===//
-//===------------------ Ported From Clang Compiler Driver -------------------===//
+//===------------ driver.cpp - clangport GCC-Compatible Driver ------------===//
+//===----------------- Ported From Clang Compiler Driver ------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
