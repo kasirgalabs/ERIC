@@ -43,9 +43,17 @@ sudo apt install ninja-build
 ### 1.2 LLVM Installation ###
 
 #### Recommended Installation ####
+Here normally you can clone LLVM library as:
+
 ```bash
-git clone https://github.com/llvm/llvm-project.git && \
-cd llvm-project && \
+git clone https://github.com/llvm/llvm-project.git
+```
+
+However we are using LLVM 11.1.0, so download from: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-11.1.0.zip
+unzip and after that for build:
+
+```bash
+cd llvm-project-llvmorg-11.1.0 && \
 mkdir build && \ cd build && \
 cmake -G Ninja \
 -DLLVM_ENABLE_PROJECTS=clang \ 
@@ -62,9 +70,9 @@ cmake --build .
 ```
 
 #### Recommended Light Installation ####
+
 ```bash
-git clone https://github.com/llvm/llvm-project.git && \
-cd llvm-project && \
+cd llvm-project-llvmorg-11.1.0 && \
 mkdir build && \
 cd build && \
 cmake -G Ninja \
