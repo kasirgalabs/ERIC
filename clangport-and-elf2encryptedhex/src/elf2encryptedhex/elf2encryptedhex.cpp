@@ -3394,6 +3394,8 @@ namespace portedDump {
 
   counter++;
 
+  // Here we can add desired encryption method
+
   if(instnum != ""){
       if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"  && (counter <= num)){
         std::stringstream enckeyallaligned;
