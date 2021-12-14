@@ -87,277 +87,6 @@
 #include <iomanip>
 #include <sstream>
 
-llvm::StringRef opcodeList[90] = {
-"beq"               
-,"bne"               
-,"blt"               
-,"bge"               
-,"bltu"              
-,"bgeu"              
-,"jalr"              
-,"jal"               
-,"lui"               
-,"auipc"             
-,"addi"              
-,"slli"              
-,"slti"              
-,"sltiu"             
-,"xori"              
-,"srli"              
-,"srai"              
-,"ori"               
-,"andi"              
-,"add"               
-,"sub"               
-,"sll"               
-,"slt"               
-,"sltu"              
-,"xor"               
-,"srl"               
-,"sra"               
-,"or"                
-,"and"               
-,"addiw"             
-,"slliw"             
-,"srliw"             
-,"sraiw"             
-,"addw"              
-,"subw"              
-,"sllw"              
-,"srlw"              
-,"sraw"              
-,"lb"                
-,"lh"                
-,"lw"                
-,"ld"                
-,"lbu"               
-,"lhu"               
-,"lwu"               
-,"sb"                
-,"sh"                
-,"sw"                
-,"sd"                
-,"fence"             
-,"fence_i"           
-,"mul"               
-,"mulh"              
-,"mulhsu"            
-,"mulhu"             
-,"div"               
-,"divu"              
-,"rem"               
-,"remu"              
-,"mulw"              
-,"divw"              
-,"divuw"             
-,"remw"              
-,"remuw"             
-,"lr_w"              
-,"sc_w"              
-,"lr_d"              
-,"sc_d"              
-,"ecall"             
-,"ebreak"            
-,"uret"              
-,"mret"              
-,"dret"              
-,"sfence_vma"        
-,"wfi"               
-,"csrrw"             
-,"csrrs"             
-,"csrrc"             
-,"csrrwi"            
-,"csrrsi"            
-,"csrrci"            
-,"slli_rv32"         
-,"srli_rv32"         
-,"srai_rv32"         
-,"rdcycle"           
-,"rdtime"            
-,"rdinstret"         
-,"rdcycleh"          
-,"rdtimeh"           
-,"rdinstreth"
-};
-
-llvm::StringRef opcodes_rv32i[52] = {
-"lui"
-,"auipc"
-,"addi"
-,"slti"
-,"sltiu"
-,"xori"
-,"ori"
-,"andi"
-,"slli"
-,"srli"
-,"srai"
-,"add"
-,"sub"
-,"sll"
-,"slt"
-,"sltu"
-,"xor"
-,"srl"
-,"sra"
-,"or"
-,"and"
-,"fence"
-,"fence.i"
-,"csrrw"
-,"csrrs"
-,"csrrc"
-,"csrrwi"
-,"csrrsi"
-,"csrrci"
-,"ecall"
-,"ebreak"
-,"uret"
-,"sret"
-,"mret"
-,"wfi"
-,"sfence.vma"
-,"lb"
-,"lh"
-,"lw"
-,"lbu"
-,"lhu"
-,"sb"
-,"sh"
-,"sw"
-,"jal"
-,"jalr"
-,"beq"
-,"bne"
-,"blt"
-,"bge"
-,"bltu"
-,"bgeu"};
-
-llvm::StringRef opcodes_rv32m[8] =  {
-"mul"
-,"mulh"
-,"mulhsu"
-,"mulhu"
-,"div"
-,"divu"
-,"rem"
-,"remu"};
-
-llvm::StringRef opcodes_rv32a[11] = {
-"lr.w"
-,"sc.w"
-,"amoswap.w"
-,"amoadd.w"
-,"amoxor.w"
-,"amoand.w"
-,"amoor.w"
-,"amomin.w"
-,"amomax.w"
-,"amominu.w"
-,"amomaxu.w"};
-
-llvm::StringRef opcodes_rv32f[52] = {
-"fmadd.s"
-,"fmsub.s"
-,"fnmsub.s"
-,"fnmadd.s"
-,"fadd.s"
-,"fsub.s"
-,"fmul.s"
-,"fdiv.s"
-,"fsqrt.s"
-,"fsgnj.s"
-,"fsgnjn.s"
-,"fsgnjx.s"
-,"fmin.s"
-,"fmax.s"
-,"fcvt.w.s"
-,"fcvt.wu.s"
-,"fmv.x.w"
-,"feq.s"
-,"flt.s"
-,"fle.s"
-,"fclass.s"
-,"fcvt.s.w"
-,"fcvt.s.wu"
-,"fmv.w.x"
-,"fmadd.d"
-,"fmsub.d"
-,"fnmsub.d"
-,"fnmadd.d"
-,"fadd.d"
-,"fsub.d"
-,"fmul.d"
-,"fdiv.d"
-,"fsqrt.d"
-,"fsgnj.d"
-,"fsgnjn.d"
-,"fsgnjx.d"
-,"fmin.d"
-,"fmax.d"
-,"fcvt.s.d"
-,"fcvt.d.s"
-,"feq.d"
-,"flt.d"
-,"fle.d"
-,"fclass.d"
-,"fcvt.w.d"
-,"fcvt.wu.d"
-,"fcvt.d.w"
-,"fcvt.d.wu"
-,"flw"
-,"fsw"
-,"fld"
-,"fsd"};
-
-llvm::StringRef opcodes_rv32c[42] = {
-"c.addi4spn"
-,"c.fld"
-,"c.lw"
-,"c.flw"
-,"c.ld"
-,"c.fsd"
-,"c.sw"
-,"c.fsw"
-,"c.sd"
-,"c.nop"
-,"c.addi"
-,"c.jal"
-,"c.addiw"
-,"c.li"
-,"c.addi16sp"
-,"c.lui"
-,"c.srli"
-,"c.srai"
-,"c.andi"
-,"c.sub"
-,"c.xor"
-,"c.or"
-,"c.and"
-,"c.subw"
-,"c.addw"
-,"c.j"
-,"c.beqz"
-,"c.bnez"
-,"c.slli"
-,"c.fldsp"
-,"c.lwsp"
-,"c.flwsp"
-,"c.ldsp"
-,"c.jr"
-,"c.mv"
-,"c.ebreak"
-,"c.jalr"
-,"c.add"
-,"c.fsdsp"
-,"c.swsp"
-,"c.fswsp"
-,"c.sdsp"};
-
-int g_argc;
-char **g_argv;
-
 using namespace llvm;
 using namespace llvm::object;
 using namespace llvm::objdump;
@@ -5861,17 +5590,6 @@ static void dumpInput(StringRef file) {
     reportError(errorCodeToError(object_error::invalid_file_type), file);
 }
 
-int gcd(int a, int b) {
-   int t;
-   while(1) {
-      t= a % b;
-      if(t ==0 )
-      return b;
-      a = b;
-      b = t;
-   }
-}
-
 int hexCharToInt(char a){
     if(a>='0' && a<='9')
         return (a-48);
@@ -5901,11 +5619,6 @@ std::string int_to_hex( T i )
 
 int main(int argc, char **argv) {
 
-g_argc = argc;
-g_argv = argv;
-
-
-
   using namespace llvm;
   InitLLVM X(argc, argv);
   const cl::OptionCategory *OptionFilters[] = {&ObjdumpCat, &MachOCat};
@@ -5929,7 +5642,7 @@ g_argv = argv;
   // Register the target printer for --version.
   cl::AddExtraVersionPrinter(TargetRegistry::printRegisteredTargetsForVersion);
 
-  cl::ParseCommandLineOptions(argc, argv, "llvm object file dumper\n", nullptr,
+  cl::ParseCommandLineOptions(argc, argv, "alp obfuscator object file to hex generator and encryptor\n", nullptr,
                               /*EnvVar=*/nullptr,
                               /*LongOptionsUseDoubleDash=*/true);
 
@@ -5938,54 +5651,8 @@ g_argv = argv;
 
   ToolName = argv[0];
 
-for(int k = 0; k<15; k++){
-  OSS << "1";
-}
-
-    if(enckeyall != ""){
-
-    std::stringstream read;
-
-    read << std::hex << setfill('0') << setw(8) << std::stoll(enckeyall,NULL,  2);
-
-
-
-    char character;
-    int mm;
-
-      while (read >> character){
-        
-
-          double p = 13;
-          double q = 11;
-          double e = 7;
-          double n = p * q;
-          double track;
-          double phi = (p - 1) * (q - 1);
-
-          while(e<phi) {
-             track = gcd(e,phi);
-             if(track==1)
-                break;
-             else
-                e++;
-          }
-
-          double d1 = 1/e;
-          double d = fmod(d1,phi);
-          double message = hexCharToInt(character);
-          double c = pow(message,e);
-          double m = pow(c,d);
-          c=fmod(c,n);
-          m=fmod(m,n);
-          mm = (int)(ceil(m));
-
-          OSS << int_to_hex(c);
-      }
-      
-      OSS << "\n";
-  }
-
+  if(instnum != "")
+    num = std::stoi(instnum);
 
   // Defaults to a.out if no filenames specified.
   if (InputFilenames.empty())
@@ -6014,462 +5681,454 @@ for(int k = 0; k<15; k++){
 
   DisasmSymbolSet.insert(DisassembleSymbols.begin(), DisassembleSymbols.end());
 
-int i = 0;
-
-const int ienc32instsSize = 47;
-const int menc32instsSize = 8;
-const int aenc32instsSize = 11;
-const int fenc32instsSize = 26;
-const int denc32instsSize = 26;
-const int qenc32instsSize = 28;
-
-const int ienc64instsSize = 12;
-const int menc64instsSize = 5;
-const int aenc64instsSize = 11;
-const int fenc64instsSize = 4;
-const int denc64instsSize = 6;
-const int qenc64instsSize = 4;
-
-const int cencq0instsSize = 11;
-const int cencq1instsSize = 21;
-const int cencq2instsSize = 17;
-
-int ienc32instsArr[ienc32instsSize];
-for(i=ienc32instsSize-1; i>=0; i--){
-  ienc32instsArr[i] = 0;
-}
-for(i=0; i<ienc32insts.length(); i++){
-  ienc32instsArr[i] = ienc32insts[i] - '0';
-}
-
-int menc32instsArr[menc32instsSize];
-for(i=menc32instsSize-1; i>=0; i--){
-  menc32instsArr[i] = 0;
-}
-for(i=0; i<menc32insts.length(); i++){
-  menc32instsArr[i] = menc32insts[i] - '0';
-}
-
-int aenc32instsArr[aenc32instsSize];
-for(i=aenc32instsSize-1; i>=0; i--){
-  aenc32instsArr[i] = 0;
-}
-for(i=0; i<aenc32insts.length(); i++){
-  aenc32instsArr[i] = aenc32insts[i] - '0';
-}
-
-int fenc32instsArr[fenc32instsSize];
-for(i=fenc32instsSize-1; i>=0; i--){
-  fenc32instsArr[i] = 0;
-}
-for(i=0; i<fenc32insts.length(); i++){
-  fenc32instsArr[i] = fenc32insts[i] - '0';
-}
-
-int denc32instsArr[denc32instsSize];
-for(i=denc32instsSize-1; i>=0; i--){
-  denc32instsArr[i] = 0;
-}
-for(i=0; i<denc32insts.length(); i++){
-  denc32instsArr[i] = denc32insts[i] - '0';
-}
-
-int qenc32instsArr[qenc32instsSize];
-for(i=qenc32instsSize-1; i>=0; i--){
-  qenc32instsArr[i] = 0;
-}
-for(i=0; i<qenc32insts.length(); i++){
-  qenc32instsArr[i] = qenc32insts[i] - '0';
-}
-
-int ienc64instsArr[ienc64instsSize];
-for(i=ienc64instsSize-1; i>=0; i--){
-  ienc64instsArr[i] = 0;
-}
-for(i=0; i<ienc64insts.length(); i++){
-  ienc64instsArr[i] = ienc64insts[i] - '0';
-}
-
-int menc64instsArr[menc64instsSize];
-for(i=menc64instsSize-1; i>=0; i--){
-  menc64instsArr[i] = 0;
-}
-for(i=0; i<menc64insts.length(); i++){
-  menc64instsArr[i] = menc64insts[i] - '0';
-}
-
-int aenc64instsArr[aenc64instsSize];
-for(i=aenc64instsSize-1; i>=0; i--){
-  aenc64instsArr[i] = 0;
-}
-for(i=0; i<aenc64insts.length(); i++){
-  aenc64instsArr[i] = aenc64insts[i] - '0';
-}
-
-int fenc64instsArr[fenc64instsSize];
-for(i=fenc64instsSize-1; i>=0; i--){
-  fenc64instsArr[i] = 0;
-}
-for(int i=0;i<fenc64insts.length();i++){
-  fenc64instsArr[i] = fenc64insts[i] - '0';
-}
-
-int denc64instsArr[denc64instsSize];
-for(i=denc64instsSize-1; i>=0; i--){
-  denc64instsArr[i] = 0;
-}
-for(i=0; i<denc64insts.length(); i++){
-  denc64instsArr[i] = denc64insts[i] - '0';
-}
-
-int qenc64instsArr[qenc64instsSize];
-for(i=qenc64instsSize-1; i>=0; i--){
-  qenc64instsArr[i] = 0;
-}
-for(i=0; i<qenc64insts.length(); i++){
-  qenc64instsArr[i] = qenc64insts[i] - '0';
-}
-
-int cencq0instsArr[cencq0instsSize];
-for(i=cencq0instsSize-1; i>=0; i--){
-  cencq0instsArr[i] = 0;
-}
-for(i=0; i<cencq0insts.length(); i++){
-  cencq0instsArr[i] = cencq0insts[i] - '0';
-}
-
-int cencq1instsArr[cencq1instsSize];
-for(i=cencq1instsSize-1; i>=0; i--){
-  cencq1instsArr[i] = 0;
-}
-for(i=0; i<cencq1insts.length(); i++){
-  cencq1instsArr[i] = cencq1insts[i] - '0';
-}
-
-int cencq2instsArr[cencq2instsSize];
-for(i=cencq2instsSize-1; i>=0; i--){
-  cencq2instsArr[i] = 0;
-}
-for(i=0; i<cencq2insts.length(); i++){
-  cencq2instsArr[i] = cencq2insts[i] - '0';
-}
-
-// rv32i
-if(ienc32instsArr[0 ] == 1) lui     = true;  
-if(ienc32instsArr[1 ] == 1) auipc   = true;
-if(ienc32instsArr[2 ] == 1) jal     = true;
-if(ienc32instsArr[3 ] == 1) jalr    = true;
-if(ienc32instsArr[4 ] == 1) beq     = true;
-if(ienc32instsArr[5 ] == 1) bne     = true;
-if(ienc32instsArr[6 ] == 1) blt     = true;
-if(ienc32instsArr[7 ] == 1) bge     = true;
-if(ienc32instsArr[8 ] == 1) bltu    = true;
-if(ienc32instsArr[9 ] == 1) bgeu    = true;
-if(ienc32instsArr[10] == 1) lb      = true;
-if(ienc32instsArr[11] == 1) lh      = true;
-if(ienc32instsArr[12] == 1) lw      = true;
-if(ienc32instsArr[13] == 1) lbu     = true;
-if(ienc32instsArr[14] == 1) lhu     = true;
-if(ienc32instsArr[15] == 1) sb      = true;
-if(ienc32instsArr[16] == 1) sh      = true;
-if(ienc32instsArr[17] == 1) sw      = true;
-if(ienc32instsArr[18] == 1) addi    = true;
-if(ienc32instsArr[19] == 1) slti    = true;
-if(ienc32instsArr[20] == 1) sltiu   = true;
-if(ienc32instsArr[21] == 1) xori    = true;
-if(ienc32instsArr[22] == 1) ori     = true;
-if(ienc32instsArr[23] == 1) andi    = true;
-if(ienc32instsArr[24] == 1) slli    = true;
-if(ienc32instsArr[25] == 1) srli    = true;
-if(ienc32instsArr[26] == 1) srai    = true;
-if(ienc32instsArr[27] == 1) add     = true;
-if(ienc32instsArr[28] == 1) sub     = true;
-if(ienc32instsArr[29] == 1) sll     = true;
-if(ienc32instsArr[30] == 1) slt     = true;
-if(ienc32instsArr[31] == 1) sltu    = true;
-if(ienc32instsArr[32] == 1) xor_    = true;
-if(ienc32instsArr[33] == 1) srl     = true;
-if(ienc32instsArr[34] == 1) sra     = true;
-if(ienc32instsArr[35] == 1) or_     = true;
-if(ienc32instsArr[36] == 1) and_    = true;
-if(ienc32instsArr[37] == 1) fence   = true;
-if(ienc32instsArr[38] == 1) fence_i = true;
-if(ienc32instsArr[39] == 1) ecall   = true;
-if(ienc32instsArr[40] == 1) ebreak  = true;
-if(ienc32instsArr[41] == 1) csrrw   = true;
-if(ienc32instsArr[42] == 1) csrrs   = true;
-if(ienc32instsArr[43] == 1) csrrc   = true;
-if(ienc32instsArr[44] == 1) csrrwi  = true;
-if(ienc32instsArr[45] == 1) csrrsi  = true;
-if(ienc32instsArr[46] == 1) csrrci  = true;
-
-// rv32m
-if(menc32instsArr[0 ] == 1) mul    = true;
-if(menc32instsArr[1 ] == 1) mulh   = true;
-if(menc32instsArr[2 ] == 1) mulhsu = true;
-if(menc32instsArr[3 ] == 1) mulhu  = true;
-if(menc32instsArr[4 ] == 1) div_   = true;
-if(menc32instsArr[5 ] == 1) divu   = true;
-if(menc32instsArr[6 ] == 1) rem    = true;
-if(menc32instsArr[7 ] == 1) remu   = true;
-
-// rv32a
-if(aenc32instsArr[0 ] == 1) lr_w      = true;
-if(aenc32instsArr[1 ] == 1) sc_w      = true;
-if(aenc32instsArr[2 ] == 1) amoswap_w = true;
-if(aenc32instsArr[3 ] == 1) amoadd_w  = true;
-if(aenc32instsArr[4 ] == 1) amoxor_w  = true;
-if(aenc32instsArr[5 ] == 1) amoand_w  = true;
-if(aenc32instsArr[6 ] == 1) amoor_w   = true;
-if(aenc32instsArr[7 ] == 1) amomin_w  = true;
-if(aenc32instsArr[8 ] == 1) amomax_w  = true;
-if(aenc32instsArr[9 ] == 1) amominu_w = true;
-if(aenc32instsArr[10] == 1) amomaxu_w = true;
-
-// rv32f
-if(fenc32instsArr[0 ] == 1) flw       = true;
-if(fenc32instsArr[1 ] == 1) fsw       = true;
-if(fenc32instsArr[2 ] == 1) fmadd_s   = true;
-if(fenc32instsArr[3 ] == 1) fmsub_s   = true;
-if(fenc32instsArr[4 ] == 1) fnmsub_s  = true;
-if(fenc32instsArr[5 ] == 1) fnmadd_s  = true;
-if(fenc32instsArr[6 ] == 1) fadd_s    = true;
-if(fenc32instsArr[7 ] == 1) fsub_s    = true;
-if(fenc32instsArr[8 ] == 1) fmul_s    = true;
-if(fenc32instsArr[9 ] == 1) fdiv_s    = true;
-if(fenc32instsArr[10] == 1) fsqrt_s   = true;
-if(fenc32instsArr[11] == 1) fsgnj_s   = true;
-if(fenc32instsArr[12] == 1) fsgnjn_s  = true;
-if(fenc32instsArr[13] == 1) fsgnjx_s  = true;
-if(fenc32instsArr[14] == 1) fmin_s    = true;
-if(fenc32instsArr[15] == 1) fmax_s    = true;
-if(fenc32instsArr[16] == 1) fcvt_w_s  = true;
-if(fenc32instsArr[17] == 1) fcvt_wu_s = true;
-if(fenc32instsArr[18] == 1) fmv_x_w   = true;
-if(fenc32instsArr[19] == 1) feq_s     = true;
-if(fenc32instsArr[20] == 1) flt_s     = true;
-if(fenc32instsArr[21] == 1) fle_s     = true;
-if(fenc32instsArr[22] == 1) fclass_s  = true;
-if(fenc32instsArr[23] == 1) fcvt_s_w  = true;
-if(fenc32instsArr[24] == 1) fcvt_s_wu = true;
-if(fenc32instsArr[25] == 1) fmv_w_x   = true;
-
-// rv32d
-if(denc32instsArr[0 ] == 1) fld       = true;
-if(denc32instsArr[1 ] == 1) fsd       = true;
-if(denc32instsArr[2 ] == 1) fmadd_d   = true;
-if(denc32instsArr[3 ] == 1) fmsub_d   = true;
-if(denc32instsArr[4 ] == 1) fnmsub_d  = true;
-if(denc32instsArr[5 ] == 1) fnmadd_d  = true;
-if(denc32instsArr[6 ] == 1) fadd_d    = true;
-if(denc32instsArr[7 ] == 1) fsub_d    = true;
-if(denc32instsArr[8 ] == 1) fmul_d    = true;
-if(denc32instsArr[9 ] == 1) fdiv_d    = true;
-if(denc32instsArr[10] == 1) fsqrt_d   = true;
-if(denc32instsArr[11] == 1) fsgnj_d   = true;
-if(denc32instsArr[12] == 1) fsgnjn_d  = true;
-if(denc32instsArr[13] == 1) fsgnjx_d  = true;
-if(denc32instsArr[14] == 1) fmin_d    = true;
-if(denc32instsArr[15] == 1) fmax_d    = true;
-if(denc32instsArr[16] == 1) fcvt_s_d  = true;
-if(denc32instsArr[17] == 1) fcvt_d_s  = true;
-if(denc32instsArr[18] == 1) feq_d     = true;
-if(denc32instsArr[19] == 1) flt_d     = true;
-if(denc32instsArr[20] == 1) fle_d     = true;
-if(denc32instsArr[21] == 1) fclass_d  = true;
-if(denc32instsArr[22] == 1) fcvt_w_d  = true;
-if(denc32instsArr[23] == 1) fcvt_wu_d = true;
-if(denc32instsArr[24] == 1) fcvt_d_w  = true;
-if(denc32instsArr[25] == 1) fcvt_d_wu = true;
-
-// rv32q
-if(qenc32instsArr[0 ] == 1) flq       = true;
-if(qenc32instsArr[1 ] == 1) fsq       = true;
-if(qenc32instsArr[2 ] == 1) fmadd_q   = true;
-if(qenc32instsArr[3 ] == 1) fmsub_q   = true;
-if(qenc32instsArr[4 ] == 1) fnmsub_q  = true;
-if(qenc32instsArr[5 ] == 1) fnmadd_q  = true;
-if(qenc32instsArr[6 ] == 1) fadd_q    = true;
-if(qenc32instsArr[7 ] == 1) fsub_q    = true;
-if(qenc32instsArr[8 ] == 1) fmul_q    = true;
-if(qenc32instsArr[9 ] == 1) fdiv_q    = true;
-if(qenc32instsArr[10] == 1) fsqrt_q   = true;
-if(qenc32instsArr[11] == 1) fsgnj_q   = true;
-if(qenc32instsArr[12] == 1) fsgnjn_q  = true;
-if(qenc32instsArr[13] == 1) fsgnjx_q  = true;
-if(qenc32instsArr[14] == 1) fmin_q    = true;
-if(qenc32instsArr[15] == 1) fmax_q    = true;
-if(qenc32instsArr[16] == 1) fcvt_s_q  = true;
-if(qenc32instsArr[17] == 1) fcvt_q_s  = true;
-if(qenc32instsArr[18] == 1) fcvt_d_q  = true;
-if(qenc32instsArr[19] == 1) fcvt_q_d  = true;
-if(qenc32instsArr[20] == 1) feq_q     = true;
-if(qenc32instsArr[21] == 1) flt_q     = true;
-if(qenc32instsArr[22] == 1) fle_q     = true;
-if(qenc32instsArr[23] == 1) fclass_q  = true;
-if(qenc32instsArr[24] == 1) fcvt_w_q  = true;
-if(qenc32instsArr[25] == 1) fcvt_wu_q = true;
-if(qenc32instsArr[26] == 1) fcvt_q_w  = true;
-if(qenc32instsArr[27] == 1) fcvt_q_wu  = true;
-
-// rv64i
-if(ienc64instsArr[0 ] == 1) lwu   = true;
-if(ienc64instsArr[1 ] == 1) ld    = true;
-if(ienc64instsArr[2 ] == 1) sd    = true;
-//if(ienc64instsArr[3 ] == 1) slli  = true;
-//if(ienc64instsArr[4 ] == 1) srli  = true;
-//if(ienc64instsArr[5 ] == 1) srai  = true;
-if(ienc64instsArr[3 ] == 1) addiw = true;
-if(ienc64instsArr[4 ] == 1) slliw = true;
-if(ienc64instsArr[5 ] == 1) srliw = true;
-if(ienc64instsArr[6 ] == 1) sraiw = true;
-if(ienc64instsArr[7 ] == 1) addw  = true;
-if(ienc64instsArr[8 ] == 1) subw  = true;
-if(ienc64instsArr[9 ] == 1) sllw  = true;
-if(ienc64instsArr[10] == 1) srlw  = true;
-if(ienc64instsArr[11] == 1) sraw  = true;
-
-// rv64m
-if(menc64instsArr[0 ] == 1) mulw  = true;
-if(menc64instsArr[1 ] == 1) divw  = true;
-if(menc64instsArr[2 ] == 1) divuw = true;
-if(menc64instsArr[3 ] == 1) remw  = true;
-if(menc64instsArr[4 ] == 1) remuw = true;
-
-// rv64a
-if(aenc64instsArr[0 ] == 1) lr_d      = true;
-if(aenc64instsArr[1 ] == 1) sc_d      = true;
-if(aenc64instsArr[2 ] == 1) amoswap_d = true;
-if(aenc64instsArr[3 ] == 1) amoadd_d  = true;
-if(aenc64instsArr[4 ] == 1) amoxor_d  = true;
-if(aenc64instsArr[5 ] == 1) amoand_d  = true;
-if(aenc64instsArr[6 ] == 1) amoor_d   = true;
-if(aenc64instsArr[7 ] == 1) amomin_d  = true;
-if(aenc64instsArr[8 ] == 1) amomax_d  = true;
-if(aenc64instsArr[9 ] == 1) amominu_d = true;
-if(aenc64instsArr[10] == 1) amomaxu_d = true;
-
-// rv64f
-if(fenc64instsArr[0 ] == 1) fcvt_l_s  = true;
-if(fenc64instsArr[1 ] == 1) fcvt_lu_s = true;
-if(fenc64instsArr[2 ] == 1) fcvt_s_l  = true;
-if(fenc64instsArr[3 ] == 1) fcvt_s_lu = true;
-
-// rv64d
-if(denc64instsArr[0 ] == 1) fcvt_l_d  = true;
-if(denc64instsArr[1 ] == 1) fcvt_lu_d = true;
-if(denc64instsArr[2 ] == 1) fmv_x_d   = true;
-if(denc64instsArr[3 ] == 1) fcvt_d_l  = true;
-if(denc64instsArr[4 ] == 1) fcvt_d_lu = true;
-if(denc64instsArr[5 ] == 1) fmv_d_x   = true;
-
-// rv64q
-if(qenc64instsArr[0 ] == 1) fcvt_l_q  = true;
-if(qenc64instsArr[1 ] == 1) fcvt_lu_q = true;
-if(qenc64instsArr[2 ] == 1) fcvt_q_l  = true;
-if(qenc64instsArr[3 ] == 1) fcvt_q_lu = true;
-
-// rvc quadrant 0
-if(cencq0instsArr[0 ] == 1) c_addi4spn = true;
-if(cencq0instsArr[1 ] == 1) c_fld      = true;
-if(cencq0instsArr[2 ] == 1) c_lq       = true;
-if(cencq0instsArr[3 ] == 1) c_lw       = true;
-if(cencq0instsArr[4 ] == 1) c_flw      = true;
-if(cencq0instsArr[5 ] == 1) c_ld       = true;
-if(cencq0instsArr[6 ] == 1) c_fsd      = true;
-if(cencq0instsArr[7 ] == 1) c_sq       = true;
-if(cencq0instsArr[8 ] == 1) c_sw       = true;
-if(cencq0instsArr[9 ] == 1) c_fsw      = true;
-if(cencq0instsArr[10] == 1) c_sd       = true;
-
-// rvc quadrant 1
-if(cencq1instsArr[0 ] == 1) c_nop      = true;
-if(cencq1instsArr[1 ] == 1) c_addi     = true;
-if(cencq1instsArr[2 ] == 1) c_jal      = true;
-if(cencq1instsArr[3 ] == 1) c_addiw    = true;
-if(cencq1instsArr[4 ] == 1) c_li       = true;
-if(cencq1instsArr[5 ] == 1) c_addi16sp = true;
-if(cencq1instsArr[6 ] == 1) c_lui      = true;
-if(cencq1instsArr[7 ] == 1) c_srli     = true;
-if(cencq1instsArr[8 ] == 1) c_srli64   = true;
-if(cencq1instsArr[9 ] == 1) c_srai     = true;
-if(cencq1instsArr[10] == 1) c_srai64   = true;
-if(cencq1instsArr[11] == 1) c_andi     = true;
-if(cencq1instsArr[12] == 1) c_sub      = true;
-if(cencq1instsArr[13] == 1) c_xor      = true;
-if(cencq1instsArr[14] == 1) c_or       = true;
-if(cencq1instsArr[15] == 1) c_and      = true;
-if(cencq1instsArr[16] == 1) c_subw     = true;
-if(cencq1instsArr[17] == 1) c_addw     = true;
-if(cencq1instsArr[18] == 1) c_j        = true;
-if(cencq1instsArr[19] == 1) c_beqz     = true;
-if(cencq1instsArr[20] == 1) c_bnez     = true;
-
-// rvc quadrant 2
-if(cencq1instsArr[0 ] == 1) c_slli   = true;
-if(cencq1instsArr[1 ] == 1) c_slli64 = true;
-if(cencq1instsArr[2 ] == 1) c_fldsp  = true;
-if(cencq1instsArr[3 ] == 1) c_lqsp   = true;
-if(cencq1instsArr[4 ] == 1) c_lwsp   = true;
-if(cencq1instsArr[5 ] == 1) c_flwsp  = true;
-if(cencq1instsArr[6 ] == 1) c_ldsp   = true;
-if(cencq1instsArr[7 ] == 1) c_jr     = true;
-if(cencq1instsArr[8 ] == 1) c_mv     = true;
-if(cencq1instsArr[9 ] == 1) c_ebreak = true;
-if(cencq1instsArr[10] == 1) c_jalr   = true;
-if(cencq1instsArr[11] == 1) c_add    = true;
-if(cencq1instsArr[12] == 1) c_fsdsp  = true;
-if(cencq1instsArr[13] == 1) c_sqsp   = true;
-if(cencq1instsArr[14] == 1) c_swsp   = true;
-if(cencq1instsArr[15] == 1) c_fswsp  = true;
-if(cencq1instsArr[16] == 1) c_sdsp   = true;
-
+  // before hex dump
+  int i = 0;
+  
+  const int ienc32instsSize = 47;
+  const int menc32instsSize = 8;
+  const int aenc32instsSize = 11;
+  const int fenc32instsSize = 26;
+  const int denc32instsSize = 26;
+  const int qenc32instsSize = 28;
+  
+  const int ienc64instsSize = 12; //15;
+  const int menc64instsSize = 5;
+  const int aenc64instsSize = 11;
+  const int fenc64instsSize = 4;
+  const int denc64instsSize = 6;
+  const int qenc64instsSize = 4;
+  
+  const int cencq0instsSize = 11;
+  const int cencq1instsSize = 21;
+  const int cencq2instsSize = 17;
+  
+  int ienc32instsArr[ienc32instsSize];
+  for(i=ienc32instsSize-1; i>=0; i--){
+    ienc32instsArr[i] = 0;
+  }
+  for(i=0; i<ienc32insts.length(); i++){
+    ienc32instsArr[i] = ienc32insts[i] - '0';
+  }
+  
+  int menc32instsArr[menc32instsSize];
+  for(i=menc32instsSize-1; i>=0; i--){
+    menc32instsArr[i] = 0;
+  }
+  for(i=0; i<menc32insts.length(); i++){
+    menc32instsArr[i] = menc32insts[i] - '0';
+  }
+  
+  int aenc32instsArr[aenc32instsSize];
+  for(i=aenc32instsSize-1; i>=0; i--){
+    aenc32instsArr[i] = 0;
+  }
+  for(i=0; i<aenc32insts.length(); i++){
+    aenc32instsArr[i] = aenc32insts[i] - '0';
+  }
+  
+  int fenc32instsArr[fenc32instsSize];
+  for(i=fenc32instsSize-1; i>=0; i--){
+    fenc32instsArr[i] = 0;
+  }
+  for(i=0; i<fenc32insts.length(); i++){
+    fenc32instsArr[i] = fenc32insts[i] - '0';
+  }
+  
+  int denc32instsArr[denc32instsSize];
+  for(i=denc32instsSize-1; i>=0; i--){
+    denc32instsArr[i] = 0;
+  }
+  for(i=0; i<denc32insts.length(); i++){
+    denc32instsArr[i] = denc32insts[i] - '0';
+  }
+  
+  int qenc32instsArr[qenc32instsSize];
+  for(i=qenc32instsSize-1; i>=0; i--){
+    qenc32instsArr[i] = 0;
+  }
+  for(i=0; i<qenc32insts.length(); i++){
+    qenc32instsArr[i] = qenc32insts[i] - '0';
+  }
+  
+  int ienc64instsArr[ienc64instsSize];
+  for(i=ienc64instsSize-1; i>=0; i--){
+    ienc64instsArr[i] = 0;
+  }
+  for(i=0; i<ienc64insts.length(); i++){
+    ienc64instsArr[i] = ienc64insts[i] - '0';
+  }
+  
+  int menc64instsArr[menc64instsSize];
+  for(i=menc64instsSize-1; i>=0; i--){
+    menc64instsArr[i] = 0;
+  }
+  for(i=0; i<menc64insts.length(); i++){
+    menc64instsArr[i] = menc64insts[i] - '0';
+  }
+  
+  int aenc64instsArr[aenc64instsSize];
+  for(i=aenc64instsSize-1; i>=0; i--){
+    aenc64instsArr[i] = 0;
+  }
+  for(i=0; i<aenc64insts.length(); i++){
+    aenc64instsArr[i] = aenc64insts[i] - '0';
+  }
+  
+  int fenc64instsArr[fenc64instsSize];
+  for(i=fenc64instsSize-1; i>=0; i--){
+    fenc64instsArr[i] = 0;
+  }
+  for(int i=0;i<fenc64insts.length();i++){
+    fenc64instsArr[i] = fenc64insts[i] - '0';
+  }
+  
+  int denc64instsArr[denc64instsSize];
+  for(i=denc64instsSize-1; i>=0; i--){
+    denc64instsArr[i] = 0;
+  }
+  for(i=0; i<denc64insts.length(); i++){
+    denc64instsArr[i] = denc64insts[i] - '0';
+  }
+  
+  int qenc64instsArr[qenc64instsSize];
+  for(i=qenc64instsSize-1; i>=0; i--){
+    qenc64instsArr[i] = 0;
+  }
+  for(i=0; i<qenc64insts.length(); i++){
+    qenc64instsArr[i] = qenc64insts[i] - '0';
+  }
+  
+  int cencq0instsArr[cencq0instsSize];
+  for(i=cencq0instsSize-1; i>=0; i--){
+    cencq0instsArr[i] = 0;
+  }
+  for(i=0; i<cencq0insts.length(); i++){
+    cencq0instsArr[i] = cencq0insts[i] - '0';
+  }
+  
+  int cencq1instsArr[cencq1instsSize];
+  for(i=cencq1instsSize-1; i>=0; i--){
+    cencq1instsArr[i] = 0;
+  }
+  for(i=0; i<cencq1insts.length(); i++){
+    cencq1instsArr[i] = cencq1insts[i] - '0';
+  }
+  
+  int cencq2instsArr[cencq2instsSize];
+  for(i=cencq2instsSize-1; i>=0; i--){
+    cencq2instsArr[i] = 0;
+  }
+  for(i=0; i<cencq2insts.length(); i++){
+    cencq2instsArr[i] = cencq2insts[i] - '0';
+  }
+  
+  // rv32i
+  if(ienc32instsArr[0 ] == 1) lui     = true;  
+  if(ienc32instsArr[1 ] == 1) auipc   = true;
+  if(ienc32instsArr[2 ] == 1) jal     = true;
+  if(ienc32instsArr[3 ] == 1) jalr    = true;
+  if(ienc32instsArr[4 ] == 1) beq     = true;
+  if(ienc32instsArr[5 ] == 1) bne     = true;
+  if(ienc32instsArr[6 ] == 1) blt     = true;
+  if(ienc32instsArr[7 ] == 1) bge     = true;
+  if(ienc32instsArr[8 ] == 1) bltu    = true;
+  if(ienc32instsArr[9 ] == 1) bgeu    = true;
+  if(ienc32instsArr[10] == 1) lb      = true;
+  if(ienc32instsArr[11] == 1) lh      = true;
+  if(ienc32instsArr[12] == 1) lw      = true;
+  if(ienc32instsArr[13] == 1) lbu     = true;
+  if(ienc32instsArr[14] == 1) lhu     = true;
+  if(ienc32instsArr[15] == 1) sb      = true;
+  if(ienc32instsArr[16] == 1) sh      = true;
+  if(ienc32instsArr[17] == 1) sw      = true;
+  if(ienc32instsArr[18] == 1) addi    = true;
+  if(ienc32instsArr[19] == 1) slti    = true;
+  if(ienc32instsArr[20] == 1) sltiu   = true;
+  if(ienc32instsArr[21] == 1) xori    = true;
+  if(ienc32instsArr[22] == 1) ori     = true;
+  if(ienc32instsArr[23] == 1) andi    = true;
+  if(ienc32instsArr[24] == 1) slli    = true;
+  if(ienc32instsArr[25] == 1) srli    = true;
+  if(ienc32instsArr[26] == 1) srai    = true;
+  if(ienc32instsArr[27] == 1) add     = true;
+  if(ienc32instsArr[28] == 1) sub     = true;
+  if(ienc32instsArr[29] == 1) sll     = true;
+  if(ienc32instsArr[30] == 1) slt     = true;
+  if(ienc32instsArr[31] == 1) sltu    = true;
+  if(ienc32instsArr[32] == 1) xor_    = true;
+  if(ienc32instsArr[33] == 1) srl     = true;
+  if(ienc32instsArr[34] == 1) sra     = true;
+  if(ienc32instsArr[35] == 1) or_     = true;
+  if(ienc32instsArr[36] == 1) and_    = true;
+  if(ienc32instsArr[37] == 1) fence   = true;
+  if(ienc32instsArr[38] == 1) fence_i = true;
+  if(ienc32instsArr[39] == 1) ecall   = true;
+  if(ienc32instsArr[40] == 1) ebreak  = true;
+  if(ienc32instsArr[41] == 1) csrrw   = true;
+  if(ienc32instsArr[42] == 1) csrrs   = true;
+  if(ienc32instsArr[43] == 1) csrrc   = true;
+  if(ienc32instsArr[44] == 1) csrrwi  = true;
+  if(ienc32instsArr[45] == 1) csrrsi  = true;
+  if(ienc32instsArr[46] == 1) csrrci  = true;
+  
+  // rv32m
+  if(menc32instsArr[0 ] == 1) mul    = true;
+  if(menc32instsArr[1 ] == 1) mulh   = true;
+  if(menc32instsArr[2 ] == 1) mulhsu = true;
+  if(menc32instsArr[3 ] == 1) mulhu  = true;
+  if(menc32instsArr[4 ] == 1) div_   = true;
+  if(menc32instsArr[5 ] == 1) divu   = true;
+  if(menc32instsArr[6 ] == 1) rem    = true;
+  if(menc32instsArr[7 ] == 1) remu   = true;
+  
+  // rv32a
+  if(aenc32instsArr[0 ] == 1) lr_w      = true;
+  if(aenc32instsArr[1 ] == 1) sc_w      = true;
+  if(aenc32instsArr[2 ] == 1) amoswap_w = true;
+  if(aenc32instsArr[3 ] == 1) amoadd_w  = true;
+  if(aenc32instsArr[4 ] == 1) amoxor_w  = true;
+  if(aenc32instsArr[5 ] == 1) amoand_w  = true;
+  if(aenc32instsArr[6 ] == 1) amoor_w   = true;
+  if(aenc32instsArr[7 ] == 1) amomin_w  = true;
+  if(aenc32instsArr[8 ] == 1) amomax_w  = true;
+  if(aenc32instsArr[9 ] == 1) amominu_w = true;
+  if(aenc32instsArr[10] == 1) amomaxu_w = true;
+  
+  // rv32f
+  if(fenc32instsArr[0 ] == 1) flw       = true;
+  if(fenc32instsArr[1 ] == 1) fsw       = true;
+  if(fenc32instsArr[2 ] == 1) fmadd_s   = true;
+  if(fenc32instsArr[3 ] == 1) fmsub_s   = true;
+  if(fenc32instsArr[4 ] == 1) fnmsub_s  = true;
+  if(fenc32instsArr[5 ] == 1) fnmadd_s  = true;
+  if(fenc32instsArr[6 ] == 1) fadd_s    = true;
+  if(fenc32instsArr[7 ] == 1) fsub_s    = true;
+  if(fenc32instsArr[8 ] == 1) fmul_s    = true;
+  if(fenc32instsArr[9 ] == 1) fdiv_s    = true;
+  if(fenc32instsArr[10] == 1) fsqrt_s   = true;
+  if(fenc32instsArr[11] == 1) fsgnj_s   = true;
+  if(fenc32instsArr[12] == 1) fsgnjn_s  = true;
+  if(fenc32instsArr[13] == 1) fsgnjx_s  = true;
+  if(fenc32instsArr[14] == 1) fmin_s    = true;
+  if(fenc32instsArr[15] == 1) fmax_s    = true;
+  if(fenc32instsArr[16] == 1) fcvt_w_s  = true;
+  if(fenc32instsArr[17] == 1) fcvt_wu_s = true;
+  if(fenc32instsArr[18] == 1) fmv_x_w   = true;
+  if(fenc32instsArr[19] == 1) feq_s     = true;
+  if(fenc32instsArr[20] == 1) flt_s     = true;
+  if(fenc32instsArr[21] == 1) fle_s     = true;
+  if(fenc32instsArr[22] == 1) fclass_s  = true;
+  if(fenc32instsArr[23] == 1) fcvt_s_w  = true;
+  if(fenc32instsArr[24] == 1) fcvt_s_wu = true;
+  if(fenc32instsArr[25] == 1) fmv_w_x   = true;
+  
+  // rv32d
+  if(denc32instsArr[0 ] == 1) fld       = true;
+  if(denc32instsArr[1 ] == 1) fsd       = true;
+  if(denc32instsArr[2 ] == 1) fmadd_d   = true;
+  if(denc32instsArr[3 ] == 1) fmsub_d   = true;
+  if(denc32instsArr[4 ] == 1) fnmsub_d  = true;
+  if(denc32instsArr[5 ] == 1) fnmadd_d  = true;
+  if(denc32instsArr[6 ] == 1) fadd_d    = true;
+  if(denc32instsArr[7 ] == 1) fsub_d    = true;
+  if(denc32instsArr[8 ] == 1) fmul_d    = true;
+  if(denc32instsArr[9 ] == 1) fdiv_d    = true;
+  if(denc32instsArr[10] == 1) fsqrt_d   = true;
+  if(denc32instsArr[11] == 1) fsgnj_d   = true;
+  if(denc32instsArr[12] == 1) fsgnjn_d  = true;
+  if(denc32instsArr[13] == 1) fsgnjx_d  = true;
+  if(denc32instsArr[14] == 1) fmin_d    = true;
+  if(denc32instsArr[15] == 1) fmax_d    = true;
+  if(denc32instsArr[16] == 1) fcvt_s_d  = true;
+  if(denc32instsArr[17] == 1) fcvt_d_s  = true;
+  if(denc32instsArr[18] == 1) feq_d     = true;
+  if(denc32instsArr[19] == 1) flt_d     = true;
+  if(denc32instsArr[20] == 1) fle_d     = true;
+  if(denc32instsArr[21] == 1) fclass_d  = true;
+  if(denc32instsArr[22] == 1) fcvt_w_d  = true;
+  if(denc32instsArr[23] == 1) fcvt_wu_d = true;
+  if(denc32instsArr[24] == 1) fcvt_d_w  = true;
+  if(denc32instsArr[25] == 1) fcvt_d_wu = true;
+  
+  // rv32q
+  if(qenc32instsArr[0 ] == 1) flq       = true;
+  if(qenc32instsArr[1 ] == 1) fsq       = true;
+  if(qenc32instsArr[2 ] == 1) fmadd_q   = true;
+  if(qenc32instsArr[3 ] == 1) fmsub_q   = true;
+  if(qenc32instsArr[4 ] == 1) fnmsub_q  = true;
+  if(qenc32instsArr[5 ] == 1) fnmadd_q  = true;
+  if(qenc32instsArr[6 ] == 1) fadd_q    = true;
+  if(qenc32instsArr[7 ] == 1) fsub_q    = true;
+  if(qenc32instsArr[8 ] == 1) fmul_q    = true;
+  if(qenc32instsArr[9 ] == 1) fdiv_q    = true;
+  if(qenc32instsArr[10] == 1) fsqrt_q   = true;
+  if(qenc32instsArr[11] == 1) fsgnj_q   = true;
+  if(qenc32instsArr[12] == 1) fsgnjn_q  = true;
+  if(qenc32instsArr[13] == 1) fsgnjx_q  = true;
+  if(qenc32instsArr[14] == 1) fmin_q    = true;
+  if(qenc32instsArr[15] == 1) fmax_q    = true;
+  if(qenc32instsArr[16] == 1) fcvt_s_q  = true;
+  if(qenc32instsArr[17] == 1) fcvt_q_s  = true;
+  if(qenc32instsArr[18] == 1) fcvt_d_q  = true;
+  if(qenc32instsArr[19] == 1) fcvt_q_d  = true;
+  if(qenc32instsArr[20] == 1) feq_q     = true;
+  if(qenc32instsArr[21] == 1) flt_q     = true;
+  if(qenc32instsArr[22] == 1) fle_q     = true;
+  if(qenc32instsArr[23] == 1) fclass_q  = true;
+  if(qenc32instsArr[24] == 1) fcvt_w_q  = true;
+  if(qenc32instsArr[25] == 1) fcvt_wu_q = true;
+  if(qenc32instsArr[26] == 1) fcvt_q_w  = true;
+  if(qenc32instsArr[27] == 1) fcvt_q_wu  = true;
+  
+  // rv64i
+  if(ienc64instsArr[0 ] == 1) lwu   = true;
+  if(ienc64instsArr[1 ] == 1) ld    = true;
+  if(ienc64instsArr[2 ] == 1) sd    = true;
+  //if(ienc64instsArr[3 ] == 1) slli  = true;
+  //if(ienc64instsArr[4 ] == 1) srli  = true;
+  //if(ienc64instsArr[5 ] == 1) srai  = true;
+  if(ienc64instsArr[3 ] == 1) addiw = true;
+  if(ienc64instsArr[4 ] == 1) slliw = true;
+  if(ienc64instsArr[5 ] == 1) srliw = true;
+  if(ienc64instsArr[6 ] == 1) sraiw = true;
+  if(ienc64instsArr[7 ] == 1) addw  = true;
+  if(ienc64instsArr[8 ] == 1) subw  = true;
+  if(ienc64instsArr[9 ] == 1) sllw  = true;
+  if(ienc64instsArr[10] == 1) srlw  = true;
+  if(ienc64instsArr[11] == 1) sraw  = true;
+  
+  // rv64m
+  if(menc64instsArr[0 ] == 1) mulw  = true;
+  if(menc64instsArr[1 ] == 1) divw  = true;
+  if(menc64instsArr[2 ] == 1) divuw = true;
+  if(menc64instsArr[3 ] == 1) remw  = true;
+  if(menc64instsArr[4 ] == 1) remuw = true;
+  
+  // rv64a
+  if(aenc64instsArr[0 ] == 1) lr_d      = true;
+  if(aenc64instsArr[1 ] == 1) sc_d      = true;
+  if(aenc64instsArr[2 ] == 1) amoswap_d = true;
+  if(aenc64instsArr[3 ] == 1) amoadd_d  = true;
+  if(aenc64instsArr[4 ] == 1) amoxor_d  = true;
+  if(aenc64instsArr[5 ] == 1) amoand_d  = true;
+  if(aenc64instsArr[6 ] == 1) amoor_d   = true;
+  if(aenc64instsArr[7 ] == 1) amomin_d  = true;
+  if(aenc64instsArr[8 ] == 1) amomax_d  = true;
+  if(aenc64instsArr[9 ] == 1) amominu_d = true;
+  if(aenc64instsArr[10] == 1) amomaxu_d = true;
+  
+  // rv64f
+  if(fenc64instsArr[0 ] == 1) fcvt_l_s  = true;
+  if(fenc64instsArr[1 ] == 1) fcvt_lu_s = true;
+  if(fenc64instsArr[2 ] == 1) fcvt_s_l  = true;
+  if(fenc64instsArr[3 ] == 1) fcvt_s_lu = true;
+  
+  // rv64d
+  if(denc64instsArr[0 ] == 1) fcvt_l_d  = true;
+  if(denc64instsArr[1 ] == 1) fcvt_lu_d = true;
+  if(denc64instsArr[2 ] == 1) fmv_x_d   = true;
+  if(denc64instsArr[3 ] == 1) fcvt_d_l  = true;
+  if(denc64instsArr[4 ] == 1) fcvt_d_lu = true;
+  if(denc64instsArr[5 ] == 1) fmv_d_x   = true;
+  
+  // rv64q
+  if(qenc64instsArr[0 ] == 1) fcvt_l_q  = true;
+  if(qenc64instsArr[1 ] == 1) fcvt_lu_q = true;
+  if(qenc64instsArr[2 ] == 1) fcvt_q_l  = true;
+  if(qenc64instsArr[3 ] == 1) fcvt_q_lu = true;
+  
+  // rvc quadrant 0
+  if(cencq0instsArr[0 ] == 1) c_addi4spn = true;
+  if(cencq0instsArr[1 ] == 1) c_fld      = true;
+  if(cencq0instsArr[2 ] == 1) c_lq       = true;
+  if(cencq0instsArr[3 ] == 1) c_lw       = true;
+  if(cencq0instsArr[4 ] == 1) c_flw      = true;
+  if(cencq0instsArr[5 ] == 1) c_ld       = true;
+  if(cencq0instsArr[6 ] == 1) c_fsd      = true;
+  if(cencq0instsArr[7 ] == 1) c_sq       = true;
+  if(cencq0instsArr[8 ] == 1) c_sw       = true;
+  if(cencq0instsArr[9 ] == 1) c_fsw      = true;
+  if(cencq0instsArr[10] == 1) c_sd       = true;
+  
+  // rvc quadrant 1
+  if(cencq1instsArr[0 ] == 1) c_nop      = true;
+  if(cencq1instsArr[1 ] == 1) c_addi     = true;
+  if(cencq1instsArr[2 ] == 1) c_jal      = true;
+  if(cencq1instsArr[3 ] == 1) c_addiw    = true;
+  if(cencq1instsArr[4 ] == 1) c_li       = true;
+  if(cencq1instsArr[5 ] == 1) c_addi16sp = true;
+  if(cencq1instsArr[6 ] == 1) c_lui      = true;
+  if(cencq1instsArr[7 ] == 1) c_srli     = true;
+  if(cencq1instsArr[8 ] == 1) c_srli64   = true;
+  if(cencq1instsArr[9 ] == 1) c_srai     = true;
+  if(cencq1instsArr[10] == 1) c_srai64   = true;
+  if(cencq1instsArr[11] == 1) c_andi     = true;
+  if(cencq1instsArr[12] == 1) c_sub      = true;
+  if(cencq1instsArr[13] == 1) c_xor      = true;
+  if(cencq1instsArr[14] == 1) c_or       = true;
+  if(cencq1instsArr[15] == 1) c_and      = true;
+  if(cencq1instsArr[16] == 1) c_subw     = true;
+  if(cencq1instsArr[17] == 1) c_addw     = true;
+  if(cencq1instsArr[18] == 1) c_j        = true;
+  if(cencq1instsArr[19] == 1) c_beqz     = true;
+  if(cencq1instsArr[20] == 1) c_bnez     = true;
+  
+  // rvc quadrant 2
+  if(cencq1instsArr[0 ] == 1) c_slli   = true;
+  if(cencq1instsArr[1 ] == 1) c_slli64 = true;
+  if(cencq1instsArr[2 ] == 1) c_fldsp  = true;
+  if(cencq1instsArr[3 ] == 1) c_lqsp   = true;
+  if(cencq1instsArr[4 ] == 1) c_lwsp   = true;
+  if(cencq1instsArr[5 ] == 1) c_flwsp  = true;
+  if(cencq1instsArr[6 ] == 1) c_ldsp   = true;
+  if(cencq1instsArr[7 ] == 1) c_jr     = true;
+  if(cencq1instsArr[8 ] == 1) c_mv     = true;
+  if(cencq1instsArr[9 ] == 1) c_ebreak = true;
+  if(cencq1instsArr[10] == 1) c_jalr   = true;
+  if(cencq1instsArr[11] == 1) c_add    = true;
+  if(cencq1instsArr[12] == 1) c_fsdsp  = true;
+  if(cencq1instsArr[13] == 1) c_sqsp   = true;
+  if(cencq1instsArr[14] == 1) c_swsp   = true;
+  if(cencq1instsArr[15] == 1) c_fswsp  = true;
+  if(cencq1instsArr[16] == 1) c_sdsp   = true;
+  
+  // hex dump
   llvm::for_each(InputFilenames, dumpInput);
 
   warnOnNoMatchForSections();
 
+  OSS<<"";
+  
+  OSS.close();
+  
+  OSS.open(fileName + "out.hex", fstream::in | fstream::out);
+  
+  std::string hashstr = "00000000000000000000000000000000";
+  std::string binArr = "";
+  
+  OSS.clear();
+  OSS.seekg(ios_base::beg);
 
-OSS<<"";
+  std::string line;
+  while (std::getline(OSS, line)){
+      binArr = "";
+      int_to_hex(line);
+  if(line.length()<=8){
+      for(int i=0;i<line.length();i++)
+        binArr += hex_char_to_bin((char)line.at(i));
+  
+      if(binArr.length() < 32){
+        binArr = "0000000000000000" + binArr;
+      }
+  
+      hashstr = strBitArrXor(binArr, hashstr, 4);
+      }
+  }
 
-OSS.close();
+  OSS.clear();
+  OSS.seekg(ios_base::beg);
+  
+  OSS<<int_to_hex(std::stoll(hashstr, NULL, 2));
 
-OSS.open(fileName + "out.hex", fstream::in | fstream::out); //fstream::in | fstream::out | fstream::trunc);
-
-//fstream OSS2;
-//OSS2.open(fileName + "out.hex", fstream::in | fstream::out);
-
-
-std::string hashstr = "00000000000000000000000000000000";
-//std::stringstream hashstream;
-std::string binArr = "";
-
-OSS.clear();
-OSS.seekg(ios_base::beg);
-//OSS2.seekg(ios_base::end);
-
-std::string line;
-while (std::getline(OSS, line)){
-    binArr = "";
-    int_to_hex(line);
-if(line.length()<=8){
-    for(int i=0;i<line.length();i++)
-    //OSS2<<line.length()<<endl;
-      binArr += hex_char_to_bin((char)line.at(i));
-
-    if(binArr.length() < 32){
-      binArr = "0000000000000000" + binArr;
-    }
-
-    //hashstream << std::hex << setfill('0') << setw(2*4) << std::stoll(strBitArrXor(binArr, hashstr, 4),NULL,  2);
-    hashstr = strBitArrXor(binArr, hashstr, 4);
-    //hashstr = hashstream.str();
-    //hashstream.str(std::string());*//**/
-}}
-
-OSS.clear();/**/
-OSS.seekg(ios_base::beg);
-//
-OSS<<int_to_hex(std::stoll(hashstr, NULL, 2));//<<endl;
-    
   return EXIT_SUCCESS;
 }
