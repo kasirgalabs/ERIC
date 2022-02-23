@@ -15,27 +15,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "MCTargetDesc/RISCVInstPrinter.h"
-#include "RISCV.h"
-#include "llvm/IR/Instruction.h"
-#include <stdlib.h>
 #include "elf2encryptedhex.h"
-#include "COFFDump.h"
+
+#include "MCTargetDesc/RISCVInstPrinter.h"
+
 #include "ELFDump.h"
-#include "MachODump.h"
-#include "WasmDump.h"
-#include "XCOFFDump.h"
+
 #include "llvm/ADT/IndexedMap.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallSet.h"
 #include "llvm/ADT/STLExtras.h"
-#include "llvm/ADT/SetOperations.h"
+
 #include "llvm/ADT/StringExtras.h"
-#include "llvm/ADT/StringSet.h"
+
 #include "llvm/ADT/Triple.h"
-#include "llvm/CodeGen/FaultMaps.h"
-#include "llvm/DebugInfo/DWARF/DWARFContext.h"
-#include "llvm/DebugInfo/Symbolize/Symbolize.h"
+
 #include "llvm/Demangle/Demangle.h"
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
@@ -48,18 +42,18 @@
 #include "llvm/MC/MCObjectFileInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
-#include "llvm/MC/MCTargetOptions.h"
+
 #include "llvm/Object/Archive.h"
-#include "llvm/Object/COFF.h"
-#include "llvm/Object/COFFImportFile.h"
+
+
 #include "llvm/Object/ELFObjectFile.h"
-#include "llvm/Object/MachO.h"
-#include "llvm/Object/MachOUniversal.h"
-#include "llvm/Object/ObjectFile.h"
-#include "llvm/Object/Wasm.h"
+
+
+
+
 #include "llvm/Support/Casting.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Debug.h"
+
+
 #include "llvm/Support/Errc.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Format.h"
@@ -80,33 +74,27 @@
 #include <system_error>
 #include <unordered_map>
 #include <utility>
-#include <fstream>
-#include <string>
 
-#include <bitset>
-#include <iomanip>
+#include <fstream>
 #include <sstream>
+#include "picosha2.h"
+#include "custom-encryptor.h"
 
 using namespace llvm;
 using namespace llvm::object;
 using namespace llvm::objdump;
 
-#define DEBUG_TYPE "elf2encryptedhex"
 
-static cl::OptionCategory ObjdumpCat("elf2encryptedhex Options");
+static cl::OptionCategory ObjdumpCat("llvm-objdump Options");
 
-////////////////options
-
-// encrypt with the given key option for all over hex
-
-static cl::opt<std::string> instnum("instnum",
-    cl::desc("Number of instructions to encrypt from beginning of the program"),
-    cl::cat(ObjdumpCat));
 
 cl::opt<std::string> objdump::enckeyall("enckeyall",
     cl::desc("32 bit key option to encrypt all instructions, usage: --enckeyall=\"<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)\""),
     cl::cat(ObjdumpCat));
 
+static cl::opt<std::string> instnum("instnum",
+    cl::desc("Number of instructions to encrypt from beginning of the program"),
+    cl::cat(ObjdumpCat));
 
 // key options for 32 bit instructions(instruction length 32 bit) dependent on extension
 
@@ -2267,33 +2255,11 @@ cl::opt<std::string> objdump::b_p_c_sdsp("b_p_c_sdsp",
     cl::cat(ObjdumpCat));
 
 
-static cl::opt<uint64_t> AdjustVMA(
-    "adjust-vma",
-    cl::desc("Increase the displayed address by the specified offset"),
-    cl::value_desc("offset"), cl::init(0), cl::cat(ObjdumpCat));
-
-static cl::opt<bool>
-    AllHeaders("all-headers",
-               cl::desc("Display all available header information"),
-               cl::cat(ObjdumpCat));
-static cl::alias AllHeadersShort("x", cl::desc("Alias for --all-headers"),
-                                 cl::NotHidden, cl::Grouping,
-                                 cl::aliasopt(AllHeaders));
-
 static cl::opt<std::string>
     ArchName("arch-name",
              cl::desc("Target arch to disassemble for, "
                       "see -version for available targets"),
              cl::cat(ObjdumpCat));
-
-cl::opt<bool>
-    objdump::ArchiveHeaders("archive-headers",
-                            cl::desc("Display archive header information"),
-                            cl::cat(ObjdumpCat));
-static cl::alias ArchiveHeadersShort("a",
-                                     cl::desc("Alias for --archive-headers"),
-                                     cl::NotHidden, cl::Grouping,
-                                     cl::aliasopt(ArchiveHeaders));
 
 cl::opt<bool> objdump::Demangle("demangle", cl::desc("Demangle symbols names"),
                                 cl::init(false), cl::cat(ObjdumpCat));
@@ -2318,19 +2284,6 @@ static cl::alias DisassembleAllShort("D",
                                      cl::NotHidden, cl::Grouping,
                                      cl::aliasopt(DisassembleAll));
 
-cl::opt<bool> objdump::SymbolDescription(
-    "symbol-description",
-    cl::desc("Add symbol description for disassembly. This "
-             "option is for XCOFF files only"),
-    cl::init(false), cl::cat(ObjdumpCat));
-
-static cl::list<std::string>
-    DisassembleSymbols("disassemble-symbols", cl::CommaSeparated,
-                       cl::desc("List of symbols to disassemble. "
-                                "Accept demangled names when --demangle is "
-                                "specified, otherwise accept mangled names"),
-                       cl::cat(ObjdumpCat));
-
 static cl::opt<bool> DisassembleZeroes(
     "disassemble-zeroes",
     cl::desc("Do not skip blocks of zeroes when disassembling"),
@@ -2340,72 +2293,10 @@ static cl::alias
                            cl::NotHidden, cl::Grouping,
                            cl::aliasopt(DisassembleZeroes));
 
-static cl::list<std::string>
-    DisassemblerOptions("disassembler-options",
-                        cl::desc("Pass target specific disassembler options"),
-                        cl::value_desc("options"), cl::CommaSeparated,
-                        cl::cat(ObjdumpCat));
-static cl::alias
-    DisassemblerOptionsShort("M", cl::desc("Alias for --disassembler-options"),
-                             cl::NotHidden, cl::Grouping, cl::Prefix,
-                             cl::CommaSeparated,
-                             cl::aliasopt(DisassemblerOptions));
-
-cl::opt<DIDumpType> objdump::DwarfDumpType(
-    "dwarf", cl::init(DIDT_Null), cl::desc("Dump of dwarf debug sections:"),
-    cl::values(clEnumValN(DIDT_DebugFrame, "frames", ".debug_frame")),
-    cl::cat(ObjdumpCat));
-
-static cl::opt<bool> DynamicRelocations(
-    "dynamic-reloc",
-    cl::desc("Display the dynamic relocation entries in the file"),
-    cl::cat(ObjdumpCat));
-static cl::alias DynamicRelocationShort("R",
-                                        cl::desc("Alias for --dynamic-reloc"),
-                                        cl::NotHidden, cl::Grouping,
-                                        cl::aliasopt(DynamicRelocations));
-
-static cl::opt<bool>
-    FaultMapSection("fault-map-section",
-                    cl::desc("Display contents of faultmap section"),
-                    cl::cat(ObjdumpCat));
-
-static cl::opt<bool>
-    FileHeaders("file-headers",
-                cl::desc("Display the contents of the overall file header"),
-                cl::cat(ObjdumpCat));
-static cl::alias FileHeadersShort("f", cl::desc("Alias for --file-headers"),
-                                  cl::NotHidden, cl::Grouping,
-                                  cl::aliasopt(FileHeaders));
-
-cl::opt<bool>
-    objdump::SectionContents("full-contents",
-                             cl::desc("Display the content of each section"),
-                             cl::cat(ObjdumpCat));
-static cl::alias SectionContentsShort("s",
-                                      cl::desc("Alias for --full-contents"),
-                                      cl::NotHidden, cl::Grouping,
-                                      cl::aliasopt(SectionContents));
-
 static cl::list<std::string> InputFilenames(cl::Positional,
                                             cl::desc("<input object files>"),
                                             cl::ZeroOrMore,
                                             cl::cat(ObjdumpCat));
-
-static cl::opt<bool>
-    PrintLines("line-numbers",
-               cl::desc("Display source line numbers with "
-                        "disassembly. Implies disassemble object"),
-               cl::cat(ObjdumpCat));
-static cl::alias PrintLinesShort("l", cl::desc("Alias for --line-numbers"),
-                                 cl::NotHidden, cl::Grouping,
-                                 cl::aliasopt(PrintLines));
-
-static cl::opt<bool> MachOOpt("macho",
-                              cl::desc("Use MachO specific object file parser"),
-                              cl::cat(ObjdumpCat));
-static cl::alias MachOm("m", cl::desc("Alias for --macho"), cl::NotHidden,
-                        cl::Grouping, cl::aliasopt(MachOOpt));
 
 cl::opt<std::string> objdump::MCPU(
     "mcpu", cl::desc("Target a specific cpu type (-mcpu=help for details)"),
@@ -2416,101 +2307,14 @@ cl::list<std::string> objdump::MAttrs("mattr", cl::CommaSeparated,
                                       cl::value_desc("a1,+a2,-a3,..."),
                                       cl::cat(ObjdumpCat));
 
-cl::opt<bool> objdump::NoShowRawInsn(
-    "no-show-raw-insn",
-    cl::desc(
-        "When disassembling instructions, do not print the instruction bytes."),
-    cl::cat(ObjdumpCat));
-
-cl::opt<bool> objdump::NoLeadingAddr("no-leading-addr",
-                                     cl::desc("Print no leading address"),
-                                     cl::cat(ObjdumpCat));
-
-static cl::opt<bool> RawClangAST(
-    "raw-clang-ast",
-    cl::desc("Dump the raw binary contents of the clang AST section"),
-    cl::cat(ObjdumpCat));
-
-cl::opt<bool>
-    objdump::Relocations("reloc",
-                         cl::desc("Display the relocation entries in the file"),
-                         cl::cat(ObjdumpCat));
-static cl::alias RelocationsShort("r", cl::desc("Alias for --reloc"),
-                                  cl::NotHidden, cl::Grouping,
-                                  cl::aliasopt(Relocations));
-
-cl::opt<bool>
-    objdump::PrintImmHex("print-imm-hex",
-                         cl::desc("Use hex format for immediate values"),
-                         cl::cat(ObjdumpCat));
-
-cl::opt<bool>
-    objdump::PrivateHeaders("private-headers",
-                            cl::desc("Display format specific file headers"),
-                            cl::cat(ObjdumpCat));
-static cl::alias PrivateHeadersShort("p",
-                                     cl::desc("Alias for --private-headers"),
-                                     cl::NotHidden, cl::Grouping,
-                                     cl::aliasopt(PrivateHeaders));
-
-cl::list<std::string>
-    objdump::FilterSections("section",
-                            cl::desc("Operate on the specified sections only. "
-                                     "With -macho dump segment,section"),
-                            cl::cat(ObjdumpCat));
-static cl::alias FilterSectionsj("j", cl::desc("Alias for --section"),
-                                 cl::NotHidden, cl::Grouping, cl::Prefix,
-                                 cl::aliasopt(FilterSections));
-
-cl::opt<bool> objdump::SectionHeaders(
-    "section-headers",
-    cl::desc("Display summaries of the headers for each section."),
-    cl::cat(ObjdumpCat));
-static cl::alias SectionHeadersShort("headers",
-                                     cl::desc("Alias for --section-headers"),
-                                     cl::NotHidden,
-                                     cl::aliasopt(SectionHeaders));
-static cl::alias SectionHeadersShorter("h",
-                                       cl::desc("Alias for --section-headers"),
-                                       cl::NotHidden, cl::Grouping,
-                                       cl::aliasopt(SectionHeaders));
-
-static cl::opt<bool>
-    ShowLMA("show-lma",
-            cl::desc("Display LMA column when dumping ELF section headers"),
-            cl::cat(ObjdumpCat));
-
-static cl::opt<bool> PrintSource(
-    "source",
-    cl::desc(
-        "Display source inlined with disassembly. Implies disassemble object"),
-    cl::cat(ObjdumpCat));
-static cl::alias PrintSourceShort("S", cl::desc("Alias for -source"),
-                                  cl::NotHidden, cl::Grouping,
-                                  cl::aliasopt(PrintSource));
-
 static cl::opt<uint64_t>
     StartAddress("start-address", cl::desc("Disassemble beginning at address"),
                  cl::value_desc("address"), cl::init(0), cl::cat(ObjdumpCat));
-static cl::opt<uint64_t> StopAddress("stop-address",
+static cl::opt<uint64_t> 
+    StopAddress("stop-address",
                                      cl::desc("Stop disassembly at address"),
                                      cl::value_desc("address"),
                                      cl::init(UINT64_MAX), cl::cat(ObjdumpCat));
-
-cl::opt<bool> objdump::SymbolTable("syms", cl::desc("Display the symbol table"),
-                                   cl::cat(ObjdumpCat));
-static cl::alias SymbolTableShort("t", cl::desc("Alias for --syms"),
-                                  cl::NotHidden, cl::Grouping,
-                                  cl::aliasopt(SymbolTable));
-
-static cl::opt<bool> DynamicSymbolTable(
-    "dynamic-syms",
-    cl::desc("Display the contents of the dynamic symbol table"),
-    cl::cat(ObjdumpCat));
-static cl::alias DynamicSymbolTableShort("T",
-                                         cl::desc("Alias for --dynamic-syms"),
-                                         cl::NotHidden, cl::Grouping,
-                                         cl::aliasopt(DynamicSymbolTable));
 
 cl::opt<std::string> objdump::TripleName(
     "triple",
@@ -2518,45 +2322,11 @@ cl::opt<std::string> objdump::TripleName(
         "Target triple to disassemble for, see -version for available targets"),
     cl::cat(ObjdumpCat));
 
-cl::opt<bool> objdump::UnwindInfo("unwind-info",
-                                  cl::desc("Display unwind information"),
-                                  cl::cat(ObjdumpCat));
-static cl::alias UnwindInfoShort("u", cl::desc("Alias for --unwind-info"),
-                                 cl::NotHidden, cl::Grouping,
-                                 cl::aliasopt(UnwindInfo));
-
-static cl::opt<bool>
-    Wide("wide", cl::desc("Ignored for compatibility with GNU objdump"),
-         cl::cat(ObjdumpCat));
-static cl::alias WideShort("w", cl::Grouping, cl::aliasopt(Wide));
-
-enum DebugVarsFormat {
-  DVDisabled,
-  DVUnicode,
-  DVASCII,
-};
-
-static cl::opt<DebugVarsFormat> DbgVariables(
-    "debug-vars", cl::init(DVDisabled),
-    cl::desc("Print the locations (in registers or memory) of "
-             "source-level variables alongside disassembly"),
-    cl::ValueOptional,
-    cl::values(clEnumValN(DVUnicode, "", "unicode"),
-               clEnumValN(DVUnicode, "unicode", "unicode"),
-               clEnumValN(DVASCII, "ascii", "unicode")),
-    cl::cat(ObjdumpCat));
-
-static cl::opt<int>
-    DbgIndent("debug-vars-indent", cl::init(40),
-              cl::desc("Distance to indent the source-level variable display, "
-                       "relative to the start of the disassembly"),
-              cl::cat(ObjdumpCat));
-
 static cl::extrahelp
     HelpResponse("\nPass @FILE as argument to read options from FILE.\n");
 
-static StringSet<> DisasmSymbolSet;
-StringSet<> objdump::FoundSectionSet;
+
+
 static StringRef ToolName;
 
 namespace {
@@ -2572,26 +2342,452 @@ struct FilterResult {
 };
 } // namespace
 
-static FilterResult checkSectionFilter(object::SectionRef S) {
-  if (FilterSections.empty())
-    return {/*Keep=*/true, /*IncrementIndex=*/true};
+template< typename T >
+std::string int_to_hex( T i )
+{
+  std::stringstream stream;
+  stream << std::hex << i;
+  return stream.str();
+}
 
-  Expected<StringRef> SecNameOrErr = S.getName();
-  if (!SecNameOrErr) {
-    consumeError(SecNameOrErr.takeError());
-    return {/*Keep=*/false, /*IncrementIndex=*/false};
+const char* hex_char_to_bin(char c)
+{
+    switch(std::tolower(c))
+    {
+        case '0': return "0000";
+        case '1': return "0001";
+        case '2': return "0010";
+        case '3': return "0011";
+        case '4': return "0100";
+        case '5': return "0101";
+        case '6': return "0110";
+        case '7': return "0111";
+        case '8': return "1000";
+        case '9': return "1001";
+        case 'a': return "1010";
+        case 'b': return "1011";
+        case 'c': return "1100";
+        case 'd': return "1101";
+        case 'e': return "1110";
+        case 'f': return "1111";
+    }
+    return "0000";
+}
+
+template <typename C>
+struct reverse_wrapper {
+
+    C & c_;
+    reverse_wrapper(C & c) :  c_(c) {}
+
+    typename C::reverse_iterator begin() {return c_.rbegin();}
+    typename C::reverse_iterator end() {return c_.rend(); }
+};
+
+template <typename C, size_t N>
+struct reverse_wrapper< C[N] >{
+
+    C (&c_)[N];
+    reverse_wrapper( C(&c)[N] ) : c_(c) {}
+
+    typename std::reverse_iterator<const C *> begin() { return std::rbegin(c_); }
+    typename std::reverse_iterator<const C *> end() { return std::rend(c_); }
+};
+
+template <typename C>
+reverse_wrapper<C> r_wrap(C & c) {
+    return reverse_wrapper<C>(c);
+}
+
+std::string strBitArrXor(std::string a, std::string b, int j){
+
+std::string c = "";
+
+for ( int i = 0; i < 8*j; ++i )
+{
+    c += ((a[i] - '0') ^ (b[i] - '0')) + '0';
+}
+return c;
+}
+
+int counter = 0;
+int num = 0;
+
+namespace portedOuts{
+  std::error_code EC = std::error_code();
+  
+  raw_fd_ostream *outs; //("a.txt", EC); //, sys::fs::CD_CreateAlways, sys::fs::FA_Write | sys::fs::FA_Read, sys::fs::OF_None);
+}
+
+namespace portedDump {
+ void dumpBytes(ArrayRef<uint8_t> bytes, raw_ostream &OS, std::string encryptInstParKey,
+                bool encryptInstrv32i,
+                bool encryptInstrv32m,
+                bool encryptInstrv32a,
+                bool encryptInstrv32f,
+                bool encryptInstrv32d,
+                bool encryptInstrv32q,
+
+                bool encryptInstrv64i,
+                bool encryptInstrv64m,
+                bool encryptInstrv64a,
+                bool encryptInstrv64f,
+                bool encryptInstrv64d,
+                bool encryptInstrv64q,
+
+                bool encryptInstrvcq0,
+                bool encryptInstrvcq1,
+                bool encryptInstrvcq2
+ ) {
+  std::stringstream OSS;
+
+  int j = 0;
+  char hexArr[(bytes.size()) / 8];
+  static const char hex_rep[] = "0123456789abcdef";
+
+  for (char i: r_wrap(bytes)){
+     hexArr[2*j] = hex_rep[(i & 0xF0) >> 4];
+     hexArr[2*j + 1] = hex_rep[i & 0xF];
+     j++;
   }
-  StringRef SecName = *SecNameOrErr;
 
-  // StringSet does not allow empty key so avoid adding sections with
-  // no name (such as the section with index 0) here.
-  if (!SecName.empty())
-    FoundSectionSet.insert(SecName);
+  std::string binArr = "";
+  for(int i=0;i<strlen(hexArr);i++)
+    binArr += hex_char_to_bin(hexArr[i]);
 
-  // Only show the section if it's in the FilterSections list, but always
-  // increment so the indexing is stable.
-  return {/*Keep=*/is_contained(FilterSections, SecName),
-          /*IncrementIndex=*/true};
+  counter++;
+
+  // Here we can add desired encryption method
+
+  if(custom == true){
+    OSS << custom_encrypt(binArr);
+  }
+  else{
+    if(instnum != ""){
+        if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"  && (counter <= num)){
+          std::stringstream enckeyallaligned;
+          enckeyallaligned << std::setfill('0') << std::setw(32) << enckeyall; // std::setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
+    
+          OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
+        }
+    
+        else if(encryptInstParKey != ""){
+          OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2);
+        }
+    
+        else if(encryptInstrv32i){
+          if(ienc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32m){
+          if(menc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32a){
+          if(aenc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32f){
+          if(fenc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32d){
+          if(denc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32q){
+          if(qenc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+    
+        else if(encryptInstrv64i){
+          if(ienc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64m){
+          if(menc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64a){
+          if(aenc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64f){
+          if(fenc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64d){
+          if(denc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64q){
+          if(qenc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+    
+        else if(encryptInstrvcq0){
+          if(cencq0key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrvcq1){
+          if(cencq1key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrvcq2){
+          if(cencq2key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+
+
+        else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+    }
+    else {
+       if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"){
+          std::stringstream enckeyallaligned;
+          enckeyallaligned << std::setfill('0') << std::setw(32) << enckeyall; // std::setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
+    
+          OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
+        }
+    
+        else if(encryptInstParKey != ""){
+          OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2);
+        }
+    
+        else if(encryptInstrv32i){
+          if(ienc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32m){
+          if(menc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32a){
+          if(aenc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32f){
+          if(fenc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32d){
+          if(denc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv32q){
+          if(qenc32key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+    
+        else if(encryptInstrv64i){
+          if(ienc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64m){
+          if(menc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64a){
+          if(aenc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64f){
+          if(fenc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64d){
+          if(denc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrv64q){
+          if(qenc64key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+    
+        else if(encryptInstrvcq0){
+          if(cencq0key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrvcq1){
+          if(cencq1key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+        else if(encryptInstrvcq2){
+          if(cencq2key != ""){
+            OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
+          }
+          else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+        }
+
+
+        else{
+            if(j==2) OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "0000000000000000", j),NULL,  2);
+            else OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, "00000000000000000000000000000000", j),NULL,  2);
+          } // do not encrypt, just print to hex file
+    
+    }
+  }
+  OS << OSS.str();
+  OSS.str("");
+  //OS<<"dene";
+  //OSS.clear();
+  //OS << std::stoll(binArr,NULL,  2);
+ } // end of dumpBytes function
+} // end of namespace portedDump
+
+
+static FilterResult checkSectionFilter(object::SectionRef S) {
+  return {/*Keep=*/true, /*IncrementIndex=*/true}; // if (FilterSections.empty())
 }
 
 SectionFilter objdump::ToolSectionFilter(object::ObjectFile const &O,
@@ -2608,17 +2804,6 @@ SectionFilter objdump::ToolSectionFilter(object::ObjectFile const &O,
         return Result.Keep;
       },
       O);
-}
-
-std::string objdump::getFileNameForError(const object::Archive::Child &C,
-                                         unsigned Index) {
-  Expected<StringRef> NameOrErr = C.getName();
-  if (NameOrErr)
-    return std::string(NameOrErr.get());
-  // If we have an error getting the name then we print the index of the archive
-  // member. Since we are already in an error state, we just ignore this error.
-  consumeError(NameOrErr.takeError());
-  return "<file index: " + std::to_string(Index) + ">";
 }
 
 void objdump::reportWarning(Twine Message, StringRef File) {
@@ -2653,32 +2838,6 @@ LLVM_ATTRIBUTE_NORETURN void objdump::reportError(Error E, StringRef FileName,
   exit(1);
 }
 
-static void reportCmdLineWarning(Twine Message) {
-  WithColor::warning(errs(), ToolName) << Message << "\n";
-}
-
-LLVM_ATTRIBUTE_NORETURN static void reportCmdLineError(Twine Message) {
-  WithColor::error(errs(), ToolName) << Message << "\n";
-  exit(1);
-}
-
-static void warnOnNoMatchForSections() {
-  SetVector<StringRef> MissingSections;
-  for (StringRef S : FilterSections) {
-    if (FoundSectionSet.count(S))
-      return;
-    // User may specify a unnamed section. Don't warn for it.
-    if (!S.empty())
-      MissingSections.insert(S);
-  }
-
-  // Warn only if no section in FilterSections is matched.
-  for (StringRef S : MissingSections)
-    reportCmdLineWarning("section '" + S +
-                         "' mentioned in a -j/--section option, but not "
-                         "found in any input file");
-}
-
 static const Target *getTarget(const ObjectFile *Obj) {
   // Figure out the target triple.
   Triple TheTriple("unknown-unknown-unknown");
@@ -2703,918 +2862,15 @@ static const Target *getTarget(const ObjectFile *Obj) {
   return TheTarget;
 }
 
-bool objdump::isRelocAddressLess(RelocationRef A, RelocationRef B) {
-  return A.getOffset() < B.getOffset();
-}
-
-static Error getRelocationValueString(const RelocationRef &Rel,
-                                      SmallVectorImpl<char> &Result) {
-  const ObjectFile *Obj = Rel.getObject();
-  if (auto *ELF = dyn_cast<ELFObjectFileBase>(Obj))
-    return getELFRelocationValueString(ELF, Rel, Result);
-  if (auto *COFF = dyn_cast<COFFObjectFile>(Obj))
-    return getCOFFRelocationValueString(COFF, Rel, Result);
-  if (auto *Wasm = dyn_cast<WasmObjectFile>(Obj))
-    return getWasmRelocationValueString(Wasm, Rel, Result);
-  if (auto *MachO = dyn_cast<MachOObjectFile>(Obj))
-    return getMachORelocationValueString(MachO, Rel, Result);
-  if (auto *XCOFF = dyn_cast<XCOFFObjectFile>(Obj))
-    return getXCOFFRelocationValueString(XCOFF, Rel, Result);
-  llvm_unreachable("unknown object file format");
-}
 
 /// Indicates whether this relocation should hidden when listing
 /// relocations, usually because it is the trailing part of a multipart
 /// relocation that will be printed as part of the leading relocation.
 static bool getHidden(RelocationRef RelRef) {
-  auto *MachO = dyn_cast<MachOObjectFile>(RelRef.getObject());
-  if (!MachO)
-    return false;
-
-  unsigned Arch = MachO->getArch();
-  DataRefImpl Rel = RelRef.getRawDataRefImpl();
-  uint64_t Type = MachO->getRelocationType(Rel);
-
-  // On arches that use the generic relocations, GENERIC_RELOC_PAIR
-  // is always hidden.
-  if (Arch == Triple::x86 || Arch == Triple::arm || Arch == Triple::ppc)
-    return Type == MachO::GENERIC_RELOC_PAIR;
-
-  if (Arch == Triple::x86_64) {
-    // On x86_64, X86_64_RELOC_UNSIGNED is hidden only when it follows
-    // an X86_64_RELOC_SUBTRACTOR.
-    if (Type == MachO::X86_64_RELOC_UNSIGNED && Rel.d.a > 0) {
-      DataRefImpl RelPrev = Rel;
-      RelPrev.d.a--;
-      uint64_t PrevType = MachO->getRelocationType(RelPrev);
-      if (PrevType == MachO::X86_64_RELOC_SUBTRACTOR)
-        return true;
-    }
-  }
-
-  return false;
+  return false; // if(!Macho)
 }
-
 
 namespace {
-
-/// Get the column at which we want to start printing the instruction
-/// disassembly, taking into account anything which appears to the left of it.
-unsigned getInstStartColumn(const MCSubtargetInfo &STI) {
-  return NoShowRawInsn ? 16 : STI.getTargetTriple().isX86() ? 40 : 24;
-}
-
-/// Stores a single expression representing the location of a source-level
-/// variable, along with the PC range for which that expression is valid.
-struct LiveVariable {
-  DWARFLocationExpression LocExpr;
-  const char *VarName;
-  DWARFUnit *Unit;
-  const DWARFDie FuncDie;
-
-  LiveVariable(const DWARFLocationExpression &LocExpr, const char *VarName,
-               DWARFUnit *Unit, const DWARFDie FuncDie)
-      : LocExpr(LocExpr), VarName(VarName), Unit(Unit), FuncDie(FuncDie) {}
-
-  bool liveAtAddress(object::SectionedAddress Addr) {
-    if (LocExpr.Range == None)
-      return false;
-    return LocExpr.Range->SectionIndex == Addr.SectionIndex &&
-           LocExpr.Range->LowPC <= Addr.Address &&
-           LocExpr.Range->HighPC > Addr.Address;
-  }
-
-  void print(raw_ostream &OS, const MCRegisterInfo &MRI) const {
-    DataExtractor Data({LocExpr.Expr.data(), LocExpr.Expr.size()},
-                       Unit->getContext().isLittleEndian(), 0);
-    DWARFExpression Expression(Data, Unit->getAddressByteSize());
-    Expression.printCompact(OS, MRI);
-  }
-};
-
-/// Helper class for printing source variable locations alongside disassembly.
-class LiveVariablePrinter {
-  // Information we want to track about one column in which we are printing a
-  // variable live range.
-  struct Column {
-    unsigned VarIdx = NullVarIdx;
-    bool LiveIn = false;
-    bool LiveOut = false;
-    bool MustDrawLabel  = false;
-
-    bool isActive() const { return VarIdx != NullVarIdx; }
-
-    static constexpr unsigned NullVarIdx = std::numeric_limits<unsigned>::max();
-  };
-
-  // All live variables we know about in the object/image file.
-  std::vector<LiveVariable> LiveVariables;
-
-  // The columns we are currently drawing.
-  IndexedMap<Column> ActiveCols;
-
-  const MCRegisterInfo &MRI;
-  const MCSubtargetInfo &STI;
-
-  void addVariable(DWARFDie FuncDie, DWARFDie VarDie) {
-    uint64_t FuncLowPC, FuncHighPC, SectionIndex;
-    FuncDie.getLowAndHighPC(FuncLowPC, FuncHighPC, SectionIndex);
-    const char *VarName = VarDie.getName(DINameKind::ShortName);
-    DWARFUnit *U = VarDie.getDwarfUnit();
-
-    Expected<DWARFLocationExpressionsVector> Locs =
-        VarDie.getLocations(dwarf::DW_AT_location);
-    if (!Locs) {
-      // If the variable doesn't have any locations, just ignore it. We don't
-      // report an error or warning here as that could be noisy on optimised
-      // code.
-      consumeError(Locs.takeError());
-      return;
-    }
-
-    for (const DWARFLocationExpression &LocExpr : *Locs) {
-      if (LocExpr.Range) {
-        LiveVariables.emplace_back(LocExpr, VarName, U, FuncDie);
-      } else {
-        // If the LocExpr does not have an associated range, it is valid for
-        // the whole of the function.
-        // TODO: technically it is not valid for any range covered by another
-        // LocExpr, does that happen in reality?
-        DWARFLocationExpression WholeFuncExpr{
-            DWARFAddressRange(FuncLowPC, FuncHighPC, SectionIndex),
-            LocExpr.Expr};
-        LiveVariables.emplace_back(WholeFuncExpr, VarName, U, FuncDie);
-      }
-    }
-  }
-
-  void addFunction(DWARFDie D) {
-    for (const DWARFDie &Child : D.children()) {
-      if (Child.getTag() == dwarf::DW_TAG_variable ||
-          Child.getTag() == dwarf::DW_TAG_formal_parameter)
-        addVariable(D, Child);
-      else
-        addFunction(Child);
-    }
-  }
-
-  // Get the column number (in characters) at which the first live variable
-  // line should be printed.
-  unsigned getIndentLevel() const {
-    return DbgIndent + getInstStartColumn(STI);
-  }
-
-  // Indent to the first live-range column to the right of the currently
-  // printed line, and return the index of that column.
-  // TODO: formatted_raw_ostream uses "column" to mean a number of characters
-  // since the last \n, and we use it to mean the number of slots in which we
-  // put live variable lines. Pick a less overloaded word.
-  unsigned moveToFirstVarColumn(formatted_raw_ostream &OS) {
-    // Logical column number: column zero is the first column we print in, each
-    // logical column is 2 physical columns wide.
-    unsigned FirstUnprintedLogicalColumn =
-        std::max((int)(OS.getColumn() - getIndentLevel() + 1) / 2, 0);
-    // Physical column number: the actual column number in characters, with
-    // zero being the left-most side of the screen.
-    unsigned FirstUnprintedPhysicalColumn =
-        getIndentLevel() + FirstUnprintedLogicalColumn * 2;
-
-    if (FirstUnprintedPhysicalColumn > OS.getColumn())
-      OS.PadToColumn(FirstUnprintedPhysicalColumn);
-
-    return FirstUnprintedLogicalColumn;
-  }
-
-  unsigned findFreeColumn() {
-    for (unsigned ColIdx = 0; ColIdx < ActiveCols.size(); ++ColIdx)
-      if (!ActiveCols[ColIdx].isActive())
-        return ColIdx;
-
-    size_t OldSize = ActiveCols.size();
-    ActiveCols.grow(std::max<size_t>(OldSize * 2, 1));
-    return OldSize;
-  }
-
-public:
-  LiveVariablePrinter(const MCRegisterInfo &MRI, const MCSubtargetInfo &STI)
-      : LiveVariables(), ActiveCols(Column()), MRI(MRI), STI(STI) {}
-
-  void dump() const {
-    for (const LiveVariable &LV : LiveVariables) {
-      dbgs() << LV.VarName << " @ " << LV.LocExpr.Range << ": ";
-      LV.print(dbgs(), MRI);
-    }
-  }
-
-  void addCompileUnit(DWARFDie D) {
-    if (D.getTag() == dwarf::DW_TAG_subprogram)
-      addFunction(D);
-    else
-      for (const DWARFDie &Child : D.children())
-        addFunction(Child);
-  }
-
-  /// Update to match the state of the instruction between ThisAddr and
-  /// NextAddr. In the common case, any live range active at ThisAddr is
-  /// live-in to the instruction, and any live range active at NextAddr is
-  /// live-out of the instruction. If IncludeDefinedVars is false, then live
-  /// ranges starting at NextAddr will be ignored.
-  void update(object::SectionedAddress ThisAddr,
-              object::SectionedAddress NextAddr, bool IncludeDefinedVars) {
-    // First, check variables which have already been assigned a column, so
-    // that we don't change their order.
-    SmallSet<unsigned, 8> CheckedVarIdxs;
-    for (unsigned ColIdx = 0, End = ActiveCols.size(); ColIdx < End; ++ColIdx) {
-      if (!ActiveCols[ColIdx].isActive())
-        continue;
-      CheckedVarIdxs.insert(ActiveCols[ColIdx].VarIdx);
-      LiveVariable &LV = LiveVariables[ActiveCols[ColIdx].VarIdx];
-      ActiveCols[ColIdx].LiveIn = LV.liveAtAddress(ThisAddr);
-      ActiveCols[ColIdx].LiveOut = LV.liveAtAddress(NextAddr);
-      LLVM_DEBUG(dbgs() << "pass 1, " << ThisAddr.Address << "-"
-                        << NextAddr.Address << ", " << LV.VarName << ", Col "
-                        << ColIdx << ": LiveIn=" << ActiveCols[ColIdx].LiveIn
-                        << ", LiveOut=" << ActiveCols[ColIdx].LiveOut << "\n");
-
-      if (!ActiveCols[ColIdx].LiveIn && !ActiveCols[ColIdx].LiveOut)
-        ActiveCols[ColIdx].VarIdx = Column::NullVarIdx;
-    }
-
-    // Next, look for variables which don't already have a column, but which
-    // are now live.
-    if (IncludeDefinedVars) {
-      for (unsigned VarIdx = 0, End = LiveVariables.size(); VarIdx < End;
-           ++VarIdx) {
-        if (CheckedVarIdxs.count(VarIdx))
-          continue;
-        LiveVariable &LV = LiveVariables[VarIdx];
-        bool LiveIn = LV.liveAtAddress(ThisAddr);
-        bool LiveOut = LV.liveAtAddress(NextAddr);
-        if (!LiveIn && !LiveOut)
-          continue;
-
-        unsigned ColIdx = findFreeColumn();
-        LLVM_DEBUG(dbgs() << "pass 2, " << ThisAddr.Address << "-"
-                          << NextAddr.Address << ", " << LV.VarName << ", Col "
-                          << ColIdx << ": LiveIn=" << LiveIn
-                          << ", LiveOut=" << LiveOut << "\n");
-        ActiveCols[ColIdx].VarIdx = VarIdx;
-        ActiveCols[ColIdx].LiveIn = LiveIn;
-        ActiveCols[ColIdx].LiveOut = LiveOut;
-        ActiveCols[ColIdx].MustDrawLabel = true;
-      }
-    }
-  }
-
-  enum class LineChar {
-    RangeStart,
-    RangeMid,
-    RangeEnd,
-    LabelVert,
-    LabelCornerNew,
-    LabelCornerActive,
-    LabelHoriz,
-  };
-  const char *getLineChar(LineChar C) const {
-    bool IsASCII = DbgVariables == DVASCII;
-    switch (C) {
-    case LineChar::RangeStart:
-      return IsASCII ? "^" : u8"\u2548";
-    case LineChar::RangeMid:
-      return IsASCII ? "|" : u8"\u2503";
-    case LineChar::RangeEnd:
-      return IsASCII ? "v" : u8"\u253b";
-    case LineChar::LabelVert:
-      return IsASCII ? "|" : u8"\u2502";
-    case LineChar::LabelCornerNew:
-      return IsASCII ? "/" : u8"\u250c";
-    case LineChar::LabelCornerActive:
-      return IsASCII ? "|" : u8"\u2520";
-    case LineChar::LabelHoriz:
-      return IsASCII ? "-" : u8"\u2500";
-    }
-    llvm_unreachable("Unhandled LineChar enum");
-  }
-
-  /// Print live ranges to the right of an existing line. This assumes the
-  /// line is not an instruction, so doesn't start or end any live ranges, so
-  /// we only need to print active ranges or empty columns. If AfterInst is
-  /// true, this is being printed after the last instruction fed to update(),
-  /// otherwise this is being printed before it.
-  void printAfterOtherLine(formatted_raw_ostream &OS, bool AfterInst) { // bu da lazim
-    if (ActiveCols.size()) {
-      unsigned FirstUnprintedColumn = moveToFirstVarColumn(OS);
-      for (size_t ColIdx = FirstUnprintedColumn, End = ActiveCols.size();
-           ColIdx < End; ++ColIdx) {
-        if (ActiveCols[ColIdx].isActive()) {
-          if ((AfterInst && ActiveCols[ColIdx].LiveOut) ||
-              (!AfterInst && ActiveCols[ColIdx].LiveIn))
-            OS << getLineChar(LineChar::RangeMid);
-          else if (!AfterInst && ActiveCols[ColIdx].LiveOut)
-            OS << getLineChar(LineChar::LabelVert);
-          else
-            OS << " ";
-        }
-        OS << " ";
-      }
-    }
-  }
-
-  /// Print any live variable range info needed to the right of a
-  /// non-instruction line of disassembly. This is where we print the variable
-  /// names and expressions, with thin line-drawing characters connecting them
-  /// to the live range which starts at the next instruction. If MustPrint is
-  /// true, we have to print at least one line (with the continuation of any
-  /// already-active live ranges) because something has already been printed
-  /// earlier on this line.
-  void printBetweenInsts(formatted_raw_ostream &OS, bool MustPrint) {
-    bool PrintedSomething = false;
-    for (unsigned ColIdx = 0, End = ActiveCols.size(); ColIdx < End; ++ColIdx) {
-      if (ActiveCols[ColIdx].isActive() && ActiveCols[ColIdx].MustDrawLabel) {
-        // First we need to print the live range markers for any active
-        // columns to the left of this one.
-        OS.PadToColumn(getIndentLevel());
-        for (unsigned ColIdx2 = 0; ColIdx2 < ColIdx; ++ColIdx2) {
-          if (ActiveCols[ColIdx2].isActive()) {
-            if (ActiveCols[ColIdx2].MustDrawLabel &&
-                           !ActiveCols[ColIdx2].LiveIn)
-              OS << getLineChar(LineChar::LabelVert) << " ";
-            else
-              OS << getLineChar(LineChar::RangeMid) << " ";
-          } else
-            OS << "  ";
-        }
-
-        // Then print the variable name and location of the new live range,
-        // with box drawing characters joining it to the live range line.
-        OS << getLineChar(ActiveCols[ColIdx].LiveIn
-                              ? LineChar::LabelCornerActive
-                              : LineChar::LabelCornerNew)
-           << getLineChar(LineChar::LabelHoriz) << " ";
-        WithColor(OS, raw_ostream::GREEN)
-            << LiveVariables[ActiveCols[ColIdx].VarIdx].VarName;
-        OS << " = ";
-        {
-          WithColor ExprColor(OS, raw_ostream::CYAN);
-          LiveVariables[ActiveCols[ColIdx].VarIdx].print(OS, MRI);
-        }
-
-        // If there are any columns to the right of the expression we just
-        // printed, then continue their live range lines.
-        unsigned FirstUnprintedColumn = moveToFirstVarColumn(OS);
-        for (unsigned ColIdx2 = FirstUnprintedColumn, End = ActiveCols.size();
-             ColIdx2 < End; ++ColIdx2) {
-          if (ActiveCols[ColIdx2].isActive() && ActiveCols[ColIdx2].LiveIn)
-            OS << getLineChar(LineChar::RangeMid) << " ";
-          else
-            OS << "  ";
-        }
-
-        PrintedSomething = true;
-      }
-    }
-
-    for (unsigned ColIdx = 0, End = ActiveCols.size(); ColIdx < End; ++ColIdx)
-      if (ActiveCols[ColIdx].isActive())
-        ActiveCols[ColIdx].MustDrawLabel = false;
-
-    // If we must print something (because we printed a line/column number),
-    // but don't have any new variables to print, then print a line which
-    // just continues any existing live ranges.
-    if (MustPrint && !PrintedSomething)
-      printAfterOtherLine(OS, false);
-  }
-
-  /// Print the live variable ranges to the right of a disassembled instruction.
-  void printAfterInst(formatted_raw_ostream &OS) {
-    if (!ActiveCols.size())
-      return;
-    unsigned FirstUnprintedColumn = moveToFirstVarColumn(OS);
-    for (unsigned ColIdx = FirstUnprintedColumn, End = ActiveCols.size();
-         ColIdx < End; ++ColIdx) {
-      if (!ActiveCols[ColIdx].isActive())
-        OS << "  ";
-      else if (ActiveCols[ColIdx].LiveIn && ActiveCols[ColIdx].LiveOut)
-        OS << getLineChar(LineChar::RangeMid) << " ";
-      else if (ActiveCols[ColIdx].LiveOut)
-        OS << getLineChar(LineChar::RangeStart) << " ";
-      else if (ActiveCols[ColIdx].LiveIn)
-        OS << getLineChar(LineChar::RangeEnd) << " ";
-      else
-        llvm_unreachable("var must be live in or out!");
-    }
-  }
-};
-
-class SourcePrinter {
-protected:
-  DILineInfo OldLineInfo;
-  const ObjectFile *Obj = nullptr;
-  std::unique_ptr<symbolize::LLVMSymbolizer> Symbolizer;
-  // File name to file contents of source.
-  std::unordered_map<std::string, std::unique_ptr<MemoryBuffer>> SourceCache;
-  // Mark the line endings of the cached source.
-  std::unordered_map<std::string, std::vector<StringRef>> LineCache;
-  // Keep track of missing sources.
-  StringSet<> MissingSources;
-  // Only emit 'no debug info' warning once.
-  bool WarnedNoDebugInfo;
-
-private:
-  bool cacheSource(const DILineInfo& LineInfoFile);
-
-  void printLines(formatted_raw_ostream &OS, const DILineInfo &LineInfo,
-                  StringRef Delimiter, LiveVariablePrinter &LVP);
-
-  void printSources(formatted_raw_ostream &OS, const DILineInfo &LineInfo,
-                    StringRef ObjectFilename, StringRef Delimiter,
-                    LiveVariablePrinter &LVP);
-
-public:
-  SourcePrinter() = default;
-  SourcePrinter(const ObjectFile *Obj, StringRef DefaultArch)
-      : Obj(Obj), WarnedNoDebugInfo(false) {
-    symbolize::LLVMSymbolizer::Options SymbolizerOpts;
-    SymbolizerOpts.PrintFunctions =
-        DILineInfoSpecifier::FunctionNameKind::LinkageName;
-    SymbolizerOpts.Demangle = Demangle;
-    SymbolizerOpts.DefaultArch = std::string(DefaultArch);
-    Symbolizer.reset(new symbolize::LLVMSymbolizer(SymbolizerOpts));
-  }
-  virtual ~SourcePrinter() = default;
-  virtual void printSourceLine(formatted_raw_ostream &OS,
-                               object::SectionedAddress Address,
-                               StringRef ObjectFilename,
-                               LiveVariablePrinter &LVP,
-                               StringRef Delimiter = "; ");
-};
-
-bool SourcePrinter::cacheSource(const DILineInfo &LineInfo) {
-  std::unique_ptr<MemoryBuffer> Buffer;
-  if (LineInfo.Source) {
-    Buffer = MemoryBuffer::getMemBuffer(*LineInfo.Source);
-  } else {
-    auto BufferOrError = MemoryBuffer::getFile(LineInfo.FileName);
-    if (!BufferOrError) {
-      if (MissingSources.insert(LineInfo.FileName).second)
-        reportWarning("failed to find source " + LineInfo.FileName,
-                      Obj->getFileName());
-      return false;
-    }
-    Buffer = std::move(*BufferOrError);
-  }
-  // Chomp the file to get lines
-  const char *BufferStart = Buffer->getBufferStart(),
-             *BufferEnd = Buffer->getBufferEnd();
-  std::vector<StringRef> &Lines = LineCache[LineInfo.FileName];
-  const char *Start = BufferStart;
-  for (const char *I = BufferStart; I != BufferEnd; ++I)
-    if (*I == '\n') {
-      Lines.emplace_back(Start, I - Start - (BufferStart < I && I[-1] == '\r'));
-      Start = I + 1;
-    }
-  if (Start < BufferEnd)
-    Lines.emplace_back(Start, BufferEnd - Start);
-  SourceCache[LineInfo.FileName] = std::move(Buffer);
-  return true;
-}
-
-void SourcePrinter::printSourceLine(formatted_raw_ostream &OS,
-                                    object::SectionedAddress Address,
-                                    StringRef ObjectFilename,
-                                    LiveVariablePrinter &LVP,
-                                    StringRef Delimiter) {
-  if (!Symbolizer)
-    return;
-
-  DILineInfo LineInfo = DILineInfo();
-  auto ExpectedLineInfo = Symbolizer->symbolizeCode(*Obj, Address);
-  std::string ErrorMessage;
-  if (!ExpectedLineInfo)
-    ErrorMessage = toString(ExpectedLineInfo.takeError());
-  else
-    LineInfo = *ExpectedLineInfo;
-
-  if (LineInfo.FileName == DILineInfo::BadString) {
-    if (!WarnedNoDebugInfo) {
-      std::string Warning =
-          "failed to parse debug information for " + ObjectFilename.str();
-      if (!ErrorMessage.empty())
-        Warning += ": " + ErrorMessage;
-      reportWarning(Warning, ObjectFilename);
-      WarnedNoDebugInfo = true;
-    }
-  }
-
-  if (PrintLines)
-    printLines(OS, LineInfo, Delimiter, LVP);
-  if (PrintSource)
-    printSources(OS, LineInfo, ObjectFilename, Delimiter, LVP);
-  OldLineInfo = LineInfo;
-}
-
-void SourcePrinter::printLines(formatted_raw_ostream &OS,
-                               const DILineInfo &LineInfo, StringRef Delimiter,
-                               LiveVariablePrinter &LVP) {
-  bool PrintFunctionName = LineInfo.FunctionName != DILineInfo::BadString &&
-                           LineInfo.FunctionName != OldLineInfo.FunctionName;
-  if (PrintFunctionName) {
-    OS << Delimiter << LineInfo.FunctionName;
-    // If demangling is successful, FunctionName will end with "()". Print it
-    // only if demangling did not run or was unsuccessful.
-    if (!StringRef(LineInfo.FunctionName).endswith("()"))
-      OS << "()";
-    OS << ":\n";
-  }
-  if (LineInfo.FileName != DILineInfo::BadString && LineInfo.Line != 0 &&
-      (OldLineInfo.Line != LineInfo.Line ||
-       OldLineInfo.FileName != LineInfo.FileName || PrintFunctionName)) {
-    OS << Delimiter << LineInfo.FileName << ":" << LineInfo.Line;
-    LVP.printBetweenInsts(OS, true);
-  }
-}
-
-void SourcePrinter::printSources(formatted_raw_ostream &OS,
-                                 const DILineInfo &LineInfo,
-                                 StringRef ObjectFilename, StringRef Delimiter,
-                                 LiveVariablePrinter &LVP) {
-  if (LineInfo.FileName == DILineInfo::BadString || LineInfo.Line == 0 ||
-      (OldLineInfo.Line == LineInfo.Line &&
-       OldLineInfo.FileName == LineInfo.FileName))
-    return;
-
-  if (SourceCache.find(LineInfo.FileName) == SourceCache.end())
-    if (!cacheSource(LineInfo))
-      return;
-  auto LineBuffer = LineCache.find(LineInfo.FileName);
-  if (LineBuffer != LineCache.end()) {
-    if (LineInfo.Line > LineBuffer->second.size()) {
-      reportWarning(
-          formatv(
-              "debug info line number {0} exceeds the number of lines in {1}",
-              LineInfo.Line, LineInfo.FileName),
-          ObjectFilename);
-      return;
-    }
-    // Vector begins at 0, line numbers are non-zero
-    OS << Delimiter << LineBuffer->second[LineInfo.Line - 1];
-    LVP.printBetweenInsts(OS, true);
-  }
-}
-
-static bool isAArch64Elf(const ObjectFile *Obj) {
-  const auto *Elf = dyn_cast<ELFObjectFileBase>(Obj);
-  return Elf && Elf->getEMachine() == ELF::EM_AARCH64;
-}
-
-static bool isArmElf(const ObjectFile *Obj) {
-  const auto *Elf = dyn_cast<ELFObjectFileBase>(Obj);
-  return Elf && Elf->getEMachine() == ELF::EM_ARM;
-}
-
-static bool hasMappingSymbols(const ObjectFile *Obj) {
-  return isArmElf(Obj) || isAArch64Elf(Obj);
-}
-
-static void printRelocation(formatted_raw_ostream &OS, StringRef FileName,
-                            const RelocationRef &Rel, uint64_t Address,
-                            bool Is64Bits) {
-  StringRef Fmt = Is64Bits ? "\t\t%016" PRIx64 ":  " : "\t\t\t%08" PRIx64 ":  ";
-  SmallString<16> Name;
-  SmallString<32> Val;
-  Rel.getTypeName(Name);
-  if (Error E = getRelocationValueString(Rel, Val))
-    reportError(std::move(E), FileName);
-  OS << format(Fmt.data(), Address) << Name << "\t" << Val;
-}
-
-
-template <typename C>
-struct reverse_wrapper {
-
-    C & c_;
-    reverse_wrapper(C & c) :  c_(c) {}
-
-    typename C::reverse_iterator begin() {return c_.rbegin();}
-    typename C::reverse_iterator end() {return c_.rend(); }
-};
-
-template <typename C, size_t N>
-struct reverse_wrapper< C[N] >{
-
-    C (&c_)[N];
-    reverse_wrapper( C(&c)[N] ) : c_(c) {}
-
-    typename std::reverse_iterator<const C *> begin() { return std::rbegin(c_); }
-    typename std::reverse_iterator<const C *> end() { return std::rend(c_); }
-};
-
-
-template <typename C>
-reverse_wrapper<C> r_wrap(C & c) {
-    return reverse_wrapper<C>(c);
-}
-
-using namespace std;
-
-fstream OSS;
-
-const char* hex_char_to_bin(char c)
-{
-    switch(tolower(c))
-    {
-        case '0': return "0000";
-        case '1': return "0001";
-        case '2': return "0010";
-        case '3': return "0011";
-        case '4': return "0100";
-        case '5': return "0101";
-        case '6': return "0110";
-        case '7': return "0111";
-        case '8': return "1000";
-        case '9': return "1001";
-        case 'a': return "1010";
-        case 'b': return "1011";
-        case 'c': return "1100";
-        case 'd': return "1101";
-        case 'e': return "1110";
-        case 'f': return "1111";
-    }
-}
-
-std::string strBitArrXor(std::string a, std::string b, int j){
-
-string c = "";
-
-for ( int i = 0; i < 8*j; ++i )
-{
-    c += ((a[i] - '0') ^ (b[i] - '0')) + '0';
-}
-return c;
-}
-
-int counter = 0;
-int num = 0;
-
-namespace portedDump {
- void dumpBytes(ArrayRef<uint8_t> bytes, raw_ostream &OS, std::string encryptInstParKey,
-                bool encryptInstrv32i,
-                bool encryptInstrv32m,
-                bool encryptInstrv32a,
-                bool encryptInstrv32f,
-                bool encryptInstrv32d,
-                bool encryptInstrv32q,
-
-                bool encryptInstrv64i,
-                bool encryptInstrv64m,
-                bool encryptInstrv64a,
-                bool encryptInstrv64f,
-                bool encryptInstrv64d,
-                bool encryptInstrv64q,
-
-                bool encryptInstrvcq0,
-                bool encryptInstrvcq1,
-                bool encryptInstrvcq2
- ) {
-
-  OSS.clear();
-  int j = 0;
-  char hexArr[(bytes.size()) / 8];
-  static const char hex_rep[] = "0123456789abcdef";
-
-  for (char i: r_wrap(bytes)){
-     hexArr[2*j] = hex_rep[(i & 0xF0) >> 4];
-     hexArr[2*j + 1] = hex_rep[i & 0xF];
-     j++;
-  }
-
-  std::string binArr = "";
-  for(int i=0;i<strlen(hexArr);i++)
-    binArr += hex_char_to_bin(hexArr[i]);
-
-  counter++;
-
-  // Here we can add desired encryption method
-
-  if(instnum != ""){
-      if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"  && (counter <= num)){
-        std::stringstream enckeyallaligned;
-        enckeyallaligned << setfill('0') << setw(32) << enckeyall; // setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
-  
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
-      }
-  
-      else if(encryptInstParKey != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2);
-      }
-  
-      else if(encryptInstrv32i){
-        if(ienc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32m){
-        if(menc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32a){
-        if(aenc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32f){
-        if(fenc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32d){
-        if(denc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32q){
-        if(qenc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-  
-      else if(encryptInstrv64i){
-        if(ienc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64m){
-        if(menc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64a){
-        if(aenc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64f){
-        if(fenc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64d){
-        if(denc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64q){
-        if(qenc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-  
-      else if(encryptInstrvcq0){
-        if(cencq0key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrvcq1){
-        if(cencq1key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrvcq2){
-        if(cencq2key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      
-      
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-  }
-  else {
-     if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"){
-        std::stringstream enckeyallaligned;
-        enckeyallaligned << setfill('0') << setw(32) << enckeyall; // setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
-  
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
-      }
-  
-      else if(encryptInstParKey != ""){
-        OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(encryptInstParKey), j),NULL,  2);
-      }
-  
-      else if(encryptInstrv32i){
-        if(ienc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32m){
-        if(menc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32a){
-        if(aenc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32f){
-        if(fenc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32d){
-        if(denc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv32q){
-        if(qenc32key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc32key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-  
-      else if(encryptInstrv64i){
-        if(ienc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(ienc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64m){
-        if(menc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(menc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64a){
-        if(aenc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(aenc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64f){
-        if(fenc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(fenc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64d){
-        if(denc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(denc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrv64q){
-        if(qenc64key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(qenc64key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-  
-      else if(encryptInstrvcq0){
-        if(cencq0key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq0key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrvcq1){
-        if(cencq1key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq1key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      else if(encryptInstrvcq2){
-        if(cencq2key != ""){
-          OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(cencq2key), j),NULL,  2);
-        }
-        else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-      }
-      
-      
-      else OSS << std::hex << setfill('0') << setw(2*j) << std::stoll(binArr,NULL,  2); // do not encrypt, just print to hex file
-  
-  }
- } // end of dumpBytes function
-} // end of namespace portedDump
 
 class PrettyPrinter {
 public:
@@ -3622,487 +2878,479 @@ public:
   virtual void
   printInst(MCInstPrinter &IP, const MCInst *MI, ArrayRef<uint8_t> Bytes,
             object::SectionedAddress Address, formatted_raw_ostream &OS,
-            StringRef Annot, MCSubtargetInfo const &STI, SourcePrinter *SP,
-            StringRef ObjectFilename, std::vector<RelocationRef> *Rels,
-            LiveVariablePrinter &LVP) {
-    
-    if (SP && (PrintSource || PrintLines))
-      SP->printSourceLine(OS, Address, ObjectFilename, LVP);
-    LVP.printBetweenInsts(OS, false);
+            StringRef Annot, MCSubtargetInfo const &STI,
+            StringRef ObjectFilename) {
 
-    size_t Start = OS.tell();
+    //dumpBytes(Bytes, OS);
 
-NoShowRawInsn = false;
-    if (!NoShowRawInsn) {
-      bool encryptInstrv32i = false;
-      bool encryptInstrv32m = false;
-      bool encryptInstrv32a = false;
-      bool encryptInstrv32f = false;
-      bool encryptInstrv32d = false;
-      bool encryptInstrv32q = false;
+    bool encryptInstrv32i = false;
+    bool encryptInstrv32m = false;
+    bool encryptInstrv32a = false;
+    bool encryptInstrv32f = false;
+    bool encryptInstrv32d = false;
+    bool encryptInstrv32q = false;
 
-      bool encryptInstrv64i = false;
-      bool encryptInstrv64m = false;
-      bool encryptInstrv64a = false;
-      bool encryptInstrv64f = false;
-      bool encryptInstrv64d = false;
-      bool encryptInstrv64q = false;
+    bool encryptInstrv64i = false;
+    bool encryptInstrv64m = false;
+    bool encryptInstrv64a = false;
+    bool encryptInstrv64f = false;
+    bool encryptInstrv64d = false;
+    bool encryptInstrv64q = false;
 
-      bool encryptInstrvcq0 = false;
-      bool encryptInstrvcq1 = false;
-      bool encryptInstrvcq2 = false;
+    bool encryptInstrvcq0 = false;
+    bool encryptInstrvcq1 = false;
+    bool encryptInstrvcq2 = false;
 
-      std::string encryptInstParKey = "";
+    std::string encryptInstParKey = "";
 
-if     ( lui        && ( MI->getOpcode() == RISCV::LUI        ) ) encryptInstrv32i = true;         
-else if( auipc      && ( MI->getOpcode() == RISCV::AUIPC      ) ) encryptInstrv32i = true; 
-else if( jal        && ( MI->getOpcode() == RISCV::JAL        ) ) encryptInstrv32i = true;
-else if( jalr       && ( MI->getOpcode() == RISCV::JALR       ) ) encryptInstrv32i = true;
-else if( beq        && ( MI->getOpcode() == RISCV::BEQ        ) ) encryptInstrv32i = true;
-else if( bne        && ( MI->getOpcode() == RISCV::BNE        ) ) encryptInstrv32i = true;
-else if( blt        && ( MI->getOpcode() == RISCV::BLT        ) ) encryptInstrv32i = true;
-else if( bge        && ( MI->getOpcode() == RISCV::BGE        ) ) encryptInstrv32i = true;
-else if( bltu       && ( MI->getOpcode() == RISCV::BLTU       ) ) encryptInstrv32i = true;
-else if( bgeu       && ( MI->getOpcode() == RISCV::BGEU       ) ) encryptInstrv32i = true;
-else if( lb         && ( MI->getOpcode() == RISCV::LB         ) ) encryptInstrv32i = true;
-else if( lh         && ( MI->getOpcode() == RISCV::LH         ) ) encryptInstrv32i = true;
-else if( lw         && ( MI->getOpcode() == RISCV::LW         ) ) encryptInstrv32i = true;
-else if( lbu        && ( MI->getOpcode() == RISCV::LBU        ) ) encryptInstrv32i = true;
-else if( lhu        && ( MI->getOpcode() == RISCV::LHU        ) ) encryptInstrv32i = true;
-else if( sb         && ( MI->getOpcode() == RISCV::SB         ) ) encryptInstrv32i = true;
-else if( sh         && ( MI->getOpcode() == RISCV::SH         ) ) encryptInstrv32i = true;
-else if( sw         && ( MI->getOpcode() == RISCV::SW         ) ) encryptInstrv32i = true;
-else if( addi       && ( MI->getOpcode() == RISCV::ADDI       ) ) encryptInstrv32i = true;
-else if( slti       && ( MI->getOpcode() == RISCV::SLTI       ) ) encryptInstrv32i = true;
-else if( sltiu      && ( MI->getOpcode() == RISCV::SLTIU      ) ) encryptInstrv32i = true; 
-else if( xori       && ( MI->getOpcode() == RISCV::XORI       ) ) encryptInstrv32i = true;
-else if( ori        && ( MI->getOpcode() == RISCV::ORI        ) ) encryptInstrv32i = true;
-else if( andi       && ( MI->getOpcode() == RISCV::ANDI       ) ) encryptInstrv32i = true;
-else if( slli       && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstrv32i = true;
-else if( srli       && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstrv32i = true;
-else if( srai       && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstrv32i = true;
-else if( add        && ( MI->getOpcode() == RISCV::ADD        ) ) encryptInstrv32i = true;
-else if( sub        && ( MI->getOpcode() == RISCV::SUB        ) ) encryptInstrv32i = true;
-else if( sll        && ( MI->getOpcode() == RISCV::SLL        ) ) encryptInstrv32i = true;
-else if( slt        && ( MI->getOpcode() == RISCV::SLT        ) ) encryptInstrv32i = true;
-else if( sltu       && ( MI->getOpcode() == RISCV::SLTU       ) ) encryptInstrv32i = true;
-else if( xor_       && ( MI->getOpcode() == RISCV::XOR        ) ) encryptInstrv32i = true;
-else if( srl        && ( MI->getOpcode() == RISCV::SRL        ) ) encryptInstrv32i = true;
-else if( sra        && ( MI->getOpcode() == RISCV::SRA        ) ) encryptInstrv32i = true;
-else if( or_        && ( MI->getOpcode() == RISCV::OR         ) ) encryptInstrv32i = true;
-else if( and_       && ( MI->getOpcode() == RISCV::AND        ) ) encryptInstrv32i = true;
-else if( fence      && ( MI->getOpcode() == RISCV::FENCE      ) ) encryptInstrv32i = true; 
-else if( fence_i    && ( MI->getOpcode() == RISCV::FENCE_I    ) ) encryptInstrv32i = true;     
-else if( ecall      && ( MI->getOpcode() == RISCV::ECALL      ) ) encryptInstrv32i = true; 
-else if( ebreak     && ( MI->getOpcode() == RISCV::EBREAK     ) ) encryptInstrv32i = true;   
-else if( csrrw      && ( MI->getOpcode() == RISCV::CSRRW      ) ) encryptInstrv32i = true; 
-else if( csrrs      && ( MI->getOpcode() == RISCV::CSRRS      ) ) encryptInstrv32i = true; 
-else if( csrrc      && ( MI->getOpcode() == RISCV::CSRRC      ) ) encryptInstrv32i = true; 
-else if( csrrwi     && ( MI->getOpcode() == RISCV::CSRRWI     ) ) encryptInstrv32i = true;   
-else if( csrrsi     && ( MI->getOpcode() == RISCV::CSRRSI     ) ) encryptInstrv32i = true;   
-else if( csrrci     && ( MI->getOpcode() == RISCV::CSRRCI     ) ) encryptInstrv32i = true;   
+    if     ( lui        && ( MI->getOpcode() == RISCV::LUI        ) ) encryptInstrv32i = true;         
+    else if( auipc      && ( MI->getOpcode() == RISCV::AUIPC      ) ) encryptInstrv32i = true; 
+    else if( jal        && ( MI->getOpcode() == RISCV::JAL        ) ) encryptInstrv32i = true;
+    else if( jalr       && ( MI->getOpcode() == RISCV::JALR       ) ) encryptInstrv32i = true;
+    else if( beq        && ( MI->getOpcode() == RISCV::BEQ        ) ) encryptInstrv32i = true;
+    else if( bne        && ( MI->getOpcode() == RISCV::BNE        ) ) encryptInstrv32i = true;
+    else if( blt        && ( MI->getOpcode() == RISCV::BLT        ) ) encryptInstrv32i = true;
+    else if( bge        && ( MI->getOpcode() == RISCV::BGE        ) ) encryptInstrv32i = true;
+    else if( bltu       && ( MI->getOpcode() == RISCV::BLTU       ) ) encryptInstrv32i = true;
+    else if( bgeu       && ( MI->getOpcode() == RISCV::BGEU       ) ) encryptInstrv32i = true;
+    else if( lb         && ( MI->getOpcode() == RISCV::LB         ) ) encryptInstrv32i = true;
+    else if( lh         && ( MI->getOpcode() == RISCV::LH         ) ) encryptInstrv32i = true;
+    else if( lw         && ( MI->getOpcode() == RISCV::LW         ) ) encryptInstrv32i = true;
+    else if( lbu        && ( MI->getOpcode() == RISCV::LBU        ) ) encryptInstrv32i = true;
+    else if( lhu        && ( MI->getOpcode() == RISCV::LHU        ) ) encryptInstrv32i = true;
+    else if( sb         && ( MI->getOpcode() == RISCV::SB         ) ) encryptInstrv32i = true;
+    else if( sh         && ( MI->getOpcode() == RISCV::SH         ) ) encryptInstrv32i = true;
+    else if( sw         && ( MI->getOpcode() == RISCV::SW         ) ) encryptInstrv32i = true;
+    else if( addi       && ( MI->getOpcode() == RISCV::ADDI       ) ) encryptInstrv32i = true;
+    else if( slti       && ( MI->getOpcode() == RISCV::SLTI       ) ) encryptInstrv32i = true;
+    else if( sltiu      && ( MI->getOpcode() == RISCV::SLTIU      ) ) encryptInstrv32i = true; 
+    else if( xori       && ( MI->getOpcode() == RISCV::XORI       ) ) encryptInstrv32i = true;
+    else if( ori        && ( MI->getOpcode() == RISCV::ORI        ) ) encryptInstrv32i = true;
+    else if( andi       && ( MI->getOpcode() == RISCV::ANDI       ) ) encryptInstrv32i = true;
+    else if( slli       && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstrv32i = true;
+    else if( srli       && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstrv32i = true;
+    else if( srai       && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstrv32i = true;
+    else if( add        && ( MI->getOpcode() == RISCV::ADD        ) ) encryptInstrv32i = true;
+    else if( sub        && ( MI->getOpcode() == RISCV::SUB        ) ) encryptInstrv32i = true;
+    else if( sll        && ( MI->getOpcode() == RISCV::SLL        ) ) encryptInstrv32i = true;
+    else if( slt        && ( MI->getOpcode() == RISCV::SLT        ) ) encryptInstrv32i = true;
+    else if( sltu       && ( MI->getOpcode() == RISCV::SLTU       ) ) encryptInstrv32i = true;
+    else if( xor_       && ( MI->getOpcode() == RISCV::XOR        ) ) encryptInstrv32i = true;
+    else if( srl        && ( MI->getOpcode() == RISCV::SRL        ) ) encryptInstrv32i = true;
+    else if( sra        && ( MI->getOpcode() == RISCV::SRA        ) ) encryptInstrv32i = true;
+    else if( or_        && ( MI->getOpcode() == RISCV::OR         ) ) encryptInstrv32i = true;
+    else if( and_       && ( MI->getOpcode() == RISCV::AND        ) ) encryptInstrv32i = true;
+    else if( fence      && ( MI->getOpcode() == RISCV::FENCE      ) ) encryptInstrv32i = true; 
+    else if( fence_i    && ( MI->getOpcode() == RISCV::FENCE_I    ) ) encryptInstrv32i = true;     
+    else if( ecall      && ( MI->getOpcode() == RISCV::ECALL      ) ) encryptInstrv32i = true; 
+    else if( ebreak     && ( MI->getOpcode() == RISCV::EBREAK     ) ) encryptInstrv32i = true;   
+    else if( csrrw      && ( MI->getOpcode() == RISCV::CSRRW      ) ) encryptInstrv32i = true; 
+    else if( csrrs      && ( MI->getOpcode() == RISCV::CSRRS      ) ) encryptInstrv32i = true; 
+    else if( csrrc      && ( MI->getOpcode() == RISCV::CSRRC      ) ) encryptInstrv32i = true; 
+    else if( csrrwi     && ( MI->getOpcode() == RISCV::CSRRWI     ) ) encryptInstrv32i = true;   
+    else if( csrrsi     && ( MI->getOpcode() == RISCV::CSRRSI     ) ) encryptInstrv32i = true;   
+    else if( csrrci     && ( MI->getOpcode() == RISCV::CSRRCI     ) ) encryptInstrv32i = true;   
 
-else if( lwu        && ( MI->getOpcode() == RISCV::LWU        ) ) encryptInstrv64i = true;
-else if( ld         && ( MI->getOpcode() == RISCV::LD         ) ) encryptInstrv64i = true;
-else if( sd         && ( MI->getOpcode() == RISCV::SD         ) ) encryptInstrv64i = true;
-//else if( slli       && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstrv64i = true; 
-//else if( srli       && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstrv64i = true; 
-//else if( srai       && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstrv64i = true; 
-else if( addiw      && ( MI->getOpcode() == RISCV::ADDIW      ) ) encryptInstrv64i = true;   
-else if( slliw      && ( MI->getOpcode() == RISCV::SLLIW      ) ) encryptInstrv64i = true;   
-else if( srliw      && ( MI->getOpcode() == RISCV::SRLIW      ) ) encryptInstrv64i = true;   
-else if( sraiw      && ( MI->getOpcode() == RISCV::SRAIW      ) ) encryptInstrv64i = true;   
-else if( addw       && ( MI->getOpcode() == RISCV::ADDW       ) ) encryptInstrv64i = true;   
-else if( subw       && ( MI->getOpcode() == RISCV::SUBW       ) ) encryptInstrv64i = true;   
-else if( sllw       && ( MI->getOpcode() == RISCV::SLLW       ) ) encryptInstrv64i = true;   
-else if( srlw       && ( MI->getOpcode() == RISCV::SRLW       ) ) encryptInstrv64i = true;   
-else if( sraw       && ( MI->getOpcode() == RISCV::SRAW       ) ) encryptInstrv64i = true;
+    else if( lwu        && ( MI->getOpcode() == RISCV::LWU        ) ) encryptInstrv64i = true;
+    else if( ld         && ( MI->getOpcode() == RISCV::LD         ) ) encryptInstrv64i = true;
+    else if( sd         && ( MI->getOpcode() == RISCV::SD         ) ) encryptInstrv64i = true;
+    //else if( slli       && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstrv64i = true; 
+    //else if( srli       && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstrv64i = true; 
+    //else if( srai       && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstrv64i = true; 
+    else if( addiw      && ( MI->getOpcode() == RISCV::ADDIW      ) ) encryptInstrv64i = true;   
+    else if( slliw      && ( MI->getOpcode() == RISCV::SLLIW      ) ) encryptInstrv64i = true;   
+    else if( srliw      && ( MI->getOpcode() == RISCV::SRLIW      ) ) encryptInstrv64i = true;   
+    else if( sraiw      && ( MI->getOpcode() == RISCV::SRAIW      ) ) encryptInstrv64i = true;   
+    else if( addw       && ( MI->getOpcode() == RISCV::ADDW       ) ) encryptInstrv64i = true;   
+    else if( subw       && ( MI->getOpcode() == RISCV::SUBW       ) ) encryptInstrv64i = true;   
+    else if( sllw       && ( MI->getOpcode() == RISCV::SLLW       ) ) encryptInstrv64i = true;   
+    else if( srlw       && ( MI->getOpcode() == RISCV::SRLW       ) ) encryptInstrv64i = true;   
+    else if( sraw       && ( MI->getOpcode() == RISCV::SRAW       ) ) encryptInstrv64i = true;
 
-else if( mul        && ( MI->getOpcode() == RISCV::MUL        ) ) encryptInstrv32m = true;   
-else if( mulh       && ( MI->getOpcode() == RISCV::MULH       ) ) encryptInstrv32m = true;     
-else if( mulhsu     && ( MI->getOpcode() == RISCV::MULHSU     ) ) encryptInstrv32m = true;         
-else if( mulhu      && ( MI->getOpcode() == RISCV::MULHU      ) ) encryptInstrv32m = true;       
-else if( div_       && ( MI->getOpcode() == RISCV::DIV        ) ) encryptInstrv32m = true;   
-else if( divu       && ( MI->getOpcode() == RISCV::DIVU       ) ) encryptInstrv32m = true;     
-else if( rem        && ( MI->getOpcode() == RISCV::REM        ) ) encryptInstrv32m = true;   
-else if( remu       && ( MI->getOpcode() == RISCV::REMU       ) ) encryptInstrv32m = true;
+    else if( mul        && ( MI->getOpcode() == RISCV::MUL        ) ) encryptInstrv32m = true;   
+    else if( mulh       && ( MI->getOpcode() == RISCV::MULH       ) ) encryptInstrv32m = true;     
+    else if( mulhsu     && ( MI->getOpcode() == RISCV::MULHSU     ) ) encryptInstrv32m = true;         
+    else if( mulhu      && ( MI->getOpcode() == RISCV::MULHU      ) ) encryptInstrv32m = true;       
+    else if( div_       && ( MI->getOpcode() == RISCV::DIV        ) ) encryptInstrv32m = true;   
+    else if( divu       && ( MI->getOpcode() == RISCV::DIVU       ) ) encryptInstrv32m = true;     
+    else if( rem        && ( MI->getOpcode() == RISCV::REM        ) ) encryptInstrv32m = true;   
+    else if( remu       && ( MI->getOpcode() == RISCV::REMU       ) ) encryptInstrv32m = true;
 
-else if( mulw       && ( MI->getOpcode() == RISCV::MULW       ) ) encryptInstrv64m = true;   
-else if( divw       && ( MI->getOpcode() == RISCV::DIVW       ) ) encryptInstrv64m = true;   
-else if( divuw      && ( MI->getOpcode() == RISCV::DIVUW      ) ) encryptInstrv64m = true;     
-else if( remw       && ( MI->getOpcode() == RISCV::REMW       ) ) encryptInstrv64m = true;   
-else if( remuw      && ( MI->getOpcode() == RISCV::REMUW      ) ) encryptInstrv64m = true; 
+    else if( mulw       && ( MI->getOpcode() == RISCV::MULW       ) ) encryptInstrv64m = true;   
+    else if( divw       && ( MI->getOpcode() == RISCV::DIVW       ) ) encryptInstrv64m = true;   
+    else if( divuw      && ( MI->getOpcode() == RISCV::DIVUW      ) ) encryptInstrv64m = true;     
+    else if( remw       && ( MI->getOpcode() == RISCV::REMW       ) ) encryptInstrv64m = true;   
+    else if( remuw      && ( MI->getOpcode() == RISCV::REMUW      ) ) encryptInstrv64m = true; 
 
-else if( lr_w       && ( MI->getOpcode() == RISCV::LR_W       ) ) encryptInstrv32a = true;
-else if( sc_w       && ( MI->getOpcode() == RISCV::SC_W       ) ) encryptInstrv32a = true;
-else if( amoswap_w  && ( MI->getOpcode() == RISCV::AMOSWAP_W  ) ) encryptInstrv32a = true;               
-else if( amoadd_w   && ( MI->getOpcode() == RISCV::AMOADD_W   ) ) encryptInstrv32a = true;             
-else if( amoxor_w   && ( MI->getOpcode() == RISCV::AMOXOR_W   ) ) encryptInstrv32a = true;             
-else if( amoand_w   && ( MI->getOpcode() == RISCV::AMOAND_W   ) ) encryptInstrv32a = true;             
-else if( amoor_w    && ( MI->getOpcode() == RISCV::AMOOR_W    ) ) encryptInstrv32a = true;           
-else if( amomin_w   && ( MI->getOpcode() == RISCV::AMOMIN_W   ) ) encryptInstrv32a = true;             
-else if( amomax_w   && ( MI->getOpcode() == RISCV::AMOMAX_W   ) ) encryptInstrv32a = true;             
-else if( amominu_w  && ( MI->getOpcode() == RISCV::AMOMINU_W  ) ) encryptInstrv32a = true;               
-else if( amomaxu_w  && ( MI->getOpcode() == RISCV::AMOMAXU_W  ) ) encryptInstrv32a = true;         
+    else if( lr_w       && ( MI->getOpcode() == RISCV::LR_W       ) ) encryptInstrv32a = true;
+    else if( sc_w       && ( MI->getOpcode() == RISCV::SC_W       ) ) encryptInstrv32a = true;
+    else if( amoswap_w  && ( MI->getOpcode() == RISCV::AMOSWAP_W  ) ) encryptInstrv32a = true;               
+    else if( amoadd_w   && ( MI->getOpcode() == RISCV::AMOADD_W   ) ) encryptInstrv32a = true;             
+    else if( amoxor_w   && ( MI->getOpcode() == RISCV::AMOXOR_W   ) ) encryptInstrv32a = true;             
+    else if( amoand_w   && ( MI->getOpcode() == RISCV::AMOAND_W   ) ) encryptInstrv32a = true;             
+    else if( amoor_w    && ( MI->getOpcode() == RISCV::AMOOR_W    ) ) encryptInstrv32a = true;           
+    else if( amomin_w   && ( MI->getOpcode() == RISCV::AMOMIN_W   ) ) encryptInstrv32a = true;             
+    else if( amomax_w   && ( MI->getOpcode() == RISCV::AMOMAX_W   ) ) encryptInstrv32a = true;             
+    else if( amominu_w  && ( MI->getOpcode() == RISCV::AMOMINU_W  ) ) encryptInstrv32a = true;               
+    else if( amomaxu_w  && ( MI->getOpcode() == RISCV::AMOMAXU_W  ) ) encryptInstrv32a = true;         
 
-else if( lr_d       && ( MI->getOpcode() == RISCV::LR_D       ) ) encryptInstrv64a = true;
-else if( sc_d       && ( MI->getOpcode() == RISCV::SC_D       ) ) encryptInstrv64a = true;
-else if( amoswap_d  && ( MI->getOpcode() == RISCV::AMOSWAP_D  ) ) encryptInstrv64a = true;         
-else if( amoadd_d   && ( MI->getOpcode() == RISCV::AMOADD_D   ) ) encryptInstrv64a = true;         
-else if( amoxor_d   && ( MI->getOpcode() == RISCV::AMOXOR_D   ) ) encryptInstrv64a = true;         
-else if( amoand_d   && ( MI->getOpcode() == RISCV::AMOAND_D   ) ) encryptInstrv64a = true;         
-else if( amoor_d    && ( MI->getOpcode() == RISCV::AMOOR_D    ) ) encryptInstrv64a = true;     
-else if( amomin_d   && ( MI->getOpcode() == RISCV::AMOMIN_D   ) ) encryptInstrv64a = true;         
-else if( amomax_d   && ( MI->getOpcode() == RISCV::AMOMAX_D   ) ) encryptInstrv64a = true;         
-else if( amominu_d  && ( MI->getOpcode() == RISCV::AMOMINU_D  ) ) encryptInstrv64a = true;         
-else if( amomaxu_d  && ( MI->getOpcode() == RISCV::AMOMAXU_D  ) ) encryptInstrv64a = true;         
+    else if( lr_d       && ( MI->getOpcode() == RISCV::LR_D       ) ) encryptInstrv64a = true;
+    else if( sc_d       && ( MI->getOpcode() == RISCV::SC_D       ) ) encryptInstrv64a = true;
+    else if( amoswap_d  && ( MI->getOpcode() == RISCV::AMOSWAP_D  ) ) encryptInstrv64a = true;         
+    else if( amoadd_d   && ( MI->getOpcode() == RISCV::AMOADD_D   ) ) encryptInstrv64a = true;         
+    else if( amoxor_d   && ( MI->getOpcode() == RISCV::AMOXOR_D   ) ) encryptInstrv64a = true;         
+    else if( amoand_d   && ( MI->getOpcode() == RISCV::AMOAND_D   ) ) encryptInstrv64a = true;         
+    else if( amoor_d    && ( MI->getOpcode() == RISCV::AMOOR_D    ) ) encryptInstrv64a = true;     
+    else if( amomin_d   && ( MI->getOpcode() == RISCV::AMOMIN_D   ) ) encryptInstrv64a = true;         
+    else if( amomax_d   && ( MI->getOpcode() == RISCV::AMOMAX_D   ) ) encryptInstrv64a = true;         
+    else if( amominu_d  && ( MI->getOpcode() == RISCV::AMOMINU_D  ) ) encryptInstrv64a = true;         
+    else if( amomaxu_d  && ( MI->getOpcode() == RISCV::AMOMAXU_D  ) ) encryptInstrv64a = true;         
 
-else if( flw        && ( MI->getOpcode() == RISCV::FLW        ) ) encryptInstrv32f = true;
-else if( fsw        && ( MI->getOpcode() == RISCV::FSW        ) ) encryptInstrv32f = true;
-else if( fmadd_s    && ( MI->getOpcode() == RISCV::FMADD_S    ) ) encryptInstrv32f = true;     
-else if( fmsub_s    && ( MI->getOpcode() == RISCV::FMSUB_S    ) ) encryptInstrv32f = true;     
-else if( fnmsub_s   && ( MI->getOpcode() == RISCV::FNMSUB_S   ) ) encryptInstrv32f = true;         
-else if( fnmadd_s   && ( MI->getOpcode() == RISCV::FNMADD_S   ) ) encryptInstrv32f = true;         
-else if( fadd_s     && ( MI->getOpcode() == RISCV::FADD_S     ) ) encryptInstrv32f = true;   
-else if( fsub_s     && ( MI->getOpcode() == RISCV::FSUB_S     ) ) encryptInstrv32f = true;   
-else if( fmul_s     && ( MI->getOpcode() == RISCV::FMUL_S     ) ) encryptInstrv32f = true;   
-else if( fdiv_s     && ( MI->getOpcode() == RISCV::FDIV_S     ) ) encryptInstrv32f = true;   
-else if( fsqrt_s    && ( MI->getOpcode() == RISCV::FSQRT_S    ) ) encryptInstrv32f = true;       
-else if( fsgnj_s    && ( MI->getOpcode() == RISCV::FSGNJ_S    ) ) encryptInstrv32f = true;       
-else if( fsgnjn_s   && ( MI->getOpcode() == RISCV::FSGNJN_S   ) ) encryptInstrv32f = true;         
-else if( fsgnjx_s   && ( MI->getOpcode() == RISCV::FSGNJX_S   ) ) encryptInstrv32f = true;         
-else if( fmin_s     && ( MI->getOpcode() == RISCV::FMIN_S     ) ) encryptInstrv32f = true;     
-else if( fmax_s     && ( MI->getOpcode() == RISCV::FMAX_S     ) ) encryptInstrv32f = true;     
-else if( fcvt_w_s   && ( MI->getOpcode() == RISCV::FCVT_W_S   ) ) encryptInstrv32f = true;         
-else if( fcvt_wu_s  && ( MI->getOpcode() == RISCV::FCVT_WU_S  ) ) encryptInstrv32f = true;         
-else if( fmv_x_w    && ( MI->getOpcode() == RISCV::FMV_X_W    ) ) encryptInstrv32f = true;       
-else if( feq_s      && ( MI->getOpcode() == RISCV::FEQ_S      ) ) encryptInstrv32f = true;   
-else if( flt_s      && ( MI->getOpcode() == RISCV::FLT_S      ) ) encryptInstrv32f = true;   
-else if( fle_s      && ( MI->getOpcode() == RISCV::FLE_S      ) ) encryptInstrv32f = true;   
-else if( fclass_s   && ( MI->getOpcode() == RISCV::FCLASS_S   ) ) encryptInstrv32f = true;         
-else if( fcvt_s_w   && ( MI->getOpcode() == RISCV::FCVT_S_W   ) ) encryptInstrv32f = true;         
-else if( fcvt_s_wu  && ( MI->getOpcode() == RISCV::FCVT_S_WU  ) ) encryptInstrv32f = true;         
-else if( fmv_w_x    && ( MI->getOpcode() == RISCV::FMV_W_X    ) ) encryptInstrv32f = true;     
+    else if( flw        && ( MI->getOpcode() == RISCV::FLW        ) ) encryptInstrv32f = true;
+    else if( fsw        && ( MI->getOpcode() == RISCV::FSW        ) ) encryptInstrv32f = true;
+    else if( fmadd_s    && ( MI->getOpcode() == RISCV::FMADD_S    ) ) encryptInstrv32f = true;     
+    else if( fmsub_s    && ( MI->getOpcode() == RISCV::FMSUB_S    ) ) encryptInstrv32f = true;     
+    else if( fnmsub_s   && ( MI->getOpcode() == RISCV::FNMSUB_S   ) ) encryptInstrv32f = true;         
+    else if( fnmadd_s   && ( MI->getOpcode() == RISCV::FNMADD_S   ) ) encryptInstrv32f = true;         
+    else if( fadd_s     && ( MI->getOpcode() == RISCV::FADD_S     ) ) encryptInstrv32f = true;   
+    else if( fsub_s     && ( MI->getOpcode() == RISCV::FSUB_S     ) ) encryptInstrv32f = true;   
+    else if( fmul_s     && ( MI->getOpcode() == RISCV::FMUL_S     ) ) encryptInstrv32f = true;   
+    else if( fdiv_s     && ( MI->getOpcode() == RISCV::FDIV_S     ) ) encryptInstrv32f = true;   
+    else if( fsqrt_s    && ( MI->getOpcode() == RISCV::FSQRT_S    ) ) encryptInstrv32f = true;       
+    else if( fsgnj_s    && ( MI->getOpcode() == RISCV::FSGNJ_S    ) ) encryptInstrv32f = true;       
+    else if( fsgnjn_s   && ( MI->getOpcode() == RISCV::FSGNJN_S   ) ) encryptInstrv32f = true;         
+    else if( fsgnjx_s   && ( MI->getOpcode() == RISCV::FSGNJX_S   ) ) encryptInstrv32f = true;         
+    else if( fmin_s     && ( MI->getOpcode() == RISCV::FMIN_S     ) ) encryptInstrv32f = true;     
+    else if( fmax_s     && ( MI->getOpcode() == RISCV::FMAX_S     ) ) encryptInstrv32f = true;     
+    else if( fcvt_w_s   && ( MI->getOpcode() == RISCV::FCVT_W_S   ) ) encryptInstrv32f = true;         
+    else if( fcvt_wu_s  && ( MI->getOpcode() == RISCV::FCVT_WU_S  ) ) encryptInstrv32f = true;         
+    else if( fmv_x_w    && ( MI->getOpcode() == RISCV::FMV_X_W    ) ) encryptInstrv32f = true;       
+    else if( feq_s      && ( MI->getOpcode() == RISCV::FEQ_S      ) ) encryptInstrv32f = true;   
+    else if( flt_s      && ( MI->getOpcode() == RISCV::FLT_S      ) ) encryptInstrv32f = true;   
+    else if( fle_s      && ( MI->getOpcode() == RISCV::FLE_S      ) ) encryptInstrv32f = true;   
+    else if( fclass_s   && ( MI->getOpcode() == RISCV::FCLASS_S   ) ) encryptInstrv32f = true;         
+    else if( fcvt_s_w   && ( MI->getOpcode() == RISCV::FCVT_S_W   ) ) encryptInstrv32f = true;         
+    else if( fcvt_s_wu  && ( MI->getOpcode() == RISCV::FCVT_S_WU  ) ) encryptInstrv32f = true;         
+    else if( fmv_w_x    && ( MI->getOpcode() == RISCV::FMV_W_X    ) ) encryptInstrv32f = true;     
 
-else if( fcvt_l_s   && ( MI->getOpcode() == RISCV::FCVT_L_S   ) ) encryptInstrv64f = true;       
-else if( fcvt_lu_s  && ( MI->getOpcode() == RISCV::FCVT_LU_S  ) ) encryptInstrv64f = true;         
-else if( fcvt_s_l   && ( MI->getOpcode() == RISCV::FCVT_S_L   ) ) encryptInstrv64f = true;       
-else if( fcvt_s_lu  && ( MI->getOpcode() == RISCV::FCVT_S_LU  ) ) encryptInstrv64f = true;         
+    else if( fcvt_l_s   && ( MI->getOpcode() == RISCV::FCVT_L_S   ) ) encryptInstrv64f = true;       
+    else if( fcvt_lu_s  && ( MI->getOpcode() == RISCV::FCVT_LU_S  ) ) encryptInstrv64f = true;         
+    else if( fcvt_s_l   && ( MI->getOpcode() == RISCV::FCVT_S_L   ) ) encryptInstrv64f = true;       
+    else if( fcvt_s_lu  && ( MI->getOpcode() == RISCV::FCVT_S_LU  ) ) encryptInstrv64f = true;         
 
-else if( fld        && ( MI->getOpcode() == RISCV::FLD        ) ) encryptInstrv32d = true;
-else if( fsd        && ( MI->getOpcode() == RISCV::FSD        ) ) encryptInstrv32d = true;
-else if( fmadd_d    && ( MI->getOpcode() == RISCV::FMADD_D    ) ) encryptInstrv32d = true;     
-else if( fmsub_d    && ( MI->getOpcode() == RISCV::FMSUB_D    ) ) encryptInstrv32d = true;     
-else if( fnmsub_d   && ( MI->getOpcode() == RISCV::FNMSUB_D   ) ) encryptInstrv32d = true;       
-else if( fnmadd_d   && ( MI->getOpcode() == RISCV::FNMADD_D   ) ) encryptInstrv32d = true;       
-else if( fadd_d     && ( MI->getOpcode() == RISCV::FADD_D     ) ) encryptInstrv32d = true;   
-else if( fsub_d     && ( MI->getOpcode() == RISCV::FSUB_D     ) ) encryptInstrv32d = true;   
-else if( fmul_d     && ( MI->getOpcode() == RISCV::FMUL_D     ) ) encryptInstrv32d = true;   
-else if( fdiv_d     && ( MI->getOpcode() == RISCV::FDIV_D     ) ) encryptInstrv32d = true;   
-else if( fsqrt_d    && ( MI->getOpcode() == RISCV::FSQRT_D    ) ) encryptInstrv32d = true;     
-else if( fsgnj_d    && ( MI->getOpcode() == RISCV::FSGNJ_D    ) ) encryptInstrv32d = true;     
-else if( fsgnjn_d   && ( MI->getOpcode() == RISCV::FSGNJN_D   ) ) encryptInstrv32d = true;         
-else if( fsgnjx_d   && ( MI->getOpcode() == RISCV::FSGNJX_D   ) ) encryptInstrv32d = true;         
-else if( fmin_d     && ( MI->getOpcode() == RISCV::FMIN_D     ) ) encryptInstrv32d = true;   
-else if( fmax_d     && ( MI->getOpcode() == RISCV::FMAX_D     ) ) encryptInstrv32d = true;   
-else if( fcvt_s_d   && ( MI->getOpcode() == RISCV::FCVT_S_D   ) ) encryptInstrv32d = true;         
-else if( fcvt_d_s   && ( MI->getOpcode() == RISCV::FCVT_D_S   ) ) encryptInstrv32d = true;         
-else if( feq_d      && ( MI->getOpcode() == RISCV::FEQ_D      ) ) encryptInstrv32d = true; 
-else if( flt_d      && ( MI->getOpcode() == RISCV::FLT_D      ) ) encryptInstrv32d = true; 
-else if( fle_d      && ( MI->getOpcode() == RISCV::FLE_D      ) ) encryptInstrv32d = true; 
-else if( fclass_d   && ( MI->getOpcode() == RISCV::FCLASS_D   ) ) encryptInstrv32d = true;         
-else if( fcvt_w_d   && ( MI->getOpcode() == RISCV::FCVT_W_D   ) ) encryptInstrv32d = true;         
-else if( fcvt_wu_d  && ( MI->getOpcode() == RISCV::FCVT_WU_D  ) ) encryptInstrv32d = true;         
-else if( fcvt_d_w   && ( MI->getOpcode() == RISCV::FCVT_D_W   ) ) encryptInstrv32d = true;       
-else if( fcvt_d_wu  && ( MI->getOpcode() == RISCV::FCVT_D_WU  ) ) encryptInstrv32d = true;         
+    else if( fld        && ( MI->getOpcode() == RISCV::FLD        ) ) encryptInstrv32d = true;
+    else if( fsd        && ( MI->getOpcode() == RISCV::FSD        ) ) encryptInstrv32d = true;
+    else if( fmadd_d    && ( MI->getOpcode() == RISCV::FMADD_D    ) ) encryptInstrv32d = true;     
+    else if( fmsub_d    && ( MI->getOpcode() == RISCV::FMSUB_D    ) ) encryptInstrv32d = true;     
+    else if( fnmsub_d   && ( MI->getOpcode() == RISCV::FNMSUB_D   ) ) encryptInstrv32d = true;       
+    else if( fnmadd_d   && ( MI->getOpcode() == RISCV::FNMADD_D   ) ) encryptInstrv32d = true;       
+    else if( fadd_d     && ( MI->getOpcode() == RISCV::FADD_D     ) ) encryptInstrv32d = true;   
+    else if( fsub_d     && ( MI->getOpcode() == RISCV::FSUB_D     ) ) encryptInstrv32d = true;   
+    else if( fmul_d     && ( MI->getOpcode() == RISCV::FMUL_D     ) ) encryptInstrv32d = true;   
+    else if( fdiv_d     && ( MI->getOpcode() == RISCV::FDIV_D     ) ) encryptInstrv32d = true;   
+    else if( fsqrt_d    && ( MI->getOpcode() == RISCV::FSQRT_D    ) ) encryptInstrv32d = true;     
+    else if( fsgnj_d    && ( MI->getOpcode() == RISCV::FSGNJ_D    ) ) encryptInstrv32d = true;     
+    else if( fsgnjn_d   && ( MI->getOpcode() == RISCV::FSGNJN_D   ) ) encryptInstrv32d = true;         
+    else if( fsgnjx_d   && ( MI->getOpcode() == RISCV::FSGNJX_D   ) ) encryptInstrv32d = true;         
+    else if( fmin_d     && ( MI->getOpcode() == RISCV::FMIN_D     ) ) encryptInstrv32d = true;   
+    else if( fmax_d     && ( MI->getOpcode() == RISCV::FMAX_D     ) ) encryptInstrv32d = true;   
+    else if( fcvt_s_d   && ( MI->getOpcode() == RISCV::FCVT_S_D   ) ) encryptInstrv32d = true;         
+    else if( fcvt_d_s   && ( MI->getOpcode() == RISCV::FCVT_D_S   ) ) encryptInstrv32d = true;         
+    else if( feq_d      && ( MI->getOpcode() == RISCV::FEQ_D      ) ) encryptInstrv32d = true; 
+    else if( flt_d      && ( MI->getOpcode() == RISCV::FLT_D      ) ) encryptInstrv32d = true; 
+    else if( fle_d      && ( MI->getOpcode() == RISCV::FLE_D      ) ) encryptInstrv32d = true; 
+    else if( fclass_d   && ( MI->getOpcode() == RISCV::FCLASS_D   ) ) encryptInstrv32d = true;         
+    else if( fcvt_w_d   && ( MI->getOpcode() == RISCV::FCVT_W_D   ) ) encryptInstrv32d = true;         
+    else if( fcvt_wu_d  && ( MI->getOpcode() == RISCV::FCVT_WU_D  ) ) encryptInstrv32d = true;         
+    else if( fcvt_d_w   && ( MI->getOpcode() == RISCV::FCVT_D_W   ) ) encryptInstrv32d = true;       
+    else if( fcvt_d_wu  && ( MI->getOpcode() == RISCV::FCVT_D_WU  ) ) encryptInstrv32d = true;         
 
-else if( fcvt_l_d   && ( MI->getOpcode() == RISCV::FCVT_L_D   ) ) encryptInstrv64d = true;       
-else if( fcvt_lu_d  && ( MI->getOpcode() == RISCV::FCVT_LU_D  ) ) encryptInstrv64d = true;         
-else if( fmv_x_d    && ( MI->getOpcode() == RISCV::FMV_X_D    ) ) encryptInstrv64d = true;     
-else if( fcvt_d_l   && ( MI->getOpcode() == RISCV::FCVT_D_L   ) ) encryptInstrv64d = true;       
-else if( fcvt_d_lu  && ( MI->getOpcode() == RISCV::FCVT_D_LU  ) ) encryptInstrv64d = true;         
-else if( fmv_d_x    && ( MI->getOpcode() == RISCV::FMV_D_X    ) ) encryptInstrv64d = true;     
+    else if( fcvt_l_d   && ( MI->getOpcode() == RISCV::FCVT_L_D   ) ) encryptInstrv64d = true;       
+    else if( fcvt_lu_d  && ( MI->getOpcode() == RISCV::FCVT_LU_D  ) ) encryptInstrv64d = true;         
+    else if( fmv_x_d    && ( MI->getOpcode() == RISCV::FMV_X_D    ) ) encryptInstrv64d = true;     
+    else if( fcvt_d_l   && ( MI->getOpcode() == RISCV::FCVT_D_L   ) ) encryptInstrv64d = true;       
+    else if( fcvt_d_lu  && ( MI->getOpcode() == RISCV::FCVT_D_LU  ) ) encryptInstrv64d = true;         
+    else if( fmv_d_x    && ( MI->getOpcode() == RISCV::FMV_D_X    ) ) encryptInstrv64d = true;     
 
 
-else if( c_addi4spn && ( MI->getOpcode() == RISCV::C_ADDI4SPN ) ) encryptInstrvcq0 = true;           
-else if( c_fld      && ( MI->getOpcode() == RISCV::C_FLD      ) ) encryptInstrvcq0 = true; 
-//else if( c_lq       && ( MI->getOpcode() == RISCV::C_LQ       ) ) encryptInstrvcq0 = true; 
-else if( c_lw       && ( MI->getOpcode() == RISCV::C_LW       ) ) encryptInstrvcq0 = true;
-else if( c_flw      && ( MI->getOpcode() == RISCV::C_FLW      ) ) encryptInstrvcq0 = true; 
-else if( c_ld       && ( MI->getOpcode() == RISCV::C_LD       ) ) encryptInstrvcq0 = true;
-else if( c_fsd      && ( MI->getOpcode() == RISCV::C_FSD      ) ) encryptInstrvcq0 = true;   
-//else if( c_sq       && ( MI->getOpcode() == RISCV::C_SQ       ) ) encryptInstrvcq0 = true;
-else if( c_sw       && ( MI->getOpcode() == RISCV::C_SW       ) ) encryptInstrvcq0 = true;
-else if( c_fsw      && ( MI->getOpcode() == RISCV::C_FSW      ) ) encryptInstrvcq0 = true;   
-else if( c_sd       && ( MI->getOpcode() == RISCV::C_SD       ) ) encryptInstrvcq0 = true;
+    else if( c_addi4spn && ( MI->getOpcode() == RISCV::C_ADDI4SPN ) ) encryptInstrvcq0 = true;           
+    else if( c_fld      && ( MI->getOpcode() == RISCV::C_FLD      ) ) encryptInstrvcq0 = true; 
+    //else if( c_lq       && ( MI->getOpcode() == RISCV::C_LQ       ) ) encryptInstrvcq0 = true; 
+    else if( c_lw       && ( MI->getOpcode() == RISCV::C_LW       ) ) encryptInstrvcq0 = true;
+    else if( c_flw      && ( MI->getOpcode() == RISCV::C_FLW      ) ) encryptInstrvcq0 = true; 
+    else if( c_ld       && ( MI->getOpcode() == RISCV::C_LD       ) ) encryptInstrvcq0 = true;
+    else if( c_fsd      && ( MI->getOpcode() == RISCV::C_FSD      ) ) encryptInstrvcq0 = true;   
+    //else if( c_sq       && ( MI->getOpcode() == RISCV::C_SQ       ) ) encryptInstrvcq0 = true;
+    else if( c_sw       && ( MI->getOpcode() == RISCV::C_SW       ) ) encryptInstrvcq0 = true;
+    else if( c_fsw      && ( MI->getOpcode() == RISCV::C_FSW      ) ) encryptInstrvcq0 = true;   
+    else if( c_sd       && ( MI->getOpcode() == RISCV::C_SD       ) ) encryptInstrvcq0 = true;
 
-else if( c_nop      && ( MI->getOpcode() == RISCV::C_NOP      ) ) encryptInstrvcq1 = true;   
-else if( c_addi     && ( MI->getOpcode() == RISCV::C_ADDI     ) ) encryptInstrvcq1 = true;   
-else if( c_jal      && ( MI->getOpcode() == RISCV::C_JAL      ) ) encryptInstrvcq1 = true;   
-else if( c_addiw    && ( MI->getOpcode() == RISCV::C_ADDIW    ) ) encryptInstrvcq1 = true;       
-else if( c_li       && ( MI->getOpcode() == RISCV::C_LI       ) ) encryptInstrvcq1 = true;
-else if( c_addi16sp && ( MI->getOpcode() == RISCV::C_ADDI16SP ) ) encryptInstrvcq1 = true;           
-else if( c_lui      && ( MI->getOpcode() == RISCV::C_LUI      ) ) encryptInstrvcq1 = true; 
-else if( c_srli     && ( MI->getOpcode() == RISCV::C_SRLI     ) ) encryptInstrvcq1 = true;   
-//else if( c_srli64   && ( MI->getOpcode() == RISCV::C_SRLI64   ) ) encryptInstrvcq1 = true;       
-else if( c_srai     && ( MI->getOpcode() == RISCV::C_SRAI     ) ) encryptInstrvcq1 = true;   
-//else if( c_srai64   && ( MI->getOpcode() == RISCV::C_SRAI64   ) ) encryptInstrvcq1 = true;       
-else if( c_andi     && ( MI->getOpcode() == RISCV::C_ANDI     ) ) encryptInstrvcq1 = true;   
-else if( c_sub      && ( MI->getOpcode() == RISCV::C_SUB      ) ) encryptInstrvcq1 = true; 
-else if( c_xor      && ( MI->getOpcode() == RISCV::C_XOR      ) ) encryptInstrvcq1 = true; 
-else if( c_or       && ( MI->getOpcode() == RISCV::C_OR       ) ) encryptInstrvcq1 = true;
-else if( c_and      && ( MI->getOpcode() == RISCV::C_AND      ) ) encryptInstrvcq1 = true; 
-else if( c_subw     && ( MI->getOpcode() == RISCV::C_SUBW     ) ) encryptInstrvcq1 = true;   
-else if( c_addw     && ( MI->getOpcode() == RISCV::C_ADDW     ) ) encryptInstrvcq1 = true;   
-else if( c_j        && ( MI->getOpcode() == RISCV::C_J        ) ) encryptInstrvcq1 = true;
-else if( c_beqz     && ( MI->getOpcode() == RISCV::C_BEQZ     ) ) encryptInstrvcq1 = true;   
-else if( c_bnez     && ( MI->getOpcode() == RISCV::C_BNEZ     ) ) encryptInstrvcq1 = true;   
+    else if( c_nop      && ( MI->getOpcode() == RISCV::C_NOP      ) ) encryptInstrvcq1 = true;   
+    else if( c_addi     && ( MI->getOpcode() == RISCV::C_ADDI     ) ) encryptInstrvcq1 = true;   
+    else if( c_jal      && ( MI->getOpcode() == RISCV::C_JAL      ) ) encryptInstrvcq1 = true;   
+    else if( c_addiw    && ( MI->getOpcode() == RISCV::C_ADDIW    ) ) encryptInstrvcq1 = true;       
+    else if( c_li       && ( MI->getOpcode() == RISCV::C_LI       ) ) encryptInstrvcq1 = true;
+    else if( c_addi16sp && ( MI->getOpcode() == RISCV::C_ADDI16SP ) ) encryptInstrvcq1 = true;           
+    else if( c_lui      && ( MI->getOpcode() == RISCV::C_LUI      ) ) encryptInstrvcq1 = true; 
+    else if( c_srli     && ( MI->getOpcode() == RISCV::C_SRLI     ) ) encryptInstrvcq1 = true;   
+    //else if( c_srli64   && ( MI->getOpcode() == RISCV::C_SRLI64   ) ) encryptInstrvcq1 = true;       
+    else if( c_srai     && ( MI->getOpcode() == RISCV::C_SRAI     ) ) encryptInstrvcq1 = true;   
+    //else if( c_srai64   && ( MI->getOpcode() == RISCV::C_SRAI64   ) ) encryptInstrvcq1 = true;       
+    else if( c_andi     && ( MI->getOpcode() == RISCV::C_ANDI     ) ) encryptInstrvcq1 = true;   
+    else if( c_sub      && ( MI->getOpcode() == RISCV::C_SUB      ) ) encryptInstrvcq1 = true; 
+    else if( c_xor      && ( MI->getOpcode() == RISCV::C_XOR      ) ) encryptInstrvcq1 = true; 
+    else if( c_or       && ( MI->getOpcode() == RISCV::C_OR       ) ) encryptInstrvcq1 = true;
+    else if( c_and      && ( MI->getOpcode() == RISCV::C_AND      ) ) encryptInstrvcq1 = true; 
+    else if( c_subw     && ( MI->getOpcode() == RISCV::C_SUBW     ) ) encryptInstrvcq1 = true;   
+    else if( c_addw     && ( MI->getOpcode() == RISCV::C_ADDW     ) ) encryptInstrvcq1 = true;   
+    else if( c_j        && ( MI->getOpcode() == RISCV::C_J        ) ) encryptInstrvcq1 = true;
+    else if( c_beqz     && ( MI->getOpcode() == RISCV::C_BEQZ     ) ) encryptInstrvcq1 = true;   
+    else if( c_bnez     && ( MI->getOpcode() == RISCV::C_BNEZ     ) ) encryptInstrvcq1 = true;   
 
-else if( c_slli     && ( MI->getOpcode() == RISCV::C_SLLI     ) ) encryptInstrvcq2 = true;   
-//else if( c_slli64   && ( MI->getOpcode() == RISCV::C_SLLI64   ) ) encryptInstrvcq2 = true;       
-else if( c_fldsp    && ( MI->getOpcode() == RISCV::C_FLDSP    ) ) encryptInstrvcq2 = true;     
-//else if( c_lqsp     && ( MI->getOpcode() == RISCV::C_LQSP     ) ) encryptInstrvcq2 = true;   
-else if( c_lwsp     && ( MI->getOpcode() == RISCV::C_LWSP     ) ) encryptInstrvcq2 = true;   
-else if( c_flwsp    && ( MI->getOpcode() == RISCV::C_FLWSP    ) ) encryptInstrvcq2 = true;     
-else if( c_ldsp     && ( MI->getOpcode() == RISCV::C_LDSP     ) ) encryptInstrvcq2 = true;   
-else if( c_jr       && ( MI->getOpcode() == RISCV::C_JR       ) ) encryptInstrvcq2 = true;
-else if( c_mv       && ( MI->getOpcode() == RISCV::C_MV       ) ) encryptInstrvcq2 = true;
-else if( c_ebreak   && ( MI->getOpcode() == RISCV::C_EBREAK   ) ) encryptInstrvcq2 = true;       
-else if( c_jalr     && ( MI->getOpcode() == RISCV::C_JALR     ) ) encryptInstrvcq2 = true;   
-else if( c_add      && ( MI->getOpcode() == RISCV::C_ADD      ) ) encryptInstrvcq2 = true; 
-else if( c_fsdsp    && ( MI->getOpcode() == RISCV::C_FSDSP    ) ) encryptInstrvcq2 = true;     
-//else if( c_sqsp     && ( MI->getOpcode() == RISCV::C_SQSP     ) ) encryptInstrvcq2 = true;   
-else if( c_swsp     && ( MI->getOpcode() == RISCV::C_SWSP     ) ) encryptInstrvcq2 = true;   
-else if( c_fswsp    && ( MI->getOpcode() == RISCV::C_FSWSP    ) ) encryptInstrvcq2 = true;     
-else if( c_sdsp     && ( MI->getOpcode() == RISCV::C_SDSP     ) ) encryptInstrvcq2 = true;   
-
-
-///////////////////////////////// partial
-if     ( b_p_lui        != "" && ( MI->getOpcode() == RISCV::LUI        ) ) encryptInstParKey = b_p_lui        ;
-else if( b_p_auipc      != "" && ( MI->getOpcode() == RISCV::AUIPC      ) ) encryptInstParKey = b_p_auipc      ;
-else if( b_p_jal        != "" && ( MI->getOpcode() == RISCV::JAL        ) ) encryptInstParKey = b_p_jal        ;
-else if( b_p_jalr       != "" && ( MI->getOpcode() == RISCV::JALR       ) ) encryptInstParKey = b_p_jalr       ;
-else if( b_p_beq        != "" && ( MI->getOpcode() == RISCV::BEQ        ) ) encryptInstParKey = b_p_beq        ;
-else if( b_p_bne        != "" && ( MI->getOpcode() == RISCV::BNE        ) ) encryptInstParKey = b_p_bne        ;
-else if( b_p_blt        != "" && ( MI->getOpcode() == RISCV::BLT        ) ) encryptInstParKey = b_p_blt        ;
-else if( b_p_bge        != "" && ( MI->getOpcode() == RISCV::BGE        ) ) encryptInstParKey = b_p_bge        ;
-else if( b_p_bltu       != "" && ( MI->getOpcode() == RISCV::BLTU       ) ) encryptInstParKey = b_p_bltu       ;
-else if( b_p_bgeu       != "" && ( MI->getOpcode() == RISCV::BGEU       ) ) encryptInstParKey = b_p_bgeu       ;
-else if( b_p_lb         != "" && ( MI->getOpcode() == RISCV::LB         ) ) encryptInstParKey = b_p_lb         ;
-else if( b_p_lh         != "" && ( MI->getOpcode() == RISCV::LH         ) ) encryptInstParKey = b_p_lh         ;
-else if( b_p_lw         != "" && ( MI->getOpcode() == RISCV::LW         ) ) encryptInstParKey = b_p_lw         ;
-else if( b_p_lbu        != "" && ( MI->getOpcode() == RISCV::LBU        ) ) encryptInstParKey = b_p_lbu        ;
-else if( b_p_lhu        != "" && ( MI->getOpcode() == RISCV::LHU        ) ) encryptInstParKey = b_p_lhu        ;
-else if( b_p_sb         != "" && ( MI->getOpcode() == RISCV::SB         ) ) encryptInstParKey = b_p_sb         ;
-else if( b_p_sh         != "" && ( MI->getOpcode() == RISCV::SH         ) ) encryptInstParKey = b_p_sh         ;
-else if( b_p_sw         != "" && ( MI->getOpcode() == RISCV::SW         ) ) encryptInstParKey = b_p_sw         ;
-else if( b_p_addi       != "" && ( MI->getOpcode() == RISCV::ADDI       ) ) encryptInstParKey = b_p_addi       ;
-else if( b_p_slti       != "" && ( MI->getOpcode() == RISCV::SLTI       ) ) encryptInstParKey = b_p_slti       ;
-else if( b_p_sltiu      != "" && ( MI->getOpcode() == RISCV::SLTIU      ) ) encryptInstParKey = b_p_sltiu      ;
-else if( b_p_xori       != "" && ( MI->getOpcode() == RISCV::XORI       ) ) encryptInstParKey = b_p_xori       ;
-else if( b_p_ori        != "" && ( MI->getOpcode() == RISCV::ORI        ) ) encryptInstParKey = b_p_ori        ;
-else if( b_p_andi       != "" && ( MI->getOpcode() == RISCV::ANDI       ) ) encryptInstParKey = b_p_andi       ;
-else if( b_p_slli       != "" && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstParKey = b_p_slli       ;
-else if( b_p_srli       != "" && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstParKey = b_p_srli       ;
-else if( b_p_srai       != "" && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstParKey = b_p_srai       ;
-else if( b_p_add        != "" && ( MI->getOpcode() == RISCV::ADD        ) ) encryptInstParKey = b_p_add        ;
-else if( b_p_sub        != "" && ( MI->getOpcode() == RISCV::SUB        ) ) encryptInstParKey = b_p_sub        ;
-else if( b_p_sll        != "" && ( MI->getOpcode() == RISCV::SLL        ) ) encryptInstParKey = b_p_sll        ;
-else if( b_p_slt        != "" && ( MI->getOpcode() == RISCV::SLT        ) ) encryptInstParKey = b_p_slt        ;
-else if( b_p_sltu       != "" && ( MI->getOpcode() == RISCV::SLTU       ) ) encryptInstParKey = b_p_sltu       ;
-else if( b_p_xor_       != "" && ( MI->getOpcode() == RISCV::XOR        ) ) encryptInstParKey = b_p_xor_       ;
-else if( b_p_srl        != "" && ( MI->getOpcode() == RISCV::SRL        ) ) encryptInstParKey = b_p_srl        ;
-else if( b_p_sra        != "" && ( MI->getOpcode() == RISCV::SRA        ) ) encryptInstParKey = b_p_sra        ;
-else if( b_p_or_        != "" && ( MI->getOpcode() == RISCV::OR         ) ) encryptInstParKey = b_p_or_        ;
-else if( b_p_and_       != "" && ( MI->getOpcode() == RISCV::AND        ) ) encryptInstParKey = b_p_and_       ;
-else if( b_p_fence      != "" && ( MI->getOpcode() == RISCV::FENCE      ) ) encryptInstParKey = b_p_fence      ;
-else if( b_p_fence_i    != "" && ( MI->getOpcode() == RISCV::FENCE_I    ) ) encryptInstParKey = b_p_fence_i    ;
-else if( b_p_ecall      != "" && ( MI->getOpcode() == RISCV::ECALL      ) ) encryptInstParKey = b_p_ecall      ;
-else if( b_p_ebreak     != "" && ( MI->getOpcode() == RISCV::EBREAK     ) ) encryptInstParKey = b_p_ebreak     ;
-else if( b_p_csrrw      != "" && ( MI->getOpcode() == RISCV::CSRRW      ) ) encryptInstParKey = b_p_csrrw      ;
-else if( b_p_csrrs      != "" && ( MI->getOpcode() == RISCV::CSRRS      ) ) encryptInstParKey = b_p_csrrs      ;
-else if( b_p_csrrc      != "" && ( MI->getOpcode() == RISCV::CSRRC      ) ) encryptInstParKey = b_p_csrrc      ;
-else if( b_p_csrrwi     != "" && ( MI->getOpcode() == RISCV::CSRRWI     ) ) encryptInstParKey = b_p_csrrwi     ;
-else if( b_p_csrrsi     != "" && ( MI->getOpcode() == RISCV::CSRRSI     ) ) encryptInstParKey = b_p_csrrsi     ;
-else if( b_p_csrrci     != "" && ( MI->getOpcode() == RISCV::CSRRCI     ) ) encryptInstParKey = b_p_csrrci     ;
-
-else if( b_p_lwu        != "" && ( MI->getOpcode() == RISCV::LWU        ) ) encryptInstParKey = b_p_lwu        ;
-else if( b_p_ld         != "" && ( MI->getOpcode() == RISCV::LD         ) ) encryptInstParKey = b_p_ld         ;
-else if( b_p_sd         != "" && ( MI->getOpcode() == RISCV::SD         ) ) encryptInstParKey = b_p_sd         ;
-//else if( b_p_slli       != "" && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstParKey = b_p_slli       ;
-//else if( b_p_srli       != "" && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstParKey = b_p_srli       ;
-//else if( b_p_srai       != "" && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstParKey = b_p_srai       ;
-else if( b_p_addiw      != "" && ( MI->getOpcode() == RISCV::ADDIW      ) ) encryptInstParKey = b_p_addiw      ;
-else if( b_p_slliw      != "" && ( MI->getOpcode() == RISCV::SLLIW      ) ) encryptInstParKey = b_p_slliw      ;
-else if( b_p_srliw      != "" && ( MI->getOpcode() == RISCV::SRLIW      ) ) encryptInstParKey = b_p_srliw      ;
-else if( b_p_sraiw      != "" && ( MI->getOpcode() == RISCV::SRAIW      ) ) encryptInstParKey = b_p_sraiw      ;
-else if( b_p_addw       != "" && ( MI->getOpcode() == RISCV::ADDW       ) ) encryptInstParKey = b_p_addw       ;
-else if( b_p_subw       != "" && ( MI->getOpcode() == RISCV::SUBW       ) ) encryptInstParKey = b_p_subw       ;
-else if( b_p_sllw       != "" && ( MI->getOpcode() == RISCV::SLLW       ) ) encryptInstParKey = b_p_sllw       ;
-else if( b_p_srlw       != "" && ( MI->getOpcode() == RISCV::SRLW       ) ) encryptInstParKey = b_p_srlw       ;
-else if( b_p_sraw       != "" && ( MI->getOpcode() == RISCV::SRAW       ) ) encryptInstParKey = b_p_sraw       ;
-
-else if( b_p_mul        != "" && ( MI->getOpcode() == RISCV::MUL        ) ) encryptInstParKey = b_p_mul        ;
-else if( b_p_mulh       != "" && ( MI->getOpcode() == RISCV::MULH       ) ) encryptInstParKey = b_p_mulh       ;
-else if( b_p_mulhsu     != "" && ( MI->getOpcode() == RISCV::MULHSU     ) ) encryptInstParKey = b_p_mulhsu     ;
-else if( b_p_mulhu      != "" && ( MI->getOpcode() == RISCV::MULHU      ) ) encryptInstParKey = b_p_mulhu      ;
-else if( b_p_div_       != "" && ( MI->getOpcode() == RISCV::DIV        ) ) encryptInstParKey = b_p_div_       ;
-else if( b_p_divu       != "" && ( MI->getOpcode() == RISCV::DIVU       ) ) encryptInstParKey = b_p_divu       ;
-else if( b_p_rem        != "" && ( MI->getOpcode() == RISCV::REM        ) ) encryptInstParKey = b_p_rem        ;
-else if( b_p_remu       != "" && ( MI->getOpcode() == RISCV::REMU       ) ) encryptInstParKey = b_p_remu       ;
-
-else if( b_p_mulw       != "" && ( MI->getOpcode() == RISCV::MULW       ) ) encryptInstParKey = b_p_mulw       ;
-else if( b_p_divw       != "" && ( MI->getOpcode() == RISCV::DIVW       ) ) encryptInstParKey = b_p_divw       ;
-else if( b_p_divuw      != "" && ( MI->getOpcode() == RISCV::DIVUW      ) ) encryptInstParKey = b_p_divuw      ;
-else if( b_p_remw       != "" && ( MI->getOpcode() == RISCV::REMW       ) ) encryptInstParKey = b_p_remw       ;
-else if( b_p_remuw      != "" && ( MI->getOpcode() == RISCV::REMUW      ) ) encryptInstParKey = b_p_remuw      ;
-
-else if( b_p_lr_w       != "" && ( MI->getOpcode() == RISCV::LR_W       ) ) encryptInstParKey = b_p_lr_w       ;
-else if( b_p_sc_w       != "" && ( MI->getOpcode() == RISCV::SC_W       ) ) encryptInstParKey = b_p_sc_w       ;
-else if( b_p_amoswap_w  != "" && ( MI->getOpcode() == RISCV::AMOSWAP_W  ) ) encryptInstParKey = b_p_amoswap_w  ;
-else if( b_p_amoadd_w   != "" && ( MI->getOpcode() == RISCV::AMOADD_W   ) ) encryptInstParKey = b_p_amoadd_w   ;
-else if( b_p_amoxor_w   != "" && ( MI->getOpcode() == RISCV::AMOXOR_W   ) ) encryptInstParKey = b_p_amoxor_w   ;
-else if( b_p_amoand_w   != "" && ( MI->getOpcode() == RISCV::AMOAND_W   ) ) encryptInstParKey = b_p_amoand_w   ;
-else if( b_p_amoor_w    != "" && ( MI->getOpcode() == RISCV::AMOOR_W    ) ) encryptInstParKey = b_p_amoor_w    ;
-else if( b_p_amomin_w   != "" && ( MI->getOpcode() == RISCV::AMOMIN_W   ) ) encryptInstParKey = b_p_amomin_w   ;
-else if( b_p_amomax_w   != "" && ( MI->getOpcode() == RISCV::AMOMAX_W   ) ) encryptInstParKey = b_p_amomax_w   ;
-else if( b_p_amominu_w  != "" && ( MI->getOpcode() == RISCV::AMOMINU_W  ) ) encryptInstParKey = b_p_amominu_w  ;
-else if( b_p_amomaxu_w  != "" && ( MI->getOpcode() == RISCV::AMOMAXU_W  ) ) encryptInstParKey = b_p_amomaxu_w  ;
-
-else if( b_p_lr_d       != "" && ( MI->getOpcode() == RISCV::LR_D       ) ) encryptInstParKey = b_p_lr_d       ;
-else if( b_p_sc_d       != "" && ( MI->getOpcode() == RISCV::SC_D       ) ) encryptInstParKey = b_p_sc_d       ;
-else if( b_p_amoswap_d  != "" && ( MI->getOpcode() == RISCV::AMOSWAP_D  ) ) encryptInstParKey = b_p_amoswap_d  ;
-else if( b_p_amoadd_d   != "" && ( MI->getOpcode() == RISCV::AMOADD_D   ) ) encryptInstParKey = b_p_amoadd_d   ;
-else if( b_p_amoxor_d   != "" && ( MI->getOpcode() == RISCV::AMOXOR_D   ) ) encryptInstParKey = b_p_amoxor_d   ;
-else if( b_p_amoand_d   != "" && ( MI->getOpcode() == RISCV::AMOAND_D   ) ) encryptInstParKey = b_p_amoand_d   ;
-else if( b_p_amoor_d    != "" && ( MI->getOpcode() == RISCV::AMOOR_D    ) ) encryptInstParKey = b_p_amoor_d    ;
-else if( b_p_amomin_d   != "" && ( MI->getOpcode() == RISCV::AMOMIN_D   ) ) encryptInstParKey = b_p_amomin_d   ;
-else if( b_p_amomax_d   != "" && ( MI->getOpcode() == RISCV::AMOMAX_D   ) ) encryptInstParKey = b_p_amomax_d   ;
-else if( b_p_amominu_d  != "" && ( MI->getOpcode() == RISCV::AMOMINU_D  ) ) encryptInstParKey = b_p_amominu_d  ;
-else if( b_p_amomaxu_d  != "" && ( MI->getOpcode() == RISCV::AMOMAXU_D  ) ) encryptInstParKey = b_p_amomaxu_d  ;
-
-else if( b_p_flw        != "" && ( MI->getOpcode() == RISCV::FLW        ) ) encryptInstParKey = b_p_flw        ;
-else if( b_p_fsw        != "" && ( MI->getOpcode() == RISCV::FSW        ) ) encryptInstParKey = b_p_fsw        ;
-else if( b_p_fmadd_s    != "" && ( MI->getOpcode() == RISCV::FMADD_S    ) ) encryptInstParKey = b_p_fmadd_s    ;
-else if( b_p_fmsub_s    != "" && ( MI->getOpcode() == RISCV::FMSUB_S    ) ) encryptInstParKey = b_p_fmsub_s    ;
-else if( b_p_fnmsub_s   != "" && ( MI->getOpcode() == RISCV::FNMSUB_S   ) ) encryptInstParKey = b_p_fnmsub_s   ;
-else if( b_p_fnmadd_s   != "" && ( MI->getOpcode() == RISCV::FNMADD_S   ) ) encryptInstParKey = b_p_fnmadd_s   ;
-else if( b_p_fadd_s     != "" && ( MI->getOpcode() == RISCV::FADD_S     ) ) encryptInstParKey = b_p_fadd_s     ;
-else if( b_p_fsub_s     != "" && ( MI->getOpcode() == RISCV::FSUB_S     ) ) encryptInstParKey = b_p_fsub_s     ;
-else if( b_p_fmul_s     != "" && ( MI->getOpcode() == RISCV::FMUL_S     ) ) encryptInstParKey = b_p_fmul_s     ;
-else if( b_p_fdiv_s     != "" && ( MI->getOpcode() == RISCV::FDIV_S     ) ) encryptInstParKey = b_p_fdiv_s     ;
-else if( b_p_fsqrt_s    != "" && ( MI->getOpcode() == RISCV::FSQRT_S    ) ) encryptInstParKey = b_p_fsqrt_s    ;
-else if( b_p_fsgnj_s    != "" && ( MI->getOpcode() == RISCV::FSGNJ_S    ) ) encryptInstParKey = b_p_fsgnj_s    ;
-else if( b_p_fsgnjn_s   != "" && ( MI->getOpcode() == RISCV::FSGNJN_S   ) ) encryptInstParKey = b_p_fsgnjn_s   ;
-else if( b_p_fsgnjx_s   != "" && ( MI->getOpcode() == RISCV::FSGNJX_S   ) ) encryptInstParKey = b_p_fsgnjx_s   ;
-else if( b_p_fmin_s     != "" && ( MI->getOpcode() == RISCV::FMIN_S     ) ) encryptInstParKey = b_p_fmin_s     ;
-else if( b_p_fmax_s     != "" && ( MI->getOpcode() == RISCV::FMAX_S     ) ) encryptInstParKey = b_p_fmax_s     ;
-else if( b_p_fcvt_w_s   != "" && ( MI->getOpcode() == RISCV::FCVT_W_S   ) ) encryptInstParKey = b_p_fcvt_w_s   ;
-else if( b_p_fcvt_wu_s  != "" && ( MI->getOpcode() == RISCV::FCVT_WU_S  ) ) encryptInstParKey = b_p_fcvt_wu_s  ;
-else if( b_p_fmv_x_w    != "" && ( MI->getOpcode() == RISCV::FMV_X_W    ) ) encryptInstParKey = b_p_fmv_x_w    ;
-else if( b_p_feq_s      != "" && ( MI->getOpcode() == RISCV::FEQ_S      ) ) encryptInstParKey = b_p_feq_s      ;
-else if( b_p_flt_s      != "" && ( MI->getOpcode() == RISCV::FLT_S      ) ) encryptInstParKey = b_p_flt_s      ;
-else if( b_p_fle_s      != "" && ( MI->getOpcode() == RISCV::FLE_S      ) ) encryptInstParKey = b_p_fle_s      ;
-else if( b_p_fclass_s   != "" && ( MI->getOpcode() == RISCV::FCLASS_S   ) ) encryptInstParKey = b_p_fclass_s   ;
-else if( b_p_fcvt_s_w   != "" && ( MI->getOpcode() == RISCV::FCVT_S_W   ) ) encryptInstParKey = b_p_fcvt_s_w   ;
-else if( b_p_fcvt_s_wu  != "" && ( MI->getOpcode() == RISCV::FCVT_S_WU  ) ) encryptInstParKey = b_p_fcvt_s_wu  ;
-else if( b_p_fmv_w_x    != "" && ( MI->getOpcode() == RISCV::FMV_W_X    ) ) encryptInstParKey = b_p_fmv_w_x    ;
-
-else if( b_p_fcvt_l_s   != "" && ( MI->getOpcode() == RISCV::FCVT_L_S   ) ) encryptInstParKey = b_p_fcvt_l_s   ;
-else if( b_p_fcvt_lu_s  != "" && ( MI->getOpcode() == RISCV::FCVT_LU_S  ) ) encryptInstParKey = b_p_fcvt_lu_s  ;
-else if( b_p_fcvt_s_l   != "" && ( MI->getOpcode() == RISCV::FCVT_S_L   ) ) encryptInstParKey = b_p_fcvt_s_l   ;
-else if( b_p_fcvt_s_lu  != "" && ( MI->getOpcode() == RISCV::FCVT_S_LU  ) ) encryptInstParKey = b_p_fcvt_s_lu  ;
-
-else if( b_p_fld        != "" && ( MI->getOpcode() == RISCV::FLD        ) ) encryptInstParKey = b_p_fld        ;
-else if( b_p_fsd        != "" && ( MI->getOpcode() == RISCV::FSD        ) ) encryptInstParKey = b_p_fsd        ;
-else if( b_p_fmadd_d    != "" && ( MI->getOpcode() == RISCV::FMADD_D    ) ) encryptInstParKey = b_p_fmadd_d    ;
-else if( b_p_fmsub_d    != "" && ( MI->getOpcode() == RISCV::FMSUB_D    ) ) encryptInstParKey = b_p_fmsub_d    ;
-else if( b_p_fnmsub_d   != "" && ( MI->getOpcode() == RISCV::FNMSUB_D   ) ) encryptInstParKey = b_p_fnmsub_d   ;
-else if( b_p_fnmadd_d   != "" && ( MI->getOpcode() == RISCV::FNMADD_D   ) ) encryptInstParKey = b_p_fnmadd_d   ;
-else if( b_p_fadd_d     != "" && ( MI->getOpcode() == RISCV::FADD_D     ) ) encryptInstParKey = b_p_fadd_d     ;
-else if( b_p_fsub_d     != "" && ( MI->getOpcode() == RISCV::FSUB_D     ) ) encryptInstParKey = b_p_fsub_d     ;
-else if( b_p_fmul_d     != "" && ( MI->getOpcode() == RISCV::FMUL_D     ) ) encryptInstParKey = b_p_fmul_d     ;
-else if( b_p_fdiv_d     != "" && ( MI->getOpcode() == RISCV::FDIV_D     ) ) encryptInstParKey = b_p_fdiv_d     ;
-else if( b_p_fsqrt_d    != "" && ( MI->getOpcode() == RISCV::FSQRT_D    ) ) encryptInstParKey = b_p_fsqrt_d    ;
-else if( b_p_fsgnj_d    != "" && ( MI->getOpcode() == RISCV::FSGNJ_D    ) ) encryptInstParKey = b_p_fsgnj_d    ;
-else if( b_p_fsgnjn_d   != "" && ( MI->getOpcode() == RISCV::FSGNJN_D   ) ) encryptInstParKey = b_p_fsgnjn_d   ;
-else if( b_p_fsgnjx_d   != "" && ( MI->getOpcode() == RISCV::FSGNJX_D   ) ) encryptInstParKey = b_p_fsgnjx_d   ;
-else if( b_p_fmin_d     != "" && ( MI->getOpcode() == RISCV::FMIN_D     ) ) encryptInstParKey = b_p_fmin_d     ;
-else if( b_p_fmax_d     != "" && ( MI->getOpcode() == RISCV::FMAX_D     ) ) encryptInstParKey = b_p_fmax_d     ;
-else if( b_p_fcvt_s_d   != "" && ( MI->getOpcode() == RISCV::FCVT_S_D   ) ) encryptInstParKey = b_p_fcvt_s_d   ;
-else if( b_p_fcvt_d_s   != "" && ( MI->getOpcode() == RISCV::FCVT_D_S   ) ) encryptInstParKey = b_p_fcvt_d_s   ;
-else if( b_p_feq_d      != "" && ( MI->getOpcode() == RISCV::FEQ_D      ) ) encryptInstParKey = b_p_feq_d      ;
-else if( b_p_flt_d      != "" && ( MI->getOpcode() == RISCV::FLT_D      ) ) encryptInstParKey = b_p_flt_d      ;
-else if( b_p_fle_d      != "" && ( MI->getOpcode() == RISCV::FLE_D      ) ) encryptInstParKey = b_p_fle_d      ;
-else if( b_p_fclass_d   != "" && ( MI->getOpcode() == RISCV::FCLASS_D   ) ) encryptInstParKey = b_p_fclass_d   ;
-else if( b_p_fcvt_w_d   != "" && ( MI->getOpcode() == RISCV::FCVT_W_D   ) ) encryptInstParKey = b_p_fcvt_w_d   ;
-else if( b_p_fcvt_wu_d  != "" && ( MI->getOpcode() == RISCV::FCVT_WU_D  ) ) encryptInstParKey = b_p_fcvt_wu_d  ;
-else if( b_p_fcvt_d_w   != "" && ( MI->getOpcode() == RISCV::FCVT_D_W   ) ) encryptInstParKey = b_p_fcvt_d_w   ;
-else if( b_p_fcvt_d_wu  != "" && ( MI->getOpcode() == RISCV::FCVT_D_WU  ) ) encryptInstParKey = b_p_fcvt_d_wu  ;
-
-else if( b_p_fcvt_l_d   != "" && ( MI->getOpcode() == RISCV::FCVT_L_D   ) ) encryptInstParKey = b_p_fcvt_l_d   ;
-else if( b_p_fcvt_lu_d  != "" && ( MI->getOpcode() == RISCV::FCVT_LU_D  ) ) encryptInstParKey = b_p_fcvt_lu_d  ;
-else if( b_p_fmv_x_d    != "" && ( MI->getOpcode() == RISCV::FMV_X_D    ) ) encryptInstParKey = b_p_fmv_x_d    ;
-else if( b_p_fcvt_d_l   != "" && ( MI->getOpcode() == RISCV::FCVT_D_L   ) ) encryptInstParKey = b_p_fcvt_d_l   ;
-else if( b_p_fcvt_d_lu  != "" && ( MI->getOpcode() == RISCV::FCVT_D_LU  ) ) encryptInstParKey = b_p_fcvt_d_lu  ;
-else if( b_p_fmv_d_x    != "" && ( MI->getOpcode() == RISCV::FMV_D_X    ) ) encryptInstParKey = b_p_fmv_d_x    ;
-
-else if( b_p_c_addi4spn != "" && ( MI->getOpcode() == RISCV::C_ADDI4SPN ) ) encryptInstParKey = b_p_c_addi4spn ;
-else if( b_p_c_fld      != "" && ( MI->getOpcode() == RISCV::C_FLD      ) ) encryptInstParKey = b_p_c_fld      ;
-//else if( b_p_c_lq       != "" && ( MI->getOpcode() == RISCV::C_LQ       ) ) encryptInstParKey = b_p_c_lq       ; //not supported
-else if( b_p_c_lw       != "" && ( MI->getOpcode() == RISCV::C_LW       ) ) encryptInstParKey = b_p_c_lw       ;
-else if( b_p_c_flw      != "" && ( MI->getOpcode() == RISCV::C_FLW      ) ) encryptInstParKey = b_p_c_flw      ;
-else if( b_p_c_ld       != "" && ( MI->getOpcode() == RISCV::C_LD       ) ) encryptInstParKey = b_p_c_ld       ;
-else if( b_p_c_fsd      != "" && ( MI->getOpcode() == RISCV::C_FSD      ) ) encryptInstParKey = b_p_c_fsd      ;
-//else if( b_p_c_sq       != "" && ( MI->getOpcode() == RISCV::C_SQ       ) ) encryptInstParKey = b_p_c_sq       ; //not supported
-else if( b_p_c_sw       != "" && ( MI->getOpcode() == RISCV::C_SW       ) ) encryptInstParKey = b_p_c_sw       ;
-else if( b_p_c_fsw      != "" && ( MI->getOpcode() == RISCV::C_FSW      ) ) encryptInstParKey = b_p_c_fsw      ;
-else if( b_p_c_sd       != "" && ( MI->getOpcode() == RISCV::C_SD       ) ) encryptInstParKey = b_p_c_sd       ;
-
-else if( b_p_c_nop      != "" && ( MI->getOpcode() == RISCV::C_NOP      ) ) encryptInstParKey = b_p_c_nop      ;
-else if( b_p_c_addi     != "" && ( MI->getOpcode() == RISCV::C_ADDI     ) ) encryptInstParKey = b_p_c_addi     ;
-else if( b_p_c_jal      != "" && ( MI->getOpcode() == RISCV::C_JAL      ) ) encryptInstParKey = b_p_c_jal      ;
-else if( b_p_c_addiw    != "" && ( MI->getOpcode() == RISCV::C_ADDIW    ) ) encryptInstParKey = b_p_c_addiw    ;
-else if( b_p_c_li       != "" && ( MI->getOpcode() == RISCV::C_LI       ) ) encryptInstParKey = b_p_c_li       ;
-else if( b_p_c_addi16sp != "" && ( MI->getOpcode() == RISCV::C_ADDI16SP ) ) encryptInstParKey = b_p_c_addi16sp ;
-else if( b_p_c_lui      != "" && ( MI->getOpcode() == RISCV::C_LUI      ) ) encryptInstParKey = b_p_c_lui      ;
-else if( b_p_c_srli     != "" && ( MI->getOpcode() == RISCV::C_SRLI     ) ) encryptInstParKey = b_p_c_srli     ;
-//else if( b_p_c_srli64   != "" && ( MI->getOpcode() == RISCV::C_SRLI64   ) ) encryptInstParKey = b_p_c_srli64   ; //not supported
-else if( b_p_c_srai     != "" && ( MI->getOpcode() == RISCV::C_SRAI     ) ) encryptInstParKey = b_p_c_srai     ;
-//else if( b_p_c_srai64   != "" && ( MI->getOpcode() == RISCV::C_SRAI64   ) ) encryptInstParKey = b_p_c_srai64   ; //not supported
-else if( b_p_c_andi     != "" && ( MI->getOpcode() == RISCV::C_ANDI     ) ) encryptInstParKey = b_p_c_andi     ;
-else if( b_p_c_sub      != "" && ( MI->getOpcode() == RISCV::C_SUB      ) ) encryptInstParKey = b_p_c_sub      ;
-else if( b_p_c_xor      != "" && ( MI->getOpcode() == RISCV::C_XOR      ) ) encryptInstParKey = b_p_c_xor      ;
-else if( b_p_c_or       != "" && ( MI->getOpcode() == RISCV::C_OR       ) ) encryptInstParKey = b_p_c_or       ;
-else if( b_p_c_and      != "" && ( MI->getOpcode() == RISCV::C_AND      ) ) encryptInstParKey = b_p_c_and      ;
-else if( b_p_c_subw     != "" && ( MI->getOpcode() == RISCV::C_SUBW     ) ) encryptInstParKey = b_p_c_subw     ;
-else if( b_p_c_addw     != "" && ( MI->getOpcode() == RISCV::C_ADDW     ) ) encryptInstParKey = b_p_c_addw     ;
-else if( b_p_c_j        != "" && ( MI->getOpcode() == RISCV::C_J        ) ) encryptInstParKey = b_p_c_j        ;
-else if( b_p_c_beqz     != "" && ( MI->getOpcode() == RISCV::C_BEQZ     ) ) encryptInstParKey = b_p_c_beqz     ;
-else if( b_p_c_bnez     != "" && ( MI->getOpcode() == RISCV::C_BNEZ     ) ) encryptInstParKey = b_p_c_bnez     ;
-
-else if( b_p_c_slli     != "" && ( MI->getOpcode() == RISCV::C_SLLI     ) ) encryptInstParKey = b_p_c_slli     ;
-//else if( b_p_c_slli64   != "" && ( MI->getOpcode() == RISCV::C_SLLI64   ) ) encryptInstParKey = b_p_c_slli64   ;
-else if( b_p_c_fldsp    != "" && ( MI->getOpcode() == RISCV::C_FLDSP    ) ) encryptInstParKey = b_p_c_fldsp    ;
-//else if( b_p_c_lqsp     != "" && ( MI->getOpcode() == RISCV::C_LQSP     ) ) encryptInstParKey = b_p_c_lqsp     ;
-else if( b_p_c_lwsp     != "" && ( MI->getOpcode() == RISCV::C_LWSP     ) ) encryptInstParKey = b_p_c_lwsp     ;
-else if( b_p_c_flwsp    != "" && ( MI->getOpcode() == RISCV::C_FLWSP    ) ) encryptInstParKey = b_p_c_flwsp    ;
-else if( b_p_c_ldsp     != "" && ( MI->getOpcode() == RISCV::C_LDSP     ) ) encryptInstParKey = b_p_c_ldsp     ;
-else if( b_p_c_jr       != "" && ( MI->getOpcode() == RISCV::C_JR       ) ) encryptInstParKey = b_p_c_jr       ;
-else if( b_p_c_mv       != "" && ( MI->getOpcode() == RISCV::C_MV       ) ) encryptInstParKey = b_p_c_mv       ;
-else if( b_p_c_ebreak   != "" && ( MI->getOpcode() == RISCV::C_EBREAK   ) ) encryptInstParKey = b_p_c_ebreak   ;
-else if( b_p_c_jalr     != "" && ( MI->getOpcode() == RISCV::C_JALR     ) ) encryptInstParKey = b_p_c_jalr     ;
-else if( b_p_c_add      != "" && ( MI->getOpcode() == RISCV::C_ADD      ) ) encryptInstParKey = b_p_c_add      ;
-else if( b_p_c_fsdsp    != "" && ( MI->getOpcode() == RISCV::C_FSDSP    ) ) encryptInstParKey = b_p_c_fsdsp    ;
-//else if( b_p_c_sqsp     != "" && ( MI->getOpcode() == RISCV::C_SQSP     ) ) encryptInstParKey = b_p_c_sqsp     ;
-else if( b_p_c_swsp     != "" && ( MI->getOpcode() == RISCV::C_SWSP     ) ) encryptInstParKey = b_p_c_swsp     ;
-else if( b_p_c_fswsp    != "" && ( MI->getOpcode() == RISCV::C_FSWSP    ) ) encryptInstParKey = b_p_c_fswsp    ;
-else if( b_p_c_sdsp     != "" && ( MI->getOpcode() == RISCV::C_SDSP     ) ) encryptInstParKey = b_p_c_sdsp     ;
-
-      //////////////////////////////////// partial
+    else if( c_slli     && ( MI->getOpcode() == RISCV::C_SLLI     ) ) encryptInstrvcq2 = true;   
+    //else if( c_slli64   && ( MI->getOpcode() == RISCV::C_SLLI64   ) ) encryptInstrvcq2 = true;       
+    else if( c_fldsp    && ( MI->getOpcode() == RISCV::C_FLDSP    ) ) encryptInstrvcq2 = true;     
+    //else if( c_lqsp     && ( MI->getOpcode() == RISCV::C_LQSP     ) ) encryptInstrvcq2 = true;   
+    else if( c_lwsp     && ( MI->getOpcode() == RISCV::C_LWSP     ) ) encryptInstrvcq2 = true;   
+    else if( c_flwsp    && ( MI->getOpcode() == RISCV::C_FLWSP    ) ) encryptInstrvcq2 = true;     
+    else if( c_ldsp     && ( MI->getOpcode() == RISCV::C_LDSP     ) ) encryptInstrvcq2 = true;   
+    else if( c_jr       && ( MI->getOpcode() == RISCV::C_JR       ) ) encryptInstrvcq2 = true;
+    else if( c_mv       && ( MI->getOpcode() == RISCV::C_MV       ) ) encryptInstrvcq2 = true;
+    else if( c_ebreak   && ( MI->getOpcode() == RISCV::C_EBREAK   ) ) encryptInstrvcq2 = true;       
+    else if( c_jalr     && ( MI->getOpcode() == RISCV::C_JALR     ) ) encryptInstrvcq2 = true;   
+    else if( c_add      && ( MI->getOpcode() == RISCV::C_ADD      ) ) encryptInstrvcq2 = true; 
+    else if( c_fsdsp    && ( MI->getOpcode() == RISCV::C_FSDSP    ) ) encryptInstrvcq2 = true;     
+    //else if( c_sqsp     && ( MI->getOpcode() == RISCV::C_SQSP     ) ) encryptInstrvcq2 = true;   
+    else if( c_swsp     && ( MI->getOpcode() == RISCV::C_SWSP     ) ) encryptInstrvcq2 = true;   
+    else if( c_fswsp    && ( MI->getOpcode() == RISCV::C_FSWSP    ) ) encryptInstrvcq2 = true;     
+    else if( c_sdsp     && ( MI->getOpcode() == RISCV::C_SDSP     ) ) encryptInstrvcq2 = true;   
 
 
-      portedDump::dumpBytes(Bytes, OS, encryptInstParKey, 
+    ///////////////////////////////// partial
+    if     ( b_p_lui        != "" && ( MI->getOpcode() == RISCV::LUI        ) ) encryptInstParKey = b_p_lui        ;
+    else if( b_p_auipc      != "" && ( MI->getOpcode() == RISCV::AUIPC      ) ) encryptInstParKey = b_p_auipc      ;
+    else if( b_p_jal        != "" && ( MI->getOpcode() == RISCV::JAL        ) ) encryptInstParKey = b_p_jal        ;
+    else if( b_p_jalr       != "" && ( MI->getOpcode() == RISCV::JALR       ) ) encryptInstParKey = b_p_jalr       ;
+    else if( b_p_beq        != "" && ( MI->getOpcode() == RISCV::BEQ        ) ) encryptInstParKey = b_p_beq        ;
+    else if( b_p_bne        != "" && ( MI->getOpcode() == RISCV::BNE        ) ) encryptInstParKey = b_p_bne        ;
+    else if( b_p_blt        != "" && ( MI->getOpcode() == RISCV::BLT        ) ) encryptInstParKey = b_p_blt        ;
+    else if( b_p_bge        != "" && ( MI->getOpcode() == RISCV::BGE        ) ) encryptInstParKey = b_p_bge        ;
+    else if( b_p_bltu       != "" && ( MI->getOpcode() == RISCV::BLTU       ) ) encryptInstParKey = b_p_bltu       ;
+    else if( b_p_bgeu       != "" && ( MI->getOpcode() == RISCV::BGEU       ) ) encryptInstParKey = b_p_bgeu       ;
+    else if( b_p_lb         != "" && ( MI->getOpcode() == RISCV::LB         ) ) encryptInstParKey = b_p_lb         ;
+    else if( b_p_lh         != "" && ( MI->getOpcode() == RISCV::LH         ) ) encryptInstParKey = b_p_lh         ;
+    else if( b_p_lw         != "" && ( MI->getOpcode() == RISCV::LW         ) ) encryptInstParKey = b_p_lw         ;
+    else if( b_p_lbu        != "" && ( MI->getOpcode() == RISCV::LBU        ) ) encryptInstParKey = b_p_lbu        ;
+    else if( b_p_lhu        != "" && ( MI->getOpcode() == RISCV::LHU        ) ) encryptInstParKey = b_p_lhu        ;
+    else if( b_p_sb         != "" && ( MI->getOpcode() == RISCV::SB         ) ) encryptInstParKey = b_p_sb         ;
+    else if( b_p_sh         != "" && ( MI->getOpcode() == RISCV::SH         ) ) encryptInstParKey = b_p_sh         ;
+    else if( b_p_sw         != "" && ( MI->getOpcode() == RISCV::SW         ) ) encryptInstParKey = b_p_sw         ;
+    else if( b_p_addi       != "" && ( MI->getOpcode() == RISCV::ADDI       ) ) encryptInstParKey = b_p_addi       ;
+    else if( b_p_slti       != "" && ( MI->getOpcode() == RISCV::SLTI       ) ) encryptInstParKey = b_p_slti       ;
+    else if( b_p_sltiu      != "" && ( MI->getOpcode() == RISCV::SLTIU      ) ) encryptInstParKey = b_p_sltiu      ;
+    else if( b_p_xori       != "" && ( MI->getOpcode() == RISCV::XORI       ) ) encryptInstParKey = b_p_xori       ;
+    else if( b_p_ori        != "" && ( MI->getOpcode() == RISCV::ORI        ) ) encryptInstParKey = b_p_ori        ;
+    else if( b_p_andi       != "" && ( MI->getOpcode() == RISCV::ANDI       ) ) encryptInstParKey = b_p_andi       ;
+    else if( b_p_slli       != "" && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstParKey = b_p_slli       ;
+    else if( b_p_srli       != "" && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstParKey = b_p_srli       ;
+    else if( b_p_srai       != "" && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstParKey = b_p_srai       ;
+    else if( b_p_add        != "" && ( MI->getOpcode() == RISCV::ADD        ) ) encryptInstParKey = b_p_add        ;
+    else if( b_p_sub        != "" && ( MI->getOpcode() == RISCV::SUB        ) ) encryptInstParKey = b_p_sub        ;
+    else if( b_p_sll        != "" && ( MI->getOpcode() == RISCV::SLL        ) ) encryptInstParKey = b_p_sll        ;
+    else if( b_p_slt        != "" && ( MI->getOpcode() == RISCV::SLT        ) ) encryptInstParKey = b_p_slt        ;
+    else if( b_p_sltu       != "" && ( MI->getOpcode() == RISCV::SLTU       ) ) encryptInstParKey = b_p_sltu       ;
+    else if( b_p_xor_       != "" && ( MI->getOpcode() == RISCV::XOR        ) ) encryptInstParKey = b_p_xor_       ;
+    else if( b_p_srl        != "" && ( MI->getOpcode() == RISCV::SRL        ) ) encryptInstParKey = b_p_srl        ;
+    else if( b_p_sra        != "" && ( MI->getOpcode() == RISCV::SRA        ) ) encryptInstParKey = b_p_sra        ;
+    else if( b_p_or_        != "" && ( MI->getOpcode() == RISCV::OR         ) ) encryptInstParKey = b_p_or_        ;
+    else if( b_p_and_       != "" && ( MI->getOpcode() == RISCV::AND        ) ) encryptInstParKey = b_p_and_       ;
+    else if( b_p_fence      != "" && ( MI->getOpcode() == RISCV::FENCE      ) ) encryptInstParKey = b_p_fence      ;
+    else if( b_p_fence_i    != "" && ( MI->getOpcode() == RISCV::FENCE_I    ) ) encryptInstParKey = b_p_fence_i    ;
+    else if( b_p_ecall      != "" && ( MI->getOpcode() == RISCV::ECALL      ) ) encryptInstParKey = b_p_ecall      ;
+    else if( b_p_ebreak     != "" && ( MI->getOpcode() == RISCV::EBREAK     ) ) encryptInstParKey = b_p_ebreak     ;
+    else if( b_p_csrrw      != "" && ( MI->getOpcode() == RISCV::CSRRW      ) ) encryptInstParKey = b_p_csrrw      ;
+    else if( b_p_csrrs      != "" && ( MI->getOpcode() == RISCV::CSRRS      ) ) encryptInstParKey = b_p_csrrs      ;
+    else if( b_p_csrrc      != "" && ( MI->getOpcode() == RISCV::CSRRC      ) ) encryptInstParKey = b_p_csrrc      ;
+    else if( b_p_csrrwi     != "" && ( MI->getOpcode() == RISCV::CSRRWI     ) ) encryptInstParKey = b_p_csrrwi     ;
+    else if( b_p_csrrsi     != "" && ( MI->getOpcode() == RISCV::CSRRSI     ) ) encryptInstParKey = b_p_csrrsi     ;
+    else if( b_p_csrrci     != "" && ( MI->getOpcode() == RISCV::CSRRCI     ) ) encryptInstParKey = b_p_csrrci     ;
+
+    else if( b_p_lwu        != "" && ( MI->getOpcode() == RISCV::LWU        ) ) encryptInstParKey = b_p_lwu        ;
+    else if( b_p_ld         != "" && ( MI->getOpcode() == RISCV::LD         ) ) encryptInstParKey = b_p_ld         ;
+    else if( b_p_sd         != "" && ( MI->getOpcode() == RISCV::SD         ) ) encryptInstParKey = b_p_sd         ;
+    //else if( b_p_slli       != "" && ( MI->getOpcode() == RISCV::SLLI       ) ) encryptInstParKey = b_p_slli       ;
+    //else if( b_p_srli       != "" && ( MI->getOpcode() == RISCV::SRLI       ) ) encryptInstParKey = b_p_srli       ;
+    //else if( b_p_srai       != "" && ( MI->getOpcode() == RISCV::SRAI       ) ) encryptInstParKey = b_p_srai       ;
+    else if( b_p_addiw      != "" && ( MI->getOpcode() == RISCV::ADDIW      ) ) encryptInstParKey = b_p_addiw      ;
+    else if( b_p_slliw      != "" && ( MI->getOpcode() == RISCV::SLLIW      ) ) encryptInstParKey = b_p_slliw      ;
+    else if( b_p_srliw      != "" && ( MI->getOpcode() == RISCV::SRLIW      ) ) encryptInstParKey = b_p_srliw      ;
+    else if( b_p_sraiw      != "" && ( MI->getOpcode() == RISCV::SRAIW      ) ) encryptInstParKey = b_p_sraiw      ;
+    else if( b_p_addw       != "" && ( MI->getOpcode() == RISCV::ADDW       ) ) encryptInstParKey = b_p_addw       ;
+    else if( b_p_subw       != "" && ( MI->getOpcode() == RISCV::SUBW       ) ) encryptInstParKey = b_p_subw       ;
+    else if( b_p_sllw       != "" && ( MI->getOpcode() == RISCV::SLLW       ) ) encryptInstParKey = b_p_sllw       ;
+    else if( b_p_srlw       != "" && ( MI->getOpcode() == RISCV::SRLW       ) ) encryptInstParKey = b_p_srlw       ;
+    else if( b_p_sraw       != "" && ( MI->getOpcode() == RISCV::SRAW       ) ) encryptInstParKey = b_p_sraw       ;
+
+    else if( b_p_mul        != "" && ( MI->getOpcode() == RISCV::MUL        ) ) encryptInstParKey = b_p_mul        ;
+    else if( b_p_mulh       != "" && ( MI->getOpcode() == RISCV::MULH       ) ) encryptInstParKey = b_p_mulh       ;
+    else if( b_p_mulhsu     != "" && ( MI->getOpcode() == RISCV::MULHSU     ) ) encryptInstParKey = b_p_mulhsu     ;
+    else if( b_p_mulhu      != "" && ( MI->getOpcode() == RISCV::MULHU      ) ) encryptInstParKey = b_p_mulhu      ;
+    else if( b_p_div_       != "" && ( MI->getOpcode() == RISCV::DIV        ) ) encryptInstParKey = b_p_div_       ;
+    else if( b_p_divu       != "" && ( MI->getOpcode() == RISCV::DIVU       ) ) encryptInstParKey = b_p_divu       ;
+    else if( b_p_rem        != "" && ( MI->getOpcode() == RISCV::REM        ) ) encryptInstParKey = b_p_rem        ;
+    else if( b_p_remu       != "" && ( MI->getOpcode() == RISCV::REMU       ) ) encryptInstParKey = b_p_remu       ;
+
+    else if( b_p_mulw       != "" && ( MI->getOpcode() == RISCV::MULW       ) ) encryptInstParKey = b_p_mulw       ;
+    else if( b_p_divw       != "" && ( MI->getOpcode() == RISCV::DIVW       ) ) encryptInstParKey = b_p_divw       ;
+    else if( b_p_divuw      != "" && ( MI->getOpcode() == RISCV::DIVUW      ) ) encryptInstParKey = b_p_divuw      ;
+    else if( b_p_remw       != "" && ( MI->getOpcode() == RISCV::REMW       ) ) encryptInstParKey = b_p_remw       ;
+    else if( b_p_remuw      != "" && ( MI->getOpcode() == RISCV::REMUW      ) ) encryptInstParKey = b_p_remuw      ;
+
+    else if( b_p_lr_w       != "" && ( MI->getOpcode() == RISCV::LR_W       ) ) encryptInstParKey = b_p_lr_w       ;
+    else if( b_p_sc_w       != "" && ( MI->getOpcode() == RISCV::SC_W       ) ) encryptInstParKey = b_p_sc_w       ;
+    else if( b_p_amoswap_w  != "" && ( MI->getOpcode() == RISCV::AMOSWAP_W  ) ) encryptInstParKey = b_p_amoswap_w  ;
+    else if( b_p_amoadd_w   != "" && ( MI->getOpcode() == RISCV::AMOADD_W   ) ) encryptInstParKey = b_p_amoadd_w   ;
+    else if( b_p_amoxor_w   != "" && ( MI->getOpcode() == RISCV::AMOXOR_W   ) ) encryptInstParKey = b_p_amoxor_w   ;
+    else if( b_p_amoand_w   != "" && ( MI->getOpcode() == RISCV::AMOAND_W   ) ) encryptInstParKey = b_p_amoand_w   ;
+    else if( b_p_amoor_w    != "" && ( MI->getOpcode() == RISCV::AMOOR_W    ) ) encryptInstParKey = b_p_amoor_w    ;
+    else if( b_p_amomin_w   != "" && ( MI->getOpcode() == RISCV::AMOMIN_W   ) ) encryptInstParKey = b_p_amomin_w   ;
+    else if( b_p_amomax_w   != "" && ( MI->getOpcode() == RISCV::AMOMAX_W   ) ) encryptInstParKey = b_p_amomax_w   ;
+    else if( b_p_amominu_w  != "" && ( MI->getOpcode() == RISCV::AMOMINU_W  ) ) encryptInstParKey = b_p_amominu_w  ;
+    else if( b_p_amomaxu_w  != "" && ( MI->getOpcode() == RISCV::AMOMAXU_W  ) ) encryptInstParKey = b_p_amomaxu_w  ;
+
+    else if( b_p_lr_d       != "" && ( MI->getOpcode() == RISCV::LR_D       ) ) encryptInstParKey = b_p_lr_d       ;
+    else if( b_p_sc_d       != "" && ( MI->getOpcode() == RISCV::SC_D       ) ) encryptInstParKey = b_p_sc_d       ;
+    else if( b_p_amoswap_d  != "" && ( MI->getOpcode() == RISCV::AMOSWAP_D  ) ) encryptInstParKey = b_p_amoswap_d  ;
+    else if( b_p_amoadd_d   != "" && ( MI->getOpcode() == RISCV::AMOADD_D   ) ) encryptInstParKey = b_p_amoadd_d   ;
+    else if( b_p_amoxor_d   != "" && ( MI->getOpcode() == RISCV::AMOXOR_D   ) ) encryptInstParKey = b_p_amoxor_d   ;
+    else if( b_p_amoand_d   != "" && ( MI->getOpcode() == RISCV::AMOAND_D   ) ) encryptInstParKey = b_p_amoand_d   ;
+    else if( b_p_amoor_d    != "" && ( MI->getOpcode() == RISCV::AMOOR_D    ) ) encryptInstParKey = b_p_amoor_d    ;
+    else if( b_p_amomin_d   != "" && ( MI->getOpcode() == RISCV::AMOMIN_D   ) ) encryptInstParKey = b_p_amomin_d   ;
+    else if( b_p_amomax_d   != "" && ( MI->getOpcode() == RISCV::AMOMAX_D   ) ) encryptInstParKey = b_p_amomax_d   ;
+    else if( b_p_amominu_d  != "" && ( MI->getOpcode() == RISCV::AMOMINU_D  ) ) encryptInstParKey = b_p_amominu_d  ;
+    else if( b_p_amomaxu_d  != "" && ( MI->getOpcode() == RISCV::AMOMAXU_D  ) ) encryptInstParKey = b_p_amomaxu_d  ;
+
+    else if( b_p_flw        != "" && ( MI->getOpcode() == RISCV::FLW        ) ) encryptInstParKey = b_p_flw        ;
+    else if( b_p_fsw        != "" && ( MI->getOpcode() == RISCV::FSW        ) ) encryptInstParKey = b_p_fsw        ;
+    else if( b_p_fmadd_s    != "" && ( MI->getOpcode() == RISCV::FMADD_S    ) ) encryptInstParKey = b_p_fmadd_s    ;
+    else if( b_p_fmsub_s    != "" && ( MI->getOpcode() == RISCV::FMSUB_S    ) ) encryptInstParKey = b_p_fmsub_s    ;
+    else if( b_p_fnmsub_s   != "" && ( MI->getOpcode() == RISCV::FNMSUB_S   ) ) encryptInstParKey = b_p_fnmsub_s   ;
+    else if( b_p_fnmadd_s   != "" && ( MI->getOpcode() == RISCV::FNMADD_S   ) ) encryptInstParKey = b_p_fnmadd_s   ;
+    else if( b_p_fadd_s     != "" && ( MI->getOpcode() == RISCV::FADD_S     ) ) encryptInstParKey = b_p_fadd_s     ;
+    else if( b_p_fsub_s     != "" && ( MI->getOpcode() == RISCV::FSUB_S     ) ) encryptInstParKey = b_p_fsub_s     ;
+    else if( b_p_fmul_s     != "" && ( MI->getOpcode() == RISCV::FMUL_S     ) ) encryptInstParKey = b_p_fmul_s     ;
+    else if( b_p_fdiv_s     != "" && ( MI->getOpcode() == RISCV::FDIV_S     ) ) encryptInstParKey = b_p_fdiv_s     ;
+    else if( b_p_fsqrt_s    != "" && ( MI->getOpcode() == RISCV::FSQRT_S    ) ) encryptInstParKey = b_p_fsqrt_s    ;
+    else if( b_p_fsgnj_s    != "" && ( MI->getOpcode() == RISCV::FSGNJ_S    ) ) encryptInstParKey = b_p_fsgnj_s    ;
+    else if( b_p_fsgnjn_s   != "" && ( MI->getOpcode() == RISCV::FSGNJN_S   ) ) encryptInstParKey = b_p_fsgnjn_s   ;
+    else if( b_p_fsgnjx_s   != "" && ( MI->getOpcode() == RISCV::FSGNJX_S   ) ) encryptInstParKey = b_p_fsgnjx_s   ;
+    else if( b_p_fmin_s     != "" && ( MI->getOpcode() == RISCV::FMIN_S     ) ) encryptInstParKey = b_p_fmin_s     ;
+    else if( b_p_fmax_s     != "" && ( MI->getOpcode() == RISCV::FMAX_S     ) ) encryptInstParKey = b_p_fmax_s     ;
+    else if( b_p_fcvt_w_s   != "" && ( MI->getOpcode() == RISCV::FCVT_W_S   ) ) encryptInstParKey = b_p_fcvt_w_s   ;
+    else if( b_p_fcvt_wu_s  != "" && ( MI->getOpcode() == RISCV::FCVT_WU_S  ) ) encryptInstParKey = b_p_fcvt_wu_s  ;
+    else if( b_p_fmv_x_w    != "" && ( MI->getOpcode() == RISCV::FMV_X_W    ) ) encryptInstParKey = b_p_fmv_x_w    ;
+    else if( b_p_feq_s      != "" && ( MI->getOpcode() == RISCV::FEQ_S      ) ) encryptInstParKey = b_p_feq_s      ;
+    else if( b_p_flt_s      != "" && ( MI->getOpcode() == RISCV::FLT_S      ) ) encryptInstParKey = b_p_flt_s      ;
+    else if( b_p_fle_s      != "" && ( MI->getOpcode() == RISCV::FLE_S      ) ) encryptInstParKey = b_p_fle_s      ;
+    else if( b_p_fclass_s   != "" && ( MI->getOpcode() == RISCV::FCLASS_S   ) ) encryptInstParKey = b_p_fclass_s   ;
+    else if( b_p_fcvt_s_w   != "" && ( MI->getOpcode() == RISCV::FCVT_S_W   ) ) encryptInstParKey = b_p_fcvt_s_w   ;
+    else if( b_p_fcvt_s_wu  != "" && ( MI->getOpcode() == RISCV::FCVT_S_WU  ) ) encryptInstParKey = b_p_fcvt_s_wu  ;
+    else if( b_p_fmv_w_x    != "" && ( MI->getOpcode() == RISCV::FMV_W_X    ) ) encryptInstParKey = b_p_fmv_w_x    ;
+
+    else if( b_p_fcvt_l_s   != "" && ( MI->getOpcode() == RISCV::FCVT_L_S   ) ) encryptInstParKey = b_p_fcvt_l_s   ;
+    else if( b_p_fcvt_lu_s  != "" && ( MI->getOpcode() == RISCV::FCVT_LU_S  ) ) encryptInstParKey = b_p_fcvt_lu_s  ;
+    else if( b_p_fcvt_s_l   != "" && ( MI->getOpcode() == RISCV::FCVT_S_L   ) ) encryptInstParKey = b_p_fcvt_s_l   ;
+    else if( b_p_fcvt_s_lu  != "" && ( MI->getOpcode() == RISCV::FCVT_S_LU  ) ) encryptInstParKey = b_p_fcvt_s_lu  ;
+
+    else if( b_p_fld        != "" && ( MI->getOpcode() == RISCV::FLD        ) ) encryptInstParKey = b_p_fld        ;
+    else if( b_p_fsd        != "" && ( MI->getOpcode() == RISCV::FSD        ) ) encryptInstParKey = b_p_fsd        ;
+    else if( b_p_fmadd_d    != "" && ( MI->getOpcode() == RISCV::FMADD_D    ) ) encryptInstParKey = b_p_fmadd_d    ;
+    else if( b_p_fmsub_d    != "" && ( MI->getOpcode() == RISCV::FMSUB_D    ) ) encryptInstParKey = b_p_fmsub_d    ;
+    else if( b_p_fnmsub_d   != "" && ( MI->getOpcode() == RISCV::FNMSUB_D   ) ) encryptInstParKey = b_p_fnmsub_d   ;
+    else if( b_p_fnmadd_d   != "" && ( MI->getOpcode() == RISCV::FNMADD_D   ) ) encryptInstParKey = b_p_fnmadd_d   ;
+    else if( b_p_fadd_d     != "" && ( MI->getOpcode() == RISCV::FADD_D     ) ) encryptInstParKey = b_p_fadd_d     ;
+    else if( b_p_fsub_d     != "" && ( MI->getOpcode() == RISCV::FSUB_D     ) ) encryptInstParKey = b_p_fsub_d     ;
+    else if( b_p_fmul_d     != "" && ( MI->getOpcode() == RISCV::FMUL_D     ) ) encryptInstParKey = b_p_fmul_d     ;
+    else if( b_p_fdiv_d     != "" && ( MI->getOpcode() == RISCV::FDIV_D     ) ) encryptInstParKey = b_p_fdiv_d     ;
+    else if( b_p_fsqrt_d    != "" && ( MI->getOpcode() == RISCV::FSQRT_D    ) ) encryptInstParKey = b_p_fsqrt_d    ;
+    else if( b_p_fsgnj_d    != "" && ( MI->getOpcode() == RISCV::FSGNJ_D    ) ) encryptInstParKey = b_p_fsgnj_d    ;
+    else if( b_p_fsgnjn_d   != "" && ( MI->getOpcode() == RISCV::FSGNJN_D   ) ) encryptInstParKey = b_p_fsgnjn_d   ;
+    else if( b_p_fsgnjx_d   != "" && ( MI->getOpcode() == RISCV::FSGNJX_D   ) ) encryptInstParKey = b_p_fsgnjx_d   ;
+    else if( b_p_fmin_d     != "" && ( MI->getOpcode() == RISCV::FMIN_D     ) ) encryptInstParKey = b_p_fmin_d     ;
+    else if( b_p_fmax_d     != "" && ( MI->getOpcode() == RISCV::FMAX_D     ) ) encryptInstParKey = b_p_fmax_d     ;
+    else if( b_p_fcvt_s_d   != "" && ( MI->getOpcode() == RISCV::FCVT_S_D   ) ) encryptInstParKey = b_p_fcvt_s_d   ;
+    else if( b_p_fcvt_d_s   != "" && ( MI->getOpcode() == RISCV::FCVT_D_S   ) ) encryptInstParKey = b_p_fcvt_d_s   ;
+    else if( b_p_feq_d      != "" && ( MI->getOpcode() == RISCV::FEQ_D      ) ) encryptInstParKey = b_p_feq_d      ;
+    else if( b_p_flt_d      != "" && ( MI->getOpcode() == RISCV::FLT_D      ) ) encryptInstParKey = b_p_flt_d      ;
+    else if( b_p_fle_d      != "" && ( MI->getOpcode() == RISCV::FLE_D      ) ) encryptInstParKey = b_p_fle_d      ;
+    else if( b_p_fclass_d   != "" && ( MI->getOpcode() == RISCV::FCLASS_D   ) ) encryptInstParKey = b_p_fclass_d   ;
+    else if( b_p_fcvt_w_d   != "" && ( MI->getOpcode() == RISCV::FCVT_W_D   ) ) encryptInstParKey = b_p_fcvt_w_d   ;
+    else if( b_p_fcvt_wu_d  != "" && ( MI->getOpcode() == RISCV::FCVT_WU_D  ) ) encryptInstParKey = b_p_fcvt_wu_d  ;
+    else if( b_p_fcvt_d_w   != "" && ( MI->getOpcode() == RISCV::FCVT_D_W   ) ) encryptInstParKey = b_p_fcvt_d_w   ;
+    else if( b_p_fcvt_d_wu  != "" && ( MI->getOpcode() == RISCV::FCVT_D_WU  ) ) encryptInstParKey = b_p_fcvt_d_wu  ;
+
+    else if( b_p_fcvt_l_d   != "" && ( MI->getOpcode() == RISCV::FCVT_L_D   ) ) encryptInstParKey = b_p_fcvt_l_d   ;
+    else if( b_p_fcvt_lu_d  != "" && ( MI->getOpcode() == RISCV::FCVT_LU_D  ) ) encryptInstParKey = b_p_fcvt_lu_d  ;
+    else if( b_p_fmv_x_d    != "" && ( MI->getOpcode() == RISCV::FMV_X_D    ) ) encryptInstParKey = b_p_fmv_x_d    ;
+    else if( b_p_fcvt_d_l   != "" && ( MI->getOpcode() == RISCV::FCVT_D_L   ) ) encryptInstParKey = b_p_fcvt_d_l   ;
+    else if( b_p_fcvt_d_lu  != "" && ( MI->getOpcode() == RISCV::FCVT_D_LU  ) ) encryptInstParKey = b_p_fcvt_d_lu  ;
+    else if( b_p_fmv_d_x    != "" && ( MI->getOpcode() == RISCV::FMV_D_X    ) ) encryptInstParKey = b_p_fmv_d_x    ;
+
+    else if( b_p_c_addi4spn != "" && ( MI->getOpcode() == RISCV::C_ADDI4SPN ) ) encryptInstParKey = b_p_c_addi4spn ;
+    else if( b_p_c_fld      != "" && ( MI->getOpcode() == RISCV::C_FLD      ) ) encryptInstParKey = b_p_c_fld      ;
+    //else if( b_p_c_lq       != "" && ( MI->getOpcode() == RISCV::C_LQ       ) ) encryptInstParKey = b_p_c_lq       ; //not supported
+    else if( b_p_c_lw       != "" && ( MI->getOpcode() == RISCV::C_LW       ) ) encryptInstParKey = b_p_c_lw       ;
+    else if( b_p_c_flw      != "" && ( MI->getOpcode() == RISCV::C_FLW      ) ) encryptInstParKey = b_p_c_flw      ;
+    else if( b_p_c_ld       != "" && ( MI->getOpcode() == RISCV::C_LD       ) ) encryptInstParKey = b_p_c_ld       ;
+    else if( b_p_c_fsd      != "" && ( MI->getOpcode() == RISCV::C_FSD      ) ) encryptInstParKey = b_p_c_fsd      ;
+    //else if( b_p_c_sq       != "" && ( MI->getOpcode() == RISCV::C_SQ       ) ) encryptInstParKey = b_p_c_sq       ; //not supported
+    else if( b_p_c_sw       != "" && ( MI->getOpcode() == RISCV::C_SW       ) ) encryptInstParKey = b_p_c_sw       ;
+    else if( b_p_c_fsw      != "" && ( MI->getOpcode() == RISCV::C_FSW      ) ) encryptInstParKey = b_p_c_fsw      ;
+    else if( b_p_c_sd       != "" && ( MI->getOpcode() == RISCV::C_SD       ) ) encryptInstParKey = b_p_c_sd       ;
+
+    else if( b_p_c_nop      != "" && ( MI->getOpcode() == RISCV::C_NOP      ) ) encryptInstParKey = b_p_c_nop      ;
+    else if( b_p_c_addi     != "" && ( MI->getOpcode() == RISCV::C_ADDI     ) ) encryptInstParKey = b_p_c_addi     ;
+    else if( b_p_c_jal      != "" && ( MI->getOpcode() == RISCV::C_JAL      ) ) encryptInstParKey = b_p_c_jal      ;
+    else if( b_p_c_addiw    != "" && ( MI->getOpcode() == RISCV::C_ADDIW    ) ) encryptInstParKey = b_p_c_addiw    ;
+    else if( b_p_c_li       != "" && ( MI->getOpcode() == RISCV::C_LI       ) ) encryptInstParKey = b_p_c_li       ;
+    else if( b_p_c_addi16sp != "" && ( MI->getOpcode() == RISCV::C_ADDI16SP ) ) encryptInstParKey = b_p_c_addi16sp ;
+    else if( b_p_c_lui      != "" && ( MI->getOpcode() == RISCV::C_LUI      ) ) encryptInstParKey = b_p_c_lui      ;
+    else if( b_p_c_srli     != "" && ( MI->getOpcode() == RISCV::C_SRLI     ) ) encryptInstParKey = b_p_c_srli     ;
+    //else if( b_p_c_srli64   != "" && ( MI->getOpcode() == RISCV::C_SRLI64   ) ) encryptInstParKey = b_p_c_srli64   ; //not supported
+    else if( b_p_c_srai     != "" && ( MI->getOpcode() == RISCV::C_SRAI     ) ) encryptInstParKey = b_p_c_srai     ;
+    //else if( b_p_c_srai64   != "" && ( MI->getOpcode() == RISCV::C_SRAI64   ) ) encryptInstParKey = b_p_c_srai64   ; //not supported
+    else if( b_p_c_andi     != "" && ( MI->getOpcode() == RISCV::C_ANDI     ) ) encryptInstParKey = b_p_c_andi     ;
+    else if( b_p_c_sub      != "" && ( MI->getOpcode() == RISCV::C_SUB      ) ) encryptInstParKey = b_p_c_sub      ;
+    else if( b_p_c_xor      != "" && ( MI->getOpcode() == RISCV::C_XOR      ) ) encryptInstParKey = b_p_c_xor      ;
+    else if( b_p_c_or       != "" && ( MI->getOpcode() == RISCV::C_OR       ) ) encryptInstParKey = b_p_c_or       ;
+    else if( b_p_c_and      != "" && ( MI->getOpcode() == RISCV::C_AND      ) ) encryptInstParKey = b_p_c_and      ;
+    else if( b_p_c_subw     != "" && ( MI->getOpcode() == RISCV::C_SUBW     ) ) encryptInstParKey = b_p_c_subw     ;
+    else if( b_p_c_addw     != "" && ( MI->getOpcode() == RISCV::C_ADDW     ) ) encryptInstParKey = b_p_c_addw     ;
+    else if( b_p_c_j        != "" && ( MI->getOpcode() == RISCV::C_J        ) ) encryptInstParKey = b_p_c_j        ;
+    else if( b_p_c_beqz     != "" && ( MI->getOpcode() == RISCV::C_BEQZ     ) ) encryptInstParKey = b_p_c_beqz     ;
+    else if( b_p_c_bnez     != "" && ( MI->getOpcode() == RISCV::C_BNEZ     ) ) encryptInstParKey = b_p_c_bnez     ;
+
+    else if( b_p_c_slli     != "" && ( MI->getOpcode() == RISCV::C_SLLI     ) ) encryptInstParKey = b_p_c_slli     ;
+    //else if( b_p_c_slli64   != "" && ( MI->getOpcode() == RISCV::C_SLLI64   ) ) encryptInstParKey = b_p_c_slli64   ;
+    else if( b_p_c_fldsp    != "" && ( MI->getOpcode() == RISCV::C_FLDSP    ) ) encryptInstParKey = b_p_c_fldsp    ;
+    //else if( b_p_c_lqsp     != "" && ( MI->getOpcode() == RISCV::C_LQSP     ) ) encryptInstParKey = b_p_c_lqsp     ;
+    else if( b_p_c_lwsp     != "" && ( MI->getOpcode() == RISCV::C_LWSP     ) ) encryptInstParKey = b_p_c_lwsp     ;
+    else if( b_p_c_flwsp    != "" && ( MI->getOpcode() == RISCV::C_FLWSP    ) ) encryptInstParKey = b_p_c_flwsp    ;
+    else if( b_p_c_ldsp     != "" && ( MI->getOpcode() == RISCV::C_LDSP     ) ) encryptInstParKey = b_p_c_ldsp     ;
+    else if( b_p_c_jr       != "" && ( MI->getOpcode() == RISCV::C_JR       ) ) encryptInstParKey = b_p_c_jr       ;
+    else if( b_p_c_mv       != "" && ( MI->getOpcode() == RISCV::C_MV       ) ) encryptInstParKey = b_p_c_mv       ;
+    else if( b_p_c_ebreak   != "" && ( MI->getOpcode() == RISCV::C_EBREAK   ) ) encryptInstParKey = b_p_c_ebreak   ;
+    else if( b_p_c_jalr     != "" && ( MI->getOpcode() == RISCV::C_JALR     ) ) encryptInstParKey = b_p_c_jalr     ;
+    else if( b_p_c_add      != "" && ( MI->getOpcode() == RISCV::C_ADD      ) ) encryptInstParKey = b_p_c_add      ;
+    else if( b_p_c_fsdsp    != "" && ( MI->getOpcode() == RISCV::C_FSDSP    ) ) encryptInstParKey = b_p_c_fsdsp    ;
+    //else if( b_p_c_sqsp     != "" && ( MI->getOpcode() == RISCV::C_SQSP     ) ) encryptInstParKey = b_p_c_sqsp     ;
+    else if( b_p_c_swsp     != "" && ( MI->getOpcode() == RISCV::C_SWSP     ) ) encryptInstParKey = b_p_c_swsp     ;
+    else if( b_p_c_fswsp    != "" && ( MI->getOpcode() == RISCV::C_FSWSP    ) ) encryptInstParKey = b_p_c_fswsp    ;
+    else if( b_p_c_sdsp     != "" && ( MI->getOpcode() == RISCV::C_SDSP     ) ) encryptInstParKey = b_p_c_sdsp     ;
+
+    //////////////////////////////////// partial
+
+    portedDump::dumpBytes(Bytes, OS, encryptInstParKey, 
       encryptInstrv32i,
       encryptInstrv32m,
       encryptInstrv32a,
@@ -4121,70 +3369,15 @@ else if( b_p_c_sdsp     != "" && ( MI->getOpcode() == RISCV::C_SDSP     ) ) encr
       encryptInstrvcq1,
       encryptInstrvcq2
       );
-
-    }
-
-    // The output of printInst starts with a tab. Print some spaces so that
-    // the tab has 1 column and advances to the target tab stop.
-    unsigned TabStop = getInstStartColumn(STI);
-    unsigned Column = OS.tell() - Start;
-    OS.indent(Column < TabStop - 1 ? TabStop - 1 - Column : 7 - Column % 8);
-
-    if (MI) {
-      // See MCInstPrinter::printInst. On targets where a PC relative immediate
-      // is relative to the next instruction and the length of a MCInst is
-      // difficult to measure (x86), this is the address of the next
-      // instruction.
-      uint64_t Addr =
-          Address.Address + (STI.getTargetTriple().isX86() ? Bytes.size() : 0);
-    }
   }
 };
 PrettyPrinter PrettyPrinterInst;
 
-class HexagonPrettyPrinter : public PrettyPrinter {
-public:
-  void printLead(ArrayRef<uint8_t> Bytes, uint64_t Address,
-                 formatted_raw_ostream &OS) {
-    uint32_t opcode =
-      (Bytes[3] << 24) | (Bytes[2] << 16) | (Bytes[1] << 8) | Bytes[0];
-
-    if (!NoShowRawInsn) {
-      OS << "\t";
-
-      OS << opcode;
-    }
-  }
-
-};
-HexagonPrettyPrinter HexagonPrettyPrinterInst;
-
-class AMDGCNPrettyPrinter : public PrettyPrinter {
-public:
-
-};
-AMDGCNPrettyPrinter AMDGCNPrettyPrinterInst;
-
-class BPFPrettyPrinter : public PrettyPrinter {
-public:
-
-};
-BPFPrettyPrinter BPFPrettyPrinterInst;
-
 PrettyPrinter &selectPrettyPrinter(Triple const &Triple) {
-  switch(Triple.getArch()) {
-  default:
-    return PrettyPrinterInst;
-  case Triple::hexagon:
-    return HexagonPrettyPrinterInst;
-  case Triple::amdgcn:
-    return AMDGCNPrettyPrinterInst;
-  case Triple::bpfel:
-  case Triple::bpfeb:
-    return BPFPrettyPrinterInst;
-  }
+  return PrettyPrinterInst;
 }
-}
+
+} // end of anonymous namespace
 
 static uint8_t getElfSymbolType(const ObjectFile *Obj, const SymbolRef &Sym) {
   assert(Obj->isELF());
@@ -4208,7 +3401,8 @@ addDynamicElfSymbols(const ELFObjectFile<ELFT> *Obj,
       continue;
 
     uint64_t Address = unwrapOrError(Symbol.getAddress(), Obj->getFileName());
-
+    // ELFSymbolRef::getAddress() returns size instead of value for common
+    // symbols which is not desirable for disassembly output. Overriding.
     if (SymbolType == ELF::STT_COMMON)
       Address = Obj->getSymbol(Symbol.getRawDataRefImpl())->st_value;
 
@@ -4288,87 +3482,6 @@ static size_t countSkippableZeroBytes(ArrayRef<uint8_t> Buf) {
   return N & ~0x3;
 }
 
-// Returns a map from sections to their relocations.
-static std::map<SectionRef, std::vector<RelocationRef>>
-getRelocsMap(object::ObjectFile const &Obj) {
-  std::map<SectionRef, std::vector<RelocationRef>> Ret;
-  uint64_t I = (uint64_t)-1;
-  for (SectionRef Sec : Obj.sections()) {
-    ++I;
-    Expected<section_iterator> RelocatedOrErr = Sec.getRelocatedSection();
-    if (!RelocatedOrErr)
-      reportError(Obj.getFileName(),
-                  "section (" + Twine(I) +
-                      "): failed to get a relocated section: " +
-                      toString(RelocatedOrErr.takeError()));
-
-    section_iterator Relocated = *RelocatedOrErr;
-    if (Relocated == Obj.section_end() || !checkSectionFilter(*Relocated).Keep)
-      continue;
-    std::vector<RelocationRef> &V = Ret[*Relocated];
-    for (const RelocationRef &R : Sec.relocations())
-      V.push_back(R);
-    // Sort relocations by address.
-    llvm::stable_sort(V, isRelocAddressLess);
-  }
-  return Ret;
-}
-
-// Used for --adjust-vma to check if address should be adjusted by the
-// specified value for a given section.
-// For ELF we do not adjust non-allocatable sections like debug ones,
-// because they are not loadable.
-// TODO: implement for other file formats.
-static bool shouldAdjustVA(const SectionRef &Section) {
-  const ObjectFile *Obj = Section.getObject();
-  if (Obj->isELF())
-    return ELFSectionRef(Section).getFlags() & ELF::SHF_ALLOC;
-  return false;
-}
-
-
-typedef std::pair<uint64_t, char> MappingSymbolPair;
-static char getMappingSymbolKind(ArrayRef<MappingSymbolPair> MappingSymbols,
-                                 uint64_t Address) {
-  auto It =
-      partition_point(MappingSymbols, [Address](const MappingSymbolPair &Val) {
-        return Val.first <= Address;
-      });
-  // Return zero for any address before the first mapping symbol; this means
-  // we should use the default disassembly mode, depending on the target.
-  if (It == MappingSymbols.begin())
-    return '\x00';
-  return (It - 1)->second;
-}
-
-static uint64_t dumpARMELFData(uint64_t SectionAddr, uint64_t Index,
-                               uint64_t End, const ObjectFile *Obj,
-                               ArrayRef<uint8_t> Bytes,
-                               ArrayRef<MappingSymbolPair> MappingSymbols,
-                               raw_ostream &OS) {
-  support::endianness Endian =
-      Obj->isLittleEndian() ? support::little : support::big; 
-      // endian kısmı 
-  OS << format("%8" PRIx64 ":\t", SectionAddr + Index);
-  if (Index + 4 <= End) {
-    //dumpBytes(Bytes.slice(Index, 4), OS);
-    OS << "\t.word\t"
-           << format_hex(support::endian::read32(Bytes.data() + Index, Endian),
-                         10);
-    return 4;
-  }
-  if (Index + 2 <= End) {
-    //dumpBytes(Bytes.slice(Index, 2), OS);
-    OS << "\t\t.short\t"
-           << format_hex(support::endian::read16(Bytes.data() + Index, Endian),
-                         6);
-    return 2;
-  }
-  //dumpBytes(Bytes.slice(Index, 1), OS);
-  OS << "\t\t.byte\t" << format_hex(Bytes[0], 4);
-  return 1;
-}
-
 static void dumpELFData(uint64_t SectionAddr, uint64_t Index, uint64_t End,
                         ArrayRef<uint8_t> Bytes) {
   // print out data up to 8 bytes at a time in hex and ascii
@@ -4397,7 +3510,7 @@ static void dumpELFData(uint64_t SectionAddr, uint64_t Index, uint64_t End,
       AsciiData[8] = '\0';
       outs() << std::string(IndentOffset, ' ') << "         ";
       outs() << reinterpret_cast<char *>(AsciiData);
-
+      outs() << '\n';
       NumBytes = 0;
     }
   }
@@ -4409,45 +3522,26 @@ SymbolInfoTy objdump::createSymbolInfo(const ObjectFile *Obj,
   const uint64_t Addr = unwrapOrError(Symbol.getAddress(), FileName);
   const StringRef Name = unwrapOrError(Symbol.getName(), FileName);
 
-  if (Obj->isXCOFF() && SymbolDescription) {
-    const auto *XCOFFObj = cast<XCOFFObjectFile>(Obj);
-    DataRefImpl SymbolDRI = Symbol.getRawDataRefImpl();
-
-    const uint32_t SymbolIndex = XCOFFObj->getSymbolIndex(SymbolDRI.p);
-    Optional<XCOFF::StorageMappingClass> Smc =
-        getXCOFFSymbolCsectSMC(XCOFFObj, Symbol);
-    return SymbolInfoTy(Addr, Name, Smc, SymbolIndex,
-                        isLabel(XCOFFObj, Symbol));
-  } else
-    return SymbolInfoTy(Addr, Name,
-                        Obj->isELF() ? getElfSymbolType(Obj, Symbol)
-                                     : (uint8_t)ELF::STT_NOTYPE);
+  return SymbolInfoTy(Addr, Name,
+                      Obj->isELF() ? getElfSymbolType(Obj, Symbol)
+                                    : (uint8_t)ELF::STT_NOTYPE);
 }
 
 static SymbolInfoTy createDummySymbolInfo(const ObjectFile *Obj,
                                           const uint64_t Addr, StringRef &Name,
                                           uint8_t Type) {
-  if (Obj->isXCOFF() && SymbolDescription)
-    return SymbolInfoTy(Addr, Name, None, None, false);
-  else
-    return SymbolInfoTy(Addr, Name, Type);
+  return SymbolInfoTy(Addr, Name, Type);
 }
 
 static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
                               MCContext &Ctx, MCDisassembler *PrimaryDisAsm,
-                              MCDisassembler *SecondaryDisAsm,
                               const MCInstrAnalysis *MIA, MCInstPrinter *IP,
                               const MCSubtargetInfo *PrimarySTI,
-                              const MCSubtargetInfo *SecondarySTI,
-                              PrettyPrinter &PIP,
-                              SourcePrinter &SP, bool InlineRelocs) {
+                              PrettyPrinter &PIP) {
   const MCSubtargetInfo *STI = PrimarySTI;
   MCDisassembler *DisAsm = PrimaryDisAsm;
 
   std::map<SectionRef, std::vector<RelocationRef>> RelocMap;
-  if (InlineRelocs)
-    RelocMap = getRelocsMap(*Obj);
-  bool Is64Bits = Obj->getBytesInAddress() > 4;
 
   // Create a mapping from virtual address to symbol name.  This is used to
   // pretty print the symbols while disassembling.
@@ -4457,10 +3551,11 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
 
   for (const SymbolRef &Symbol : Obj->symbols()) {
     StringRef Name = unwrapOrError(Symbol.getName(), FileName);
+    if (Name.empty())
+      continue;
 
     if (Obj->isELF() && getElfSymbolType(Obj, Symbol) == ELF::STT_SECTION)
       continue;
-
 
     section_iterator SecI = unwrapOrError(Symbol.getSection(), FileName);
     if (SecI != Obj->section_end())
@@ -4492,24 +3587,13 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
   // Sort all the symbols, this allows us to use a simple binary search to find
   // Multiple symbols can have the same address. Use a stable sort to stabilize
   // the output.
-  StringSet<> FoundDisasmSymbolSet;
+  
   for (std::pair<const SectionRef, SectionSymbolsTy> &SecSyms : AllSymbols)
     stable_sort(SecSyms.second);
   stable_sort(AbsoluteSymbols);
 
-  std::unique_ptr<DWARFContext> DICtx;
-  LiveVariablePrinter LVP(*Ctx.getRegisterInfo(), *STI);
-
-  if (DbgVariables != DVDisabled) {
-    DICtx = DWARFContext::create(*Obj);
-    for (const std::unique_ptr<DWARFUnit> &CU : DICtx->compile_units())
-      LVP.addCompileUnit(CU->getUnitDIE(false));
-  }
-
-  LLVM_DEBUG(LVP.dump());
-
   for (const SectionRef &Section : ToolSectionFilter(*Obj)) {
-    if (FilterSections.empty() &&
+    if (!DisassembleAll &&
         (!Section.isText() || Section.isVirtual()))
       continue;
 
@@ -4520,37 +3604,7 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
 
     // Get the list of all the symbols in this section.
     SectionSymbolsTy &Symbols = AllSymbols[Section];
-    std::vector<MappingSymbolPair> MappingSymbols;
-    if (hasMappingSymbols(Obj)) {
-      for (const auto &Symb : Symbols) {
-        uint64_t Address = Symb.Addr;
-        StringRef Name = Symb.Name;
-        if (Name.startswith("$d"))
-          MappingSymbols.emplace_back(Address - SectionAddr, 'd');
-        if (Name.startswith("$x"))
-          MappingSymbols.emplace_back(Address - SectionAddr, 'x');
-        if (Name.startswith("$a"))
-          MappingSymbols.emplace_back(Address - SectionAddr, 'a');
-        if (Name.startswith("$t"))
-          MappingSymbols.emplace_back(Address - SectionAddr, 't');
-      }
-    }
 
-    llvm::sort(MappingSymbols);
-
-    if (Obj->isELF() && Obj->getArch() == Triple::amdgcn) {
-      // AMDGPU disassembler uses symbolizer for printing labels
-      std::unique_ptr<MCRelocationInfo> RelInfo(
-        TheTarget->createMCRelocationInfo(TripleName, Ctx));
-      if (RelInfo) {
-        std::unique_ptr<MCSymbolizer> Symbolizer(
-          TheTarget->createMCSymbolizer(
-            TripleName, nullptr, nullptr, &Symbols, &Ctx, std::move(RelInfo)));
-        DisAsm->setSymbolizer(std::move(Symbolizer));
-      }
-    }
-
-    StringRef SegmentName = "";
 
     StringRef SectionName = unwrapOrError(Section.getName(), Obj->getFileName());
     // If the section has no symbol at the start, just insert a dummy one.
@@ -4568,8 +3622,6 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
         unwrapOrError(Section.getContents(), Obj->getFileName()));
 
     uint64_t VMAAdjustment = 0;
-    if (shouldAdjustVA(Section))
-      VMAAdjustment = AdjustVMA;
 
     uint64_t Size;
     uint64_t Index;
@@ -4580,17 +3632,12 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
     // Disassemble symbol by symbol.
     for (unsigned SI = 0, SE = Symbols.size(); SI != SE; ++SI) {
       std::string SymbolName = Symbols[SI].Name.str();
-
-      // Skip if --disassemble-symbols is not empty and the symbol is not in
-      // the list.
-      if (!DisasmSymbolSet.empty() && !DisasmSymbolSet.count(SymbolName))
-        continue;
+      if (Demangle)
+        SymbolName = demangle(SymbolName);
 
       uint64_t Start = Symbols[SI].Addr;
       if (Start < SectionAddr || StopAddress <= Start)
         continue;
-      else
-        FoundDisasmSymbolSet.insert(SymbolName);
 
       // The end is the section end, the beginning of the next symbol, or
       // --stop-address.
@@ -4603,23 +3650,42 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
       End -= SectionAddr;
 
 
-      if (Obj->isELF() && Obj->getArch() == Triple::amdgcn) {
-        if (Symbols[SI].Type == ELF::STT_AMDGPU_HSA_KERNEL) {
-          // skip amd_kernel_code_t at the begining of kernel symbol (256 bytes)
-          Start += 256;
-        }
-        if (SI == SE - 1 ||
-            Symbols[SI + 1].Type == ELF::STT_AMDGPU_HSA_KERNEL) {
-          // cut trailing zeroes at the end of kernel
-          // cut up to 256 bytes
-          const uint64_t EndAlign = 256;
-          const auto Limit = End - (std::min)(EndAlign, End - Start);
-          while (End > Limit &&
-            *reinterpret_cast<const support::ulittle32_t*>(&Bytes[End - 4]) == 0)
-            End -= 4;
-        }
+      // Don't print raw contents of a virtual section. A virtual section
+      // doesn't have any contents in the file.
+      if (Section.isVirtual()) {
+        continue;
       }
 
+      auto Status = DisAsm->onSymbolStart(Symbols[SI], Size,
+                                          Bytes.slice(Start, End - Start),
+                                          SectionAddr + Start, CommentStream);
+      // To have round trippable disassembly, we fall back to decoding the
+      // remaining bytes as instructions.
+      //
+      // If there is a failure, we disassemble the failed region as bytes before
+      // falling back. The target is expected to print nothing in this case.
+      //
+      // If there is Success or SoftFail i.e no 'real' failure, we go ahead by
+      // Size bytes before falling back.
+      // So if the entire symbol is 'eaten' by the target:
+      //   Start += Size  // Now Start = End and we will never decode as
+      //                  // instructions
+      //
+      // Right now, most targets return None i.e ignore to treat a symbol
+      // separately. But WebAssembly decodes preludes for some symbols.
+      //
+      if (Status.hasValue()) {
+        if (Status.getValue() == MCDisassembler::Fail) {
+          outs() << "// Error in decoding " << SymbolName
+                 << " : Decoding failed region as bytes.\n";
+          for (uint64_t I = 0; I < Size; ++I) {
+            outs() << "\t.byte\t " << format_hex(Bytes[I], 1, /*Upper=*/true)
+                   << "\n";
+          }
+        }
+      } else {
+        Size = 0;
+      }
 
       Start += Size;
 
@@ -4630,7 +3696,7 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
       // If there is a data/common symbol inside an ELF text section and we are
       // only disassembling text (applicable all architectures), we are in a
       // situation where we must print the data and not disassemble it.
-      if (Obj->isELF() && Section.isText()) {
+      if (Obj->isELF() && !DisassembleAll && Section.isText()) {
         uint8_t SymTy = Symbols[SI].Type;
         if (SymTy == ELF::STT_OBJECT || SymTy == ELF::STT_COMMON) {
           dumpELFData(SectionAddr, Index, End, Bytes);
@@ -4638,58 +3704,43 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
         }
       }
 
-      bool CheckARMELFData = hasMappingSymbols(Obj) &&
-                             Symbols[SI].Type != ELF::STT_OBJECT;
-
-      formatted_raw_ostream FOS(outs());
+      formatted_raw_ostream FOS(*portedOuts::outs);
+      
       while (Index < End) {
-
-            uint64_t MaxOffset = End - Index;
-
-            if (RelCur != RelEnd)
-              MaxOffset = RelCur->getOffset() - Index;
-
-            if (size_t N =
-                    countSkippableZeroBytes(Bytes.slice(Index, MaxOffset))) {
-              Index += N;
-              continue;
-            }
-
-          MCInst Inst;
-          bool Disassembled =
-              DisAsm->getInstruction(Inst, Size, Bytes.slice(Index),
-                                     SectionAddr + Index, CommentStream);
-          if (Size == 0)
-            Size = 1;
-
-          LVP.update({Index, Section.getIndex()},
-                     {Index + Size, Section.getIndex()}, Index + Size != End);
-          
-      std::unique_ptr<const MCRegisterInfo> MRI(
-      TheTarget->createMCRegInfo(TripleName));
-          PIP.printInst(
-              *IP, Disassembled ? &Inst : nullptr, Bytes.slice(Index, Size),
-              {SectionAddr + Index + VMAAdjustment, Section.getIndex()}, FOS,
-              "", *STI, &SP, Obj->getFileName(), &Rels, LVP);
-
-          if (Disassembled && MIA) {
-            uint64_t Target;
-            bool PrintTarget =
-                MIA->evaluateBranch(Inst, SectionAddr + Index, Size, Target);
-            if (!PrintTarget)
-              if (Optional<uint64_t> MaybeTarget =
-                      MIA->evaluateMemoryOperandAddress(
-                          Inst, SectionAddr + Index, Size)) {
-                Target = *MaybeTarget;
-                PrintTarget = true;
-                FOS << "  # " << Twine::utohexstr(Target);
-              }
-
-          }
         
+        // When -z or --disassemble-zeroes are given we always dissasemble
+        // them. Otherwise we might want to skip zero bytes we see.
+        if (!DisassembleZeroes) {
+          uint64_t MaxOffset = End - Index;
+          // For --reloc: print zero blocks patched by relocations, so that
+          // relocations can be shown in the dump.
+          if (RelCur != RelEnd)
+            MaxOffset = RelCur->getOffset() - Index;
 
-        LVP.printAfterInst(FOS);
-        OSS << "\n";
+          if (size_t N =
+                  countSkippableZeroBytes(Bytes.slice(Index, MaxOffset))) {
+            Index += N;
+            continue;
+          }
+        }
+
+        // Disassemble a real instruction or a data when disassemble all is
+        // provided
+        MCInst Inst;
+        bool Disassembled =
+            DisAsm->getInstruction(Inst, Size, Bytes.slice(Index),
+                                   SectionAddr + Index, CommentStream);
+        if (Size == 0)
+          Size = 1;
+
+
+        //dumpBytes(Bytes.slice(Index, Size), FOS);
+        PIP.printInst(
+            *IP, Disassembled ? &Inst : nullptr, Bytes.slice(Index, Size),
+            {SectionAddr + Index + VMAAdjustment, Section.getIndex()}, FOS,
+            "", *STI, Obj->getFileName());
+
+        FOS << "\n";
 
         // Hexagon does this in pretty printer
         if (Obj->getArch() != Triple::hexagon) {
@@ -4710,18 +3761,6 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
             if (Offset >= Index + Size)
               break;
 
-            // When --adjust-vma is used, update the address printed.
-            if (RelCur->getSymbol() != Obj->symbol_end()) {
-              Expected<section_iterator> SymSI =
-                  RelCur->getSymbol()->getSection();
-              if (SymSI && *SymSI != Obj->section_end() &&
-                  shouldAdjustVA(**SymSI))
-                Offset += AdjustVMA;
-            }
-
-            printRelocation(FOS, Obj->getFileName(), *RelCur,
-                            SectionAddr + Offset, Is64Bits);
-            LVP.printAfterOtherLine(FOS, true);
             ++RelCur;
           }
         }
@@ -4732,8 +3771,7 @@ static void disassembleObject(const Target *TheTarget, const ObjectFile *Obj,
   }
 }
 
-
-static void disassembleObject(const ObjectFile *Obj, bool InlineRelocs) {
+static void disassembleObject(const ObjectFile *Obj) {
   const Target *TheTarget = getTarget(Obj);
 
   // Package up features to be passed to target/subtarget
@@ -4774,21 +3812,6 @@ static void disassembleObject(const ObjectFile *Obj, bool InlineRelocs) {
   if (!DisAsm)
     reportError(Obj->getFileName(), "no disassembler for target " + TripleName);
 
-  // If we have an ARM object file, we need a second disassembler, because
-  // ARM CPUs have two different instruction sets: ARM mode, and Thumb mode.
-  // We use mapping symbols to switch between the two assemblers, where
-  // appropriate.
-  std::unique_ptr<MCDisassembler> SecondaryDisAsm;
-  std::unique_ptr<const MCSubtargetInfo> SecondarySTI;
-  if (isArmElf(Obj) && !STI->checkFeatures("+mclass")) {
-    if (STI->checkFeatures("+thumb-mode"))
-      Features.AddFeature("-thumb-mode");
-    else
-      Features.AddFeature("+thumb-mode");
-    SecondarySTI.reset(TheTarget->createMCSubtargetInfo(TripleName, MCPU,
-                                                        Features.getString()));
-    SecondaryDisAsm.reset(TheTarget->createMCDisassembler(*SecondarySTI, Ctx));
-  }
 
   std::unique_ptr<const MCInstrAnalysis> MIA(
       TheTarget->createMCInstrAnalysis(MII.get()));
@@ -4799,555 +3822,13 @@ static void disassembleObject(const ObjectFile *Obj, bool InlineRelocs) {
   if (!IP)
     reportError(Obj->getFileName(),
                 "no instruction printer for target " + TripleName);
-  IP->setPrintImmHex(PrintImmHex);
+  IP->setPrintImmHex(/*PrintImmHex*/false);
   IP->setPrintBranchImmAsAddress(true);
 
   PrettyPrinter &PIP = selectPrettyPrinter(Triple(TripleName));
-  SourcePrinter SP(Obj, TheTarget->getName());
 
-  for (StringRef Opt : DisassemblerOptions)
-    if (!IP->applyTargetSpecificCLOption(Opt))
-      reportError(Obj->getFileName(),
-                  "Unrecognized disassembler option: " + Opt);
-
-  disassembleObject(TheTarget, Obj, Ctx, DisAsm.get(), SecondaryDisAsm.get(),
-                    MIA.get(), IP.get(), STI.get(), SecondarySTI.get(), PIP,
-                    SP, InlineRelocs);
-}
-
-void objdump::printRelocations(const ObjectFile *Obj) {
-  StringRef Fmt = Obj->getBytesInAddress() > 4 ? "%016" PRIx64 :
-                                                 "%08" PRIx64;
-  // Regular objdump doesn't print relocations in non-relocatable object
-  // files.
-  if (!Obj->isRelocatableObject())
-    return;
-
-  // Build a mapping from relocation target to a vector of relocation
-  // sections. Usually, there is an only one relocation section for
-  // each relocated section.
-  MapVector<SectionRef, std::vector<SectionRef>> SecToRelSec;
-  uint64_t Ndx;
-  for (const SectionRef &Section : ToolSectionFilter(*Obj, &Ndx)) {
-    if (Section.relocation_begin() == Section.relocation_end())
-      continue;
-    Expected<section_iterator> SecOrErr = Section.getRelocatedSection();
-    if (!SecOrErr)
-      reportError(Obj->getFileName(),
-                  "section (" + Twine(Ndx) +
-                      "): unable to get a relocation target: " +
-                      toString(SecOrErr.takeError()));
-    SecToRelSec[**SecOrErr].push_back(Section);
-  }
-
-  for (std::pair<SectionRef, std::vector<SectionRef>> &P : SecToRelSec) {
-    StringRef SecName = unwrapOrError(P.first.getName(), Obj->getFileName());
-    outs() << "RELOCATION RECORDS FOR [" << SecName << "]:\n";
-    uint32_t OffsetPadding = (Obj->getBytesInAddress() > 4 ? 16 : 8);
-    uint32_t TypePadding = 24;
-    outs() << left_justify("OFFSET", OffsetPadding) << " "
-           << left_justify("TYPE", TypePadding) << " "
-           << "VALUE\n";
-
-    for (SectionRef Section : P.second) {
-      for (const RelocationRef &Reloc : Section.relocations()) {
-        uint64_t Address = Reloc.getOffset();
-        SmallString<32> RelocName;
-        SmallString<32> ValueStr;
-        if (Address < StartAddress || Address > StopAddress || getHidden(Reloc))
-          continue;
-        Reloc.getTypeName(RelocName);
-        if (Error E = getRelocationValueString(Reloc, ValueStr))
-          reportError(std::move(E), Obj->getFileName());
-
-        outs() << format(Fmt.data(), Address) << " "
-               << left_justify(RelocName, TypePadding) << " " << ValueStr
-               << "\n";
-      }
-    }
-    outs() << "\n";
-  }
-}
-
-void objdump::printDynamicRelocations(const ObjectFile *Obj) {
-  // For the moment, this option is for ELF only
-  if (!Obj->isELF())
-    return;
-
-  const auto *Elf = dyn_cast<ELFObjectFileBase>(Obj);
-  if (!Elf || Elf->getEType() != ELF::ET_DYN) {
-    reportError(Obj->getFileName(), "not a dynamic object");
-    return;
-  }
-
-  std::vector<SectionRef> DynRelSec = Obj->dynamic_relocation_sections();
-  if (DynRelSec.empty())
-    return;
-
-  outs() << "DYNAMIC RELOCATION RECORDS\n";
-  StringRef Fmt = Obj->getBytesInAddress() > 4 ? "%016" PRIx64 : "%08" PRIx64;
-  for (const SectionRef &Section : DynRelSec)
-    for (const RelocationRef &Reloc : Section.relocations()) {
-      uint64_t Address = Reloc.getOffset();
-      SmallString<32> RelocName;
-      SmallString<32> ValueStr;
-      Reloc.getTypeName(RelocName);
-      if (Error E = getRelocationValueString(Reloc, ValueStr))
-        reportError(std::move(E), Obj->getFileName());
-      outs() << format(Fmt.data(), Address) << " " << RelocName << " "
-             << ValueStr << "\n";
-    }
-}
-
-// Returns true if we need to show LMA column when dumping section headers. We
-// show it only when the platform is ELF and either we have at least one section
-// whose VMA and LMA are different and/or when --show-lma flag is used.
-static bool shouldDisplayLMA(const ObjectFile *Obj) {
-  if (!Obj->isELF())
-    return false;
-  for (const SectionRef &S : ToolSectionFilter(*Obj))
-    if (S.getAddress() != getELFSectionLMA(S))
-      return true;
-  return ShowLMA;
-}
-
-static size_t getMaxSectionNameWidth(const ObjectFile *Obj) {
-  // Default column width for names is 13 even if no names are that long.
-  size_t MaxWidth = 13;
-  for (const SectionRef &Section : ToolSectionFilter(*Obj)) {
-    StringRef Name = unwrapOrError(Section.getName(), Obj->getFileName());
-    MaxWidth = std::max(MaxWidth, Name.size());
-  }
-  return MaxWidth;
-}
-
-void objdump::printSectionHeaders(const ObjectFile *Obj) {
-  size_t NameWidth = getMaxSectionNameWidth(Obj);
-  size_t AddressWidth = 2 * Obj->getBytesInAddress();
-  bool HasLMAColumn = shouldDisplayLMA(Obj);
-  if (HasLMAColumn)
-    outs() << "Sections:\n"
-              "Idx "
-           << left_justify("Name", NameWidth) << " Size     "
-           << left_justify("VMA", AddressWidth) << " "
-           << left_justify("LMA", AddressWidth) << " Type\n";
-  else
-    outs() << "Sections:\n"
-              "Idx "
-           << left_justify("Name", NameWidth) << " Size     "
-           << left_justify("VMA", AddressWidth) << " Type\n";
-
-  uint64_t Idx;
-  for (const SectionRef &Section : ToolSectionFilter(*Obj, &Idx)) {
-    StringRef Name = unwrapOrError(Section.getName(), Obj->getFileName());
-    uint64_t VMA = Section.getAddress();
-    if (shouldAdjustVA(Section))
-      VMA += AdjustVMA;
-
-    uint64_t Size = Section.getSize();
-
-    std::string Type = Section.isText() ? "TEXT" : "";
-    if (Section.isData())
-      Type += Type.empty() ? "DATA" : " DATA";
-    if (Section.isBSS())
-      Type += Type.empty() ? "BSS" : " BSS";
-
-    if (HasLMAColumn)
-      outs() << format("%3" PRIu64 " %-*s %08" PRIx64 " ", Idx, NameWidth,
-                       Name.str().c_str(), Size)
-             << format_hex_no_prefix(VMA, AddressWidth) << " "
-             << format_hex_no_prefix(getELFSectionLMA(Section), AddressWidth)
-             << " " << Type << "\n";
-    else
-      outs() << format("%3" PRIu64 " %-*s %08" PRIx64 " ", Idx, NameWidth,
-                       Name.str().c_str(), Size)
-             << format_hex_no_prefix(VMA, AddressWidth) << " " << Type << "\n";
-  }
-}
-
-void objdump::printSectionContents(const ObjectFile *Obj) {
-  for (const SectionRef &Section : ToolSectionFilter(*Obj)) {
-    StringRef Name = unwrapOrError(Section.getName(), Obj->getFileName());
-    uint64_t BaseAddr = Section.getAddress();
-    uint64_t Size = Section.getSize();
-    if (!Size)
-      continue;
-
-    outs() << "Contents of section " << Name << ":\n";
-    if (Section.isBSS()) {
-      outs() << format("<skipping contents of bss section at [%04" PRIx64
-                       ", %04" PRIx64 ")>\n",
-                       BaseAddr, BaseAddr + Size);
-      continue;
-    }
-
-    StringRef Contents = unwrapOrError(Section.getContents(), Obj->getFileName());
-
-    // Dump out the content as hex and printable ascii characters.
-    for (std::size_t Addr = 0, End = Contents.size(); Addr < End; Addr += 16) {
-      outs() << format(" %04" PRIx64 " ", BaseAddr + Addr);
-      // Dump line of hex.
-      for (std::size_t I = 0; I < 16; ++I) {
-        if (I != 0 && I % 4 == 0)
-          outs() << ' ';
-        if (Addr + I < End)
-          outs() << hexdigit((Contents[Addr + I] >> 4) & 0xF, true)
-                 << hexdigit(Contents[Addr + I] & 0xF, true);
-        else
-          outs() << "  ";
-      }
-      // Print ascii.
-      outs() << "  ";
-      for (std::size_t I = 0; I < 16 && Addr + I < End; ++I) {
-        if (isPrint(static_cast<unsigned char>(Contents[Addr + I]) & 0xFF))
-          outs() << Contents[Addr + I];
-        else
-          outs() << ".";
-      }
-    }
-  }
-}
-
-void objdump::printSymbolTable(const ObjectFile *O, StringRef ArchiveName,
-                               StringRef ArchitectureName, bool DumpDynamic) {
-  if (O->isCOFF() && !DumpDynamic) {
-    outs() << "SYMBOL TABLE:\n";
-    printCOFFSymbolTable(cast<const COFFObjectFile>(O));
-    return;
-  }
-
-  const StringRef FileName = O->getFileName();
-
-  if (!DumpDynamic) {
-    outs() << "SYMBOL TABLE:\n";
-    for (auto I = O->symbol_begin(); I != O->symbol_end(); ++I)
-      printSymbol(O, *I, FileName, ArchiveName, ArchitectureName, DumpDynamic);
-    return;
-  }
-
-  outs() << "DYNAMIC SYMBOL TABLE:\n";
-  if (!O->isELF()) {
-    reportWarning(
-        "this operation is not currently supported for this file format",
-        FileName);
-    return;
-  }
-
-  const ELFObjectFileBase *ELF = cast<const ELFObjectFileBase>(O);
-  for (auto I = ELF->getDynamicSymbolIterators().begin();
-       I != ELF->getDynamicSymbolIterators().end(); ++I)
-    printSymbol(O, *I, FileName, ArchiveName, ArchitectureName, DumpDynamic);
-}
-
-void objdump::printSymbol(const ObjectFile *O, const SymbolRef &Symbol,
-                          StringRef FileName, StringRef ArchiveName,
-                          StringRef ArchitectureName, bool DumpDynamic) {
-  const MachOObjectFile *MachO = dyn_cast<const MachOObjectFile>(O);
-  uint64_t Address = unwrapOrError(Symbol.getAddress(), FileName, ArchiveName,
-                                   ArchitectureName);
-  if ((Address < StartAddress) || (Address > StopAddress))
-    return;
-  SymbolRef::Type Type =
-      unwrapOrError(Symbol.getType(), FileName, ArchiveName, ArchitectureName);
-  uint32_t Flags =
-      unwrapOrError(Symbol.getFlags(), FileName, ArchiveName, ArchitectureName);
-
-  // Don't ask a Mach-O STAB symbol for its section unless you know that
-  // STAB symbol's section field refers to a valid section index. Otherwise
-  // the symbol may error trying to load a section that does not exist.
-  bool IsSTAB = false;
-  if (MachO) {
-    DataRefImpl SymDRI = Symbol.getRawDataRefImpl();
-    uint8_t NType =
-        (MachO->is64Bit() ? MachO->getSymbol64TableEntry(SymDRI).n_type
-                          : MachO->getSymbolTableEntry(SymDRI).n_type);
-    if (NType & MachO::N_STAB)
-      IsSTAB = true;
-  }
-  section_iterator Section = IsSTAB
-                                 ? O->section_end()
-                                 : unwrapOrError(Symbol.getSection(), FileName,
-                                                 ArchiveName, ArchitectureName);
-
-  StringRef Name;
-  if (Type == SymbolRef::ST_Debug && Section != O->section_end()) {
-    if (Expected<StringRef> NameOrErr = Section->getName())
-      Name = *NameOrErr;
-    else
-      consumeError(NameOrErr.takeError());
-
-  } else {
-    Name = unwrapOrError(Symbol.getName(), FileName, ArchiveName,
-                         ArchitectureName);
-  }
-
-  bool Global = Flags & SymbolRef::SF_Global;
-  bool Weak = Flags & SymbolRef::SF_Weak;
-  bool Absolute = Flags & SymbolRef::SF_Absolute;
-  bool Common = Flags & SymbolRef::SF_Common;
-  bool Hidden = Flags & SymbolRef::SF_Hidden;
-
-  char GlobLoc = ' ';
-  if ((Section != O->section_end() || Absolute) && !Weak)
-    GlobLoc = Global ? 'g' : 'l';
-  char IFunc = ' ';
-  if (O->isELF()) {
-    if (ELFSymbolRef(Symbol).getELFType() == ELF::STT_GNU_IFUNC)
-      IFunc = 'i';
-    if (ELFSymbolRef(Symbol).getBinding() == ELF::STB_GNU_UNIQUE)
-      GlobLoc = 'u';
-  }
-
-  char Debug = ' ';
-  if (DumpDynamic)
-    Debug = 'D';
-  else if (Type == SymbolRef::ST_Debug || Type == SymbolRef::ST_File)
-    Debug = 'd';
-
-  char FileFunc = ' ';
-  if (Type == SymbolRef::ST_File)
-    FileFunc = 'f';
-  else if (Type == SymbolRef::ST_Function)
-    FileFunc = 'F';
-  else if (Type == SymbolRef::ST_Data)
-    FileFunc = 'O';
-
-  const char *Fmt = O->getBytesInAddress() > 4 ? "%016" PRIx64 : "%08" PRIx64;
-
-  outs() << format(Fmt, Address) << " "
-         << GlobLoc            // Local -> 'l', Global -> 'g', Neither -> ' '
-         << (Weak ? 'w' : ' ') // Weak?
-         << ' '                // Constructor. Not supported yet.
-         << ' '                // Warning. Not supported yet.
-         << IFunc              // Indirect reference to another symbol.
-         << Debug              // Debugging (d) or dynamic (D) symbol.
-         << FileFunc           // Name of function (F), file (f) or object (O).
-         << ' ';
-  if (Absolute) {
-    outs() << "*ABS*";
-  } else if (Common) {
-    outs() << "*COM*";
-  } else if (Section == O->section_end()) {
-    outs() << "*UND*";
-  } else {
-    if (MachO) {
-      DataRefImpl DR = Section->getRawDataRefImpl();
-      StringRef SegmentName = MachO->getSectionFinalSegmentName(DR);
-      outs() << SegmentName << ",";
-    }
-    StringRef SectionName = unwrapOrError(Section->getName(), FileName);
-    outs() << SectionName;
-  }
-
-  if (Common || O->isELF()) {
-    uint64_t Val =
-        Common ? Symbol.getAlignment() : ELFSymbolRef(Symbol).getSize();
-    outs() << '\t' << format(Fmt, Val);
-  }
-
-  if (O->isELF()) {
-    uint8_t Other = ELFSymbolRef(Symbol).getOther();
-    switch (Other) {
-    case ELF::STV_DEFAULT:
-      break;
-    case ELF::STV_INTERNAL:
-      outs() << " .internal";
-      break;
-    case ELF::STV_HIDDEN:
-      outs() << " .hidden";
-      break;
-    case ELF::STV_PROTECTED:
-      outs() << " .protected";
-      break;
-    default:
-      outs() << format(" 0x%02x", Other);
-      break;
-    }
-  } else if (Hidden) {
-    outs() << " .hidden";
-  }
-
-  if (Demangle)
-    outs() << ' ' << demangle(std::string(Name)) << '\n';
-  else
-    outs() << ' ' << Name << '\n';
-}
-
-static void printUnwindInfo(const ObjectFile *O) {
-  outs() << "Unwind info:\n\n";
-
-  if (const COFFObjectFile *Coff = dyn_cast<COFFObjectFile>(O))
-    printCOFFUnwindInfo(Coff);
-  else if (const MachOObjectFile *MachO = dyn_cast<MachOObjectFile>(O))
-    printMachOUnwindInfo(MachO);
-  else
-    // TODO: Extract DWARF dump tool to objdump.
-    WithColor::error(errs(), ToolName)
-        << "This operation is only currently supported "
-           "for COFF and MachO object files.\n";
-}
-
-/// Dump the raw contents of the __clangast section so the output can be piped
-/// into llvm-bcanalyzer.
-static void printRawClangAST(const ObjectFile *Obj) {
-  if (outs().is_displayed()) {
-    WithColor::error(errs(), ToolName)
-        << "The -raw-clang-ast option will dump the raw binary contents of "
-           "the clang ast section.\n"
-           "Please redirect the output to a file or another program such as "
-           "llvm-bcanalyzer.\n";
-    return;
-  }
-
-  StringRef ClangASTSectionName("__clangast");
-  if (Obj->isCOFF()) {
-    ClangASTSectionName = "clangast";
-  }
-
-  Optional<object::SectionRef> ClangASTSection;
-  for (auto Sec : ToolSectionFilter(*Obj)) {
-    StringRef Name;
-    if (Expected<StringRef> NameOrErr = Sec.getName())
-      Name = *NameOrErr;
-    else
-      consumeError(NameOrErr.takeError());
-
-    if (Name == ClangASTSectionName) {
-      ClangASTSection = Sec;
-      break;
-    }
-  }
-  if (!ClangASTSection)
-    return;
-
-  StringRef ClangASTContents = unwrapOrError(
-      ClangASTSection.getValue().getContents(), Obj->getFileName());
-  outs().write(ClangASTContents.data(), ClangASTContents.size());
-}
-
-static void printFaultMaps(const ObjectFile *Obj) {
-  StringRef FaultMapSectionName;
-
-  if (Obj->isELF()) {
-    FaultMapSectionName = ".llvm_faultmaps";
-  } else if (Obj->isMachO()) {
-    FaultMapSectionName = "__llvm_faultmaps";
-  } else {
-    WithColor::error(errs(), ToolName)
-        << "This operation is only currently supported "
-           "for ELF and Mach-O executable files.\n";
-    return;
-  }
-
-  Optional<object::SectionRef> FaultMapSection;
-
-  for (auto Sec : ToolSectionFilter(*Obj)) {
-    StringRef Name;
-    if (Expected<StringRef> NameOrErr = Sec.getName())
-      Name = *NameOrErr;
-    else
-      consumeError(NameOrErr.takeError());
-
-    if (Name == FaultMapSectionName) {
-      FaultMapSection = Sec;
-      break;
-    }
-  }
-
-  outs() << "FaultMap table:\n";
-
-  if (!FaultMapSection.hasValue()) {
-    outs() << "<not found>\n";
-    return;
-  }
-
-  StringRef FaultMapContents =
-      unwrapOrError(FaultMapSection.getValue().getContents(), Obj->getFileName());
-  FaultMapParser FMP(FaultMapContents.bytes_begin(),
-                     FaultMapContents.bytes_end());
-
-  outs() << FMP;
-}
-
-static void printPrivateFileHeaders(const ObjectFile *O, bool OnlyFirst) {
-  if (O->isELF()) {
-    printELFFileHeader(O);
-    printELFDynamicSection(O);
-    printELFSymbolVersionInfo(O);
-    return;
-  }
-  if (O->isCOFF())
-    return printCOFFFileHeader(O);
-  if (O->isWasm())
-    return printWasmFileHeader(O);
-  if (O->isMachO()) {
-    printMachOFileHeader(O);
-    if (!OnlyFirst)
-      printMachOLoadCommands(O);
-    return;
-  }
-  reportError(O->getFileName(), "Invalid/Unsupported object file format");
-}
-
-static void printFileHeaders(const ObjectFile *O) {
-  if (!O->isELF() && !O->isCOFF())
-    reportError(O->getFileName(), "Invalid/Unsupported object file format");
-
-  Triple::ArchType AT = O->getArch();
-  outs() << "architecture: " << Triple::getArchTypeName(AT) << "\n";
-  uint64_t Address = unwrapOrError(O->getStartAddress(), O->getFileName());
-
-  StringRef Fmt = O->getBytesInAddress() > 4 ? "%016" PRIx64 : "%08" PRIx64;
-  outs() << "start address: "
-         << "0x" << format(Fmt.data(), Address) << "\n\n";
-}
-
-static void printArchiveChild(StringRef Filename, const Archive::Child &C) {
-  Expected<sys::fs::perms> ModeOrErr = C.getAccessMode();
-  if (!ModeOrErr) {
-    WithColor::error(errs(), ToolName) << "ill-formed archive entry.\n";
-    consumeError(ModeOrErr.takeError());
-    return;
-  }
-  sys::fs::perms Mode = ModeOrErr.get();
-  outs() << ((Mode & sys::fs::owner_read) ? "r" : "-");
-  outs() << ((Mode & sys::fs::owner_write) ? "w" : "-");
-  outs() << ((Mode & sys::fs::owner_exe) ? "x" : "-");
-  outs() << ((Mode & sys::fs::group_read) ? "r" : "-");
-  outs() << ((Mode & sys::fs::group_write) ? "w" : "-");
-  outs() << ((Mode & sys::fs::group_exe) ? "x" : "-");
-  outs() << ((Mode & sys::fs::others_read) ? "r" : "-");
-  outs() << ((Mode & sys::fs::others_write) ? "w" : "-");
-  outs() << ((Mode & sys::fs::others_exe) ? "x" : "-");
-
-  outs() << " ";
-
-  outs() << format("%d/%d %6" PRId64 " ", unwrapOrError(C.getUID(), Filename),
-                   unwrapOrError(C.getGID(), Filename),
-                   unwrapOrError(C.getRawSize(), Filename));
-
-  StringRef RawLastModified = C.getRawLastModified();
-  unsigned Seconds;
-  if (RawLastModified.getAsInteger(10, Seconds))
-    outs() << "(date: \"" << RawLastModified
-           << "\" contains non-decimal chars) ";
-  else {
-    // Since ctime(3) returns a 26 character string of the form:
-    // "Sun Sep 16 01:03:52 1973\n\0"
-    // just print 24 characters.
-    time_t t = Seconds;
-    outs() << format("%.24s ", ctime(&t));
-  }
-
-  StringRef Name = "";
-  Expected<StringRef> NameOrErr = C.getName();
-  if (!NameOrErr) {
-    consumeError(NameOrErr.takeError());
-    Name = unwrapOrError(C.getRawName(), Filename);
-  } else {
-    Name = NameOrErr.get();
-  }
-  outs() << Name << "\n";
+  disassembleObject(TheTarget, Obj, Ctx, DisAsm.get(),
+                    MIA.get(), IP.get(), STI.get(), PIP);
 }
 
 // For ELF only now.
@@ -5392,159 +3873,28 @@ static void dumpObject(ObjectFile *O, const Archive *A = nullptr,
   if (StartAddress.getNumOccurrences() || StopAddress.getNumOccurrences())
     checkForInvalidStartStopAddress(O, StartAddress, StopAddress);
 
-  // Note: the order here matches GNU objdump for compatability.
-  StringRef ArchiveName = A ? A->getFileName() : "";
-  if (ArchiveHeaders && !MachOOpt && C)
-    printArchiveChild(ArchiveName, *C);
-  if (FileHeaders)
-    printFileHeaders(O);
-  if (PrivateHeaders || FirstPrivateHeader)
-    printPrivateFileHeaders(O, FirstPrivateHeader);
-  if (SectionHeaders)
-    printSectionHeaders(O);
-  if (SymbolTable)
-    printSymbolTable(O, ArchiveName);
-  if (DynamicSymbolTable)
-    printSymbolTable(O, ArchiveName, /*ArchitectureName=*/"",
-                     /*DumpDynamic=*/true);
-  if (DwarfDumpType != DIDT_Null) {
-    std::unique_ptr<DIContext> DICtx = DWARFContext::create(*O);
-    // Dump the complete DWARF structure.
-    DIDumpOptions DumpOpts;
-    DumpOpts.DumpType = DwarfDumpType;
-    DICtx->dump(outs(), DumpOpts);
-  }
-  if (Relocations && !Disassemble)
-    printRelocations(O);
-  if (DynamicRelocations)
-    printDynamicRelocations(O);
-  if (SectionContents)
-    printSectionContents(O);
+
   if (Disassemble)
-    disassembleObject(O, Relocations);
-  if (UnwindInfo)
-    printUnwindInfo(O);
-
-  // Mach-O specific options:
-  if (ExportsTrie)
-    printExportsTrie(O);
-  if (Rebase)
-    printRebaseTable(O);
-  if (Bind)
-    printBindTable(O);
-  if (LazyBind)
-    printLazyBindTable(O);
-  if (WeakBind)
-    printWeakBindTable(O);
-
-  // Other special sections:
-  if (RawClangAST)
-    printRawClangAST(O);
-  if (FaultMapSection)
-    printFaultMaps(O);
-}
-
-static void dumpObject(const COFFImportFile *I, const Archive *A,
-                       const Archive::Child *C = nullptr) {
-  StringRef ArchiveName = A ? A->getFileName() : "";
-
-  if (ArchiveHeaders && !MachOOpt && C)
-    printArchiveChild(ArchiveName, *C);
-  if (SymbolTable)
-    printCOFFSymbolTable(I);
-}
-
-/// Dump each object file in \a a;
-static void dumpArchive(const Archive *A) {
-  Error Err = Error::success();
-  unsigned I = -1;
-  for (auto &C : A->children(Err)) {
-    ++I;
-    Expected<std::unique_ptr<Binary>> ChildOrErr = C.getAsBinary();
-    if (!ChildOrErr) {
-      if (auto E = isNotObjectErrorInvalidFileType(ChildOrErr.takeError()))
-        reportError(std::move(E), getFileNameForError(C, I), A->getFileName());
-      continue;
-    }
-    if (ObjectFile *O = dyn_cast<ObjectFile>(&*ChildOrErr.get()))
-      dumpObject(O, A, &C);
-    else if (COFFImportFile *I = dyn_cast<COFFImportFile>(&*ChildOrErr.get()))
-      dumpObject(I, A, &C);
-    else
-      reportError(errorCodeToError(object_error::invalid_file_type),
-                  A->getFileName());
-  }
-  if (Err)
-    reportError(std::move(Err), A->getFileName());
+    disassembleObject(O);
 }
 
 /// Open file and figure out how to dump it.
 static void dumpInput(StringRef file) {
-  // If we are using the Mach-O specific object file parser, then let it parse
-  // the file and process the command line options.  So the -arch flags can
-  // be used to select specific slices, etc.
-  if (MachOOpt) {
-    parseInputMachO(file);
-    return;
-  }
-
   // Attempt to open the binary.
   OwningBinary<Binary> OBinary = unwrapOrError(createBinary(file), file);
   Binary &Binary = *OBinary.getBinary();
 
-  if (Archive *A = dyn_cast<Archive>(&Binary))
-    dumpArchive(A);
-  else if (ObjectFile *O = dyn_cast<ObjectFile>(&Binary))
+  if (ObjectFile *O = dyn_cast<ObjectFile>(&Binary))
     dumpObject(O);
-  else if (MachOUniversalBinary *UB = dyn_cast<MachOUniversalBinary>(&Binary))
-    parseInputMachO(UB);
   else
     reportError(errorCodeToError(object_error::invalid_file_type), file);
 }
 
-int hexCharToInt(char a){
-    if(a>='0' && a<='9')
-        return (a-48);
-    else if(a>='a' && a<='f')
-        return (a-87);
-    else return 0;
-}
-
-char hexIntToChar(int b){
-
-int a = b%16;
-    if(a >= 0 && a <= 9)
-        return (char)(a + 48);
-    else if(a >= 10 && a <= 15)
-        return (char)(a + 87);
-    else return 'Z';
-}
-
-template< typename T >
-std::string int_to_hex( T i )
-{
-  std::stringstream stream;
-  stream << std::hex << i;
-  return stream.str();
-}
-
-
 int main(int argc, char **argv) {
-
   using namespace llvm;
   InitLLVM X(argc, argv);
-  const cl::OptionCategory *OptionFilters[] = {&ObjdumpCat, &MachOCat};
+  const cl::OptionCategory *OptionFilters[] = {&ObjdumpCat};
   cl::HideUnrelatedOptions(OptionFilters);
-
-  SmallVector<const char *, 256> argv2(argv, argv + argc);
-
-  std::string fileName = "";
-  for(int i=0; i<argv2.size(); i++){
-    if(StringRef(argv[i]).endswith(".o"))
-      fileName = std::string(StringRef(argv[i]).rtrim(".o"));
-  }
-
-  OSS.open(fileName + "out.hex", fstream::in | fstream::out | fstream::trunc);
 
   // Initialize targets and assembly printers/parsers.
   InitializeAllTargetInfos();
@@ -5554,44 +3904,35 @@ int main(int argc, char **argv) {
   // Register the target printer for --version.
   cl::AddExtraVersionPrinter(TargetRegistry::printRegisteredTargetsForVersion);
 
-  cl::ParseCommandLineOptions(argc, argv, "alp obfuscator object file to hex generator and encryptor\n", nullptr,
+  cl::ParseCommandLineOptions(argc, argv, "llvm object file dumper\n", nullptr,
                               /*EnvVar=*/nullptr,
                               /*LongOptionsUseDoubleDash=*/true);
 
-  if (StartAddress >= StopAddress)
-    reportCmdLineError("start address should be less than stop address");
-
   ToolName = argv[0];
 
-  if(instnum != "")
-    num = std::stoi(instnum);
+  SmallVector<const char *, 256> argv2(argv, argv + argc);
+  std::string fileName = "";
+  for(int i=0; i<argv2.size(); i++){
+    if(StringRef(argv[i]).endswith(".o"))
+      fileName = std::string(StringRef(argv[i]).rtrim(".o"));
+  }
+
+  portedOuts::outs = new llvm::raw_fd_ostream(fileName + "out.hex", portedOuts::EC);
 
   // Defaults to a.out if no filenames specified.
   if (InputFilenames.empty())
     InputFilenames.push_back("a.out");
 
-  if (AllHeaders)
-    ArchiveHeaders = FileHeaders = PrivateHeaders = Relocations =
-        SectionHeaders = SymbolTable = true;
-
-  if (DisassembleAll || PrintSource || PrintLines ||
-      !DisassembleSymbols.empty())
+  if (DisassembleAll)
     Disassemble = true;
 
-  if (!ArchiveHeaders && !Disassemble && DwarfDumpType == DIDT_Null &&
-      !DynamicRelocations && !FileHeaders && !PrivateHeaders && !RawClangAST &&
-      !Relocations && !SectionHeaders && !SectionContents && !SymbolTable &&
-      !DynamicSymbolTable && !UnwindInfo && !FaultMapSection &&
-      !(MachOOpt &&
-        (Bind || DataInCode || DylibId || DylibsUsed || ExportsTrie ||
-         FirstPrivateHeader || IndirectSymbols || InfoPlist || LazyBind ||
-         LinkOptHints || ObjcMetaData || Rebase || UniversalHeaders ||
-         WeakBind || !FilterSections.empty()))) {
+  if (!Disassemble) {
     cl::PrintHelpMessage();
     return 2;
   }
 
-  DisasmSymbolSet.insert(DisassembleSymbols.begin(), DisassembleSymbols.end());
+  if(instnum != "")
+    num = std::stoi(instnum);
 
   // before hex dump
   int i = 0;
@@ -6003,23 +4344,18 @@ int main(int argc, char **argv) {
   if(cencq1instsArr[14] == 1) c_swsp   = true;
   if(cencq1instsArr[15] == 1) c_fswsp  = true;
   if(cencq1instsArr[16] == 1) c_sdsp   = true;
-  
-  // hex dump
+
   llvm::for_each(InputFilenames, dumpInput);
 
-  warnOnNoMatchForSections();
+  formatted_raw_ostream OOS(*portedOuts::outs);
 
-  OSS<<"";
-  
-  OSS.close();
-  
-  OSS.open(fileName + "out.hex", fstream::in | fstream::out);
+  std::fstream OSS;
+  OSS.open(fileName + "out.hex", std::fstream::in | std::fstream::out);
   
   std::string hashstr = "00000000000000000000000000000000";
   std::string binArr = "";
   
-  OSS.clear();
-  OSS.seekg(ios_base::beg);
+  OSS.seekg(std::ios_base::beg);
 
   std::string line;
   while (std::getline(OSS, line)){
@@ -6037,10 +4373,604 @@ int main(int argc, char **argv) {
       }
   }
 
-  OSS.clear();
-  OSS.seekg(ios_base::beg);
-  
-  OSS<<int_to_hex(std::stoll(hashstr, NULL, 2));
+  OSS.seekg(std::ios_base::beg);
 
+  std::vector<unsigned char> hash(picosha2::k_digest_size);
+  picosha2::hash256(hashstr.begin(), hashstr.end(), hash.begin(), hash.end());
+  std::string hex_str = picosha2::bytes_to_hex_string(hash.begin(), hash.end());
+  OOS << hex_str << "\n";
+
+  std::string instkeys =
+  std::to_string(lui)+
+  std::to_string(auipc)+
+  std::to_string(jal)+
+  std::to_string(jalr)+
+  std::to_string(beq)+
+  std::to_string(bne)+
+  std::to_string(blt)+
+  std::to_string(bge)+
+  std::to_string(bltu)+
+  std::to_string(bgeu)+
+  std::to_string(lb)+
+  std::to_string(lh)+
+  std::to_string(lw)+
+  std::to_string(lbu)+
+  std::to_string(lhu)+
+  std::to_string(sb)+
+  std::to_string(sh)+
+  std::to_string(sw)+
+  std::to_string(addi)+
+  std::to_string(slti)+
+  std::to_string(sltiu)+
+  std::to_string(xori)+
+  std::to_string(ori)+
+  std::to_string(andi)+
+  std::to_string(slli)+
+  std::to_string(srli)+
+  std::to_string(srai)+
+  std::to_string(add)+
+  std::to_string(sub)+
+  std::to_string(sll)+
+  std::to_string(slt)+
+  std::to_string(sltu)+
+  std::to_string(xor_)+
+  std::to_string(srl)+
+  std::to_string(sra)+
+  std::to_string(or_)+
+  std::to_string(and_)+
+  std::to_string(fence)+
+  std::to_string(fence_i)+
+  std::to_string(ecall)+
+  std::to_string(ebreak)+
+  std::to_string(csrrw)+
+  std::to_string(csrrs)+
+  std::to_string(csrrc)+
+  std::to_string(csrrwi)+
+  std::to_string(csrrsi)+
+  std::to_string(csrrci)+
+  
+  // rv64i
+  std::to_string(lwu)+
+  std::to_string(ld)+
+  std::to_string(sd)+
+  //std::to_string(slli)+
+  //std::to_string(srli)+
+  //std::to_string(srai)+
+  std::to_string(addiw)+
+  std::to_string(slliw)+
+  std::to_string(srliw)+
+  std::to_string(sraiw)+
+  std::to_string(addw)+
+  std::to_string(subw)+
+  std::to_string(sllw)+
+  std::to_string(srlw)+
+  std::to_string(sraw)+
+  
+  // rv32m
+  std::to_string(mul)+
+  std::to_string(mulh)+ 
+  std::to_string(mulhsu)+   
+  std::to_string(mulhu)+  
+  std::to_string(div_)+
+  std::to_string(divu)+ 
+  std::to_string(rem)+
+  std::to_string(remu)+
+  
+  
+  // rv64m
+  std::to_string(mulw)+
+  std::to_string(divw)+
+  std::to_string(divuw)+ 
+  std::to_string(remw)+
+  std::to_string(remuw)+
+  
+  // rv32a
+  std::to_string(lr_w)+
+  std::to_string(sc_w)+
+  std::to_string(amoswap_w)+   
+  std::to_string(amoadd_w)+  
+  std::to_string(amoxor_w)+  
+  std::to_string(amoand_w)+  
+  std::to_string(amoor_w)+ 
+  std::to_string(amomin_w)+  
+  std::to_string(amomax_w)+  
+  std::to_string(amominu_w)+   
+  std::to_string(amomaxu_w)+
+  
+  // rv64a
+  std::to_string(lr_d)+
+  std::to_string(sc_d)+
+  std::to_string(amoswap_d)+
+  std::to_string(amoadd_d)+
+  std::to_string(amoxor_d)+
+  std::to_string(amoand_d)+
+  std::to_string(amoor_d)+
+  std::to_string(amomin_d)+
+  std::to_string(amomax_d)+
+  std::to_string(amominu_d)+
+  std::to_string(amomaxu_d)+
+  
+  // rv32f
+  std::to_string(flw)+
+  std::to_string(fsw)+
+  std::to_string(fmadd_s)+
+  std::to_string(fmsub_s)+
+  std::to_string(fnmsub_s)+
+  std::to_string(fnmadd_s)+
+  std::to_string(fadd_s)+
+  std::to_string(fsub_s)+
+  std::to_string(fmul_s)+
+  std::to_string(fdiv_s)+
+  std::to_string(fsqrt_s)+
+  std::to_string(fsgnj_s)+
+  std::to_string(fsgnjn_s)+
+  std::to_string(fsgnjx_s)+
+  std::to_string(fmin_s)+
+  std::to_string(fmax_s)+
+  std::to_string(fcvt_w_s)+
+  std::to_string(fcvt_wu_s)+
+  std::to_string(fmv_x_w)+
+  std::to_string(feq_s)+
+  std::to_string(flt_s)+
+  std::to_string(fle_s)+
+  std::to_string(fclass_s)+
+  std::to_string(fcvt_s_w)+
+  std::to_string(fcvt_s_wu)+
+  std::to_string(fmv_w_x)+
+  
+  // rv64f
+  std::to_string( fcvt_l_s)+
+  std::to_string( fcvt_lu_s)+
+  std::to_string( fcvt_s_l)+
+  std::to_string( fcvt_s_lu)+
+  
+  // rv32d
+  std::to_string(fld)+
+  std::to_string(fsd)+
+  std::to_string(fmadd_d)+
+  std::to_string(fmsub_d)+
+  std::to_string(fnmsub_d)+
+  std::to_string(fnmadd_d)+
+  std::to_string(fadd_d)+
+  std::to_string(fsub_d)+
+  std::to_string(fmul_d)+
+  std::to_string(fdiv_d)+
+  std::to_string(fsqrt_d)+
+  std::to_string(fsgnj_d)+
+  std::to_string(fsgnjn_d)+
+  std::to_string(fsgnjx_d)+
+  std::to_string(fmin_d)+
+  std::to_string(fmax_d)+
+  std::to_string(fcvt_s_d)+
+  std::to_string(fcvt_d_s)+
+  std::to_string(feq_d)+
+  std::to_string(flt_d)+
+  std::to_string(fle_d)+
+  std::to_string(fclass_d)+
+  std::to_string(fcvt_w_d)+
+  std::to_string(fcvt_wu_d)+
+  std::to_string(fcvt_d_w)+
+  std::to_string(fcvt_d_wu)+
+  
+  // rv64d
+  std::to_string(fcvt_l_d)+
+  std::to_string(fcvt_lu_d)+
+  std::to_string(fmv_x_d)+
+  std::to_string(fcvt_d_l)+
+  std::to_string(fcvt_d_lu)+
+  std::to_string(fmv_d_x)+
+  
+  // rv32q
+  std::to_string(flq)+
+  std::to_string(fsq)+
+  std::to_string(fmadd_q)+
+  std::to_string(fmsub_q)+
+  std::to_string(fnmsub_q)+
+  std::to_string(fnmadd_q)+
+  std::to_string(fadd_q)+
+  std::to_string(fsub_q)+
+  std::to_string(fmul_q)+
+  std::to_string(fdiv_q)+
+  std::to_string(fsqrt_q)+
+  std::to_string(fsgnj_q)+
+  std::to_string(fsgnjn_q)+
+  std::to_string(fsgnjx_q)+
+  std::to_string(fmin_q)+
+  std::to_string(fmax_q)+
+  std::to_string(fcvt_s_q)+
+  std::to_string(fcvt_q_s)+
+  std::to_string(fcvt_d_q)+
+  std::to_string(fcvt_q_d)+
+  std::to_string(feq_q)+
+  std::to_string(flt_q)+
+  std::to_string(fle_q)+
+  std::to_string(fclass_q)+
+  std::to_string(fcvt_w_q)+
+  std::to_string(fcvt_wu_q)+
+  std::to_string(fcvt_q_w)+
+  std::to_string(fcvt_q_wu)+
+  
+  // rv64q
+  std::to_string(fcvt_l_q)+
+  std::to_string(fcvt_lu_q)+
+  std::to_string(fcvt_q_l)+
+  std::to_string(fcvt_q_lu)+
+  
+  // rvc quadrant 0
+  std::to_string(c_addi4spn)+
+  std::to_string(c_fld)+
+  std::to_string(c_lq)+
+  std::to_string(c_lw)+
+  std::to_string(c_flw)+
+  std::to_string(c_ld)+
+  std::to_string(c_fsd)+
+  std::to_string(c_sq)+
+  std::to_string(c_sw)+
+  std::to_string(c_fsw)+
+  std::to_string(c_sd)+
+  
+  // rvc quadrant 1
+  std::to_string(c_nop)+
+  std::to_string(c_addi)+
+  std::to_string(c_jal)+
+  std::to_string(c_addiw)+
+  std::to_string(c_li)+
+  std::to_string(c_addi16sp)+
+  std::to_string(c_lui)+
+  std::to_string(c_srli)+
+  std::to_string(c_srli64)+
+  std::to_string(c_srai)+
+  std::to_string(c_srai64)+
+  std::to_string(c_andi)+
+  std::to_string(c_sub)+
+  std::to_string(c_xor)+
+  std::to_string(c_or)+
+  std::to_string(c_and)+
+  std::to_string(c_subw)+
+  std::to_string(c_addw)+
+  std::to_string(c_j)+
+  std::to_string(c_beqz)+
+  std::to_string(c_bnez)+
+  
+  // rvc quadrant 2
+  std::to_string(c_slli)+
+  std::to_string(c_slli64)+
+  std::to_string(c_fldsp)+
+  std::to_string(c_lqsp)+
+  std::to_string(c_lwsp)+
+  std::to_string(c_flwsp)+
+  std::to_string(c_ldsp)+
+  std::to_string(c_jr)+
+  std::to_string(c_mv)+
+  std::to_string(c_ebreak)+
+  std::to_string(c_jalr)+
+  std::to_string(c_add)+
+  std::to_string(c_fsdsp)+
+  std::to_string(c_sqsp)+
+  std::to_string(c_swsp)+
+  std::to_string(c_fswsp)+
+  std::to_string(c_sdsp);
+
+  if(!instkeys.empty())
+    OOS<<instkeys<<"\n";
+
+  std::string keys =
+  enckeyall + " " +
+
+  ienc32key + " " +
+  menc32key + " " +
+  aenc32key + " " +
+  fenc32key + " " +
+  denc32key + " " +
+  qenc32key + " " +
+ 
+  ienc64key + " " +
+  menc64key + " " +
+  aenc64key + " " +
+  fenc64key + " " +
+  denc64key + " " +
+  qenc64key + " " +
+ 
+  cencq0key + " " +
+  cencq1key + " " +
+  cencq2key + " " +
+ 
+  ienc32insts + " " +
+  menc32insts + " " +
+  aenc32insts + " " +
+  fenc32insts + " " +
+  denc32insts + " " +
+  qenc32insts + " " +
+ 
+  ienc64insts + " " +
+  menc64insts + " " +
+  aenc64insts + " " + 
+  fenc64insts + " " + 
+  denc64insts + " " + 
+  qenc64insts + " " + 
+ 
+  cencq0insts + " " +
+  cencq1insts + " " +
+  cencq2insts;
+
+  if(!keys.empty())
+    OOS<<keys<<"\n";
+
+  std::string b_p_keys = 
+  // rv32i
+  b_p_lui+ " " +
+  b_p_auipc+ " " +
+  b_p_jal+ " " +
+  b_p_jalr+ " " +
+  b_p_beq+ " " +
+  b_p_bne+ " " +
+  b_p_blt+ " " +
+  b_p_bge+ " " +
+  b_p_bltu+ " " +
+  b_p_bgeu+ " " +
+  b_p_lb+ " " +
+  b_p_lh+ " " +
+  b_p_lw+ " " +
+  b_p_lbu+ " " +
+  b_p_lhu+ " " +
+  b_p_sb+ " " +
+  b_p_sh+ " " +
+  b_p_sw+ " " +
+  b_p_addi+ " " +
+  b_p_slti+ " " +
+  b_p_sltiu+ " " +
+  b_p_xori+ " " +
+  b_p_ori+ " " +
+  b_p_andi+ " " +
+  b_p_slli+ " " +
+  b_p_srli+ " " +
+  b_p_srai+ " " +
+  b_p_add+ " " +
+  b_p_sub+ " " +
+  b_p_sll+ " " +
+  b_p_slt+ " " +
+  b_p_sltu+ " " +
+  b_p_xor_+ " " +
+  b_p_srl+ " " +
+  b_p_sra+ " " +
+  b_p_or_+ " " +
+  b_p_and_+ " " +
+  b_p_fence+ " " +
+  b_p_fence_i+ " " +
+  b_p_ecall+ " " +
+  b_p_ebreak+ " " +
+  b_p_csrrw+ " " +
+  b_p_csrrs+ " " +
+  b_p_csrrc+ " " +
+  b_p_csrrwi+ " " +
+  b_p_csrrsi+ " " +
+  b_p_csrrci+ " " +
+  
+  // rv64i
+  b_p_lwu+ " " +
+  b_p_ld+ " " +
+  b_p_sd+ " " +
+  //b_p_slli+ " " +
+  //b_p_srli+ " " +
+  //b_p_srai+ " " +
+  b_p_addiw+ " " +
+  b_p_slliw+ " " +
+  b_p_srliw+ " " +
+  b_p_sraiw+ " " +
+  b_p_addw+ " " +
+  b_p_subw+ " " +
+  b_p_sllw+ " " +
+  b_p_srlw+ " " +
+  b_p_sraw+ " " +
+  
+  // rv32m
+  b_p_mul+ " " +
+  b_p_mulh+ " " + 
+  b_p_mulhsu+ " " +   
+  b_p_mulhu+ " " +  
+  b_p_div_+ " " +
+  b_p_divu+ " " + 
+  b_p_rem+ " " +
+  b_p_remu+ " " +
+  
+  
+  // rv64m
+  b_p_mulw+ " " +
+  b_p_divw+ " " +
+  b_p_divuw+ " " + 
+  b_p_remw+ " " +
+  b_p_remuw+ " " +
+  
+  // rv32a
+  b_p_lr_w+ " " +
+  b_p_sc_w+ " " +
+  b_p_amoswap_w+ " " +   
+  b_p_amoadd_w+ " " +  
+  b_p_amoxor_w+ " " +  
+  b_p_amoand_w+ " " +  
+  b_p_amoor_w+ " " + 
+  b_p_amomin_w+ " " +  
+  b_p_amomax_w+ " " +  
+  b_p_amominu_w+ " " +   
+  b_p_amomaxu_w+ " " +
+  
+  // rv64a
+  b_p_lr_d+ " " +
+  b_p_sc_d+ " " +
+  b_p_amoswap_d+ " " +
+  b_p_amoadd_d+ " " +
+  b_p_amoxor_d+ " " +
+  b_p_amoand_d+ " " +
+  b_p_amoor_d+ " " +
+  b_p_amomin_d+ " " +
+  b_p_amomax_d+ " " +
+  b_p_amominu_d+ " " +
+  b_p_amomaxu_d+ " " +
+  
+  // rv32f
+  b_p_flw+ " " +
+  b_p_fsw+ " " +
+  b_p_fmadd_s+ " " +
+  b_p_fmsub_s+ " " +
+  b_p_fnmsub_s+ " " +
+  b_p_fnmadd_s+ " " +
+  b_p_fadd_s+ " " +
+  b_p_fsub_s+ " " +
+  b_p_fmul_s+ " " +
+  b_p_fdiv_s+ " " +
+  b_p_fsqrt_s+ " " +
+  b_p_fsgnj_s+ " " +
+  b_p_fsgnjn_s+ " " +
+  b_p_fsgnjx_s+ " " +
+  b_p_fmin_s+ " " +
+  b_p_fmax_s+ " " +
+  b_p_fcvt_w_s+ " " +
+  b_p_fcvt_wu_s+ " " +
+  b_p_fmv_x_w+ " " +
+  b_p_feq_s+ " " +
+  b_p_flt_s+ " " +
+  b_p_fle_s+ " " +
+  b_p_fclass_s+ " " +
+  b_p_fcvt_s_w+ " " +
+  b_p_fcvt_s_wu+ " " +
+  b_p_fmv_w_x+ " " +
+  
+  // rv64f
+  b_p_fcvt_l_s+ " " +
+  b_p_fcvt_lu_s+ " " +
+  b_p_fcvt_s_l+ " " +
+  b_p_fcvt_s_lu+ " " +
+  
+  // rv32d
+  b_p_fld+ " " +
+  b_p_fsd+ " " +
+  b_p_fmadd_d+ " " +
+  b_p_fmsub_d+ " " +
+  b_p_fnmsub_d+ " " +
+  b_p_fnmadd_d+ " " +
+  b_p_fadd_d+ " " +
+  b_p_fsub_d+ " " +
+  b_p_fmul_d+ " " +
+  b_p_fdiv_d+ " " +
+  b_p_fsqrt_d+ " " +
+  b_p_fsgnj_d+ " " +
+  b_p_fsgnjn_d+ " " +
+  b_p_fsgnjx_d+ " " +
+  b_p_fmin_d+ " " +
+  b_p_fmax_d+ " " +
+  b_p_fcvt_s_d+ " " +
+  b_p_fcvt_d_s+ " " +
+  b_p_feq_d+ " " +
+  b_p_flt_d+ " " +
+  b_p_fle_d+ " " +
+  b_p_fclass_d+ " " +
+  b_p_fcvt_w_d+ " " +
+  b_p_fcvt_wu_d+ " " +
+  b_p_fcvt_d_w+ " " +
+  b_p_fcvt_d_wu+ " " +
+  
+  // rv64d
+  b_p_fcvt_l_d+ " " +
+  b_p_fcvt_lu_d+ " " +
+  b_p_fmv_x_d+ " " +
+  b_p_fcvt_d_l+ " " +
+  b_p_fcvt_d_lu+ " " +
+  b_p_fmv_d_x+ " " +
+  
+  // rv32q
+  b_p_flq+ " " +
+  b_p_fsq+ " " +
+  b_p_fmadd_q+ " " +
+  b_p_fmsub_q+ " " +
+  b_p_fnmsub_q+ " " +
+  b_p_fnmadd_q+ " " +
+  b_p_fadd_q+ " " +
+  b_p_fsub_q+ " " +
+  b_p_fmul_q+ " " +
+  b_p_fdiv_q+ " " +
+  b_p_fsqrt_q+ " " +
+  b_p_fsgnj_q+ " " +
+  b_p_fsgnjn_q+ " " +
+  b_p_fsgnjx_q+ " " +
+  b_p_fmin_q+ " " +
+  b_p_fmax_q+ " " +
+  b_p_fcvt_s_q+ " " +
+  b_p_fcvt_q_s+ " " +
+  b_p_fcvt_d_q+ " " +
+  b_p_fcvt_q_d+ " " +
+  b_p_feq_q+ " " +
+  b_p_flt_q+ " " +
+  b_p_fle_q+ " " +
+  b_p_fclass_q+ " " +
+  b_p_fcvt_w_q+ " " +
+  b_p_fcvt_wu_q+ " " +
+  b_p_fcvt_q_w+ " " +
+  b_p_fcvt_q_wu+ " " +
+  
+  // rv64q
+  b_p_fcvt_l_q+ " " +
+  b_p_fcvt_lu_q+ " " +
+  b_p_fcvt_q_l+ " " +
+  b_p_fcvt_q_lu+ " " +
+  
+  // rvc quadrant 0
+  b_p_c_addi4spn+ " " +
+  b_p_c_fld+ " " +
+  b_p_c_lq+ " " +
+  b_p_c_lw+ " " +
+  b_p_c_flw+ " " +
+  b_p_c_ld+ " " +
+  b_p_c_fsd+ " " +
+  b_p_c_sq+ " " +
+  b_p_c_sw+ " " +
+  b_p_c_fsw+ " " +
+  b_p_c_sd+ " " +
+  
+  // rvc quadrant 1
+  b_p_c_nop+ " " +
+  b_p_c_addi+ " " +
+  b_p_c_jal+ " " +
+  b_p_c_addiw+ " " +
+  b_p_c_li+ " " +
+  b_p_c_addi16sp+ " " +
+  b_p_c_lui+ " " +
+  b_p_c_srli+ " " +
+  b_p_c_srli64+ " " +
+  b_p_c_srai+ " " +
+  b_p_c_srai64+ " " +
+  b_p_c_andi+ " " +
+  b_p_c_sub+ " " +
+  b_p_c_xor+ " " +
+  b_p_c_or+ " " +
+  b_p_c_and+ " " +
+  b_p_c_subw+ " " +
+  b_p_c_addw+ " " +
+  b_p_c_j+ " " +
+  b_p_c_beqz+ " " +
+  b_p_c_bnez+ " " +
+  
+  // rvc quadrant 2
+  b_p_c_slli+ " " +
+  b_p_c_slli64+ " " +
+  b_p_c_fldsp+ " " +
+  b_p_c_lqsp+ " " +
+  b_p_c_lwsp+ " " +
+  b_p_c_flwsp+ " " +
+  b_p_c_ldsp+ " " +
+  b_p_c_jr+ " " +
+  b_p_c_mv+ " " +
+  b_p_c_ebreak+ " " +
+  b_p_c_jalr+ " " +
+  b_p_c_add+ " " +
+  b_p_c_fsdsp+ " " +
+  b_p_c_sqsp+ " " +
+  b_p_c_swsp+ " " +
+  b_p_c_fswsp+ " " +
+  b_p_c_sdsp;
+
+  if(!b_p_keys.empty())
+    OOS << b_p_keys << "\n";
+
+  OSS.close();
   return EXIT_SUCCESS;
 }
