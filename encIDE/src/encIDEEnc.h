@@ -1,10 +1,8 @@
-#ifndef encIDEENC_H
-#define encIDEENC_H
+#ifndef ENCIDEENC_H
+#define ENCIDEENC_H
 
-//(*Headers(encIDEenc)
 #include <wx/checkbox.h>
 #include <wx/frame.h>
-//*)
 
 #include <algorithm>
 #include <vector>
@@ -16,18 +14,14 @@
 #include <wx/event.h>
 #include <wx/gdicmn.h>
 
-#include "encIDEMain.h"
-#include "encIDEselBits.h"
+#include <wx/textctrl.h>
 
-class encIDEenc: public wxFrame
+class encIDEEnc: public wxFrame
 {
 	public:
 
-		encIDEenc(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
-		virtual ~encIDEenc();
-
-		//(*Declarations(encIDEenc)
-		//*)
+		encIDEEnc(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		virtual ~encIDEEnc();
 
 		wxCheckBox* CHK_ienc32insts;
         wxCheckBox* CHK_menc32insts;
@@ -51,7 +45,7 @@ class encIDEenc: public wxFrame
 		wxButton* Button1;
 		wxButton* goBckBtn;
 		wxButton* addAlp;
-
+		//wxStaticText* lbl1;
 		wxStaticText* LBL_ienc32insts;
         wxStaticText* LBL_menc32insts;
         wxStaticText* LBL_aenc32insts;
@@ -77,10 +71,6 @@ class encIDEenc: public wxFrame
 		void OnCheckBoxes(wxCommandEvent& event);
 
 	protected:
-
-		//(*Identifiers(encIDEenc)
-		//*)
-
 		static const long ID_CHK_ienc32insts;
         static const long ID_CHK_menc32insts;
         static const long ID_CHK_aenc32insts;
@@ -102,7 +92,7 @@ class encIDEenc: public wxFrame
 		static const long ID_BUTTON1;
 		static const long ID_BUTTON2;
 		static const long ID_BUTTON3;
-
+		//static const long ID_STATICTEXT1;
 		static const long ID_LBL_ienc32insts;
         static const long ID_LBL_menc32insts;
         static const long ID_LBL_aenc32insts;
@@ -126,10 +116,6 @@ class encIDEenc: public wxFrame
 
 
 	private:
-
-		//(*Handlers(encIDEenc)
-		//*)
-
 		void OngoBckBtnClick(wxCommandEvent& event);
 		void OnSelBitsBtnClick(wxCommandEvent& event);
 		void OnaddAlpBtnClick(wxCommandEvent& event);
@@ -138,6 +124,5 @@ class encIDEenc: public wxFrame
 
 		DECLARE_EVENT_TABLE()
 };
-
 
 #endif
