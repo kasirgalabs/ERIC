@@ -25,13 +25,8 @@ set(LLVM_LINK_COMPONENTS
 
 add_llvm_executable(elf2encryptedhex
   elf2encryptedhex.cpp
-  COFFDump.cpp
   ELFDump.cpp
-  MachODump.cpp
-  WasmDump.cpp
-  XCOFFDump.cpp
 
   DEPENDS
   intrinsics_gen
   )
-
