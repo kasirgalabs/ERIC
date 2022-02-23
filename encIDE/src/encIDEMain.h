@@ -1,82 +1,132 @@
-#ifndef encIDEMAIN_H
-#define encIDEMAIN_H
+#ifndef ENCIDEMAIN_H
+#define ENCIDEMAIN_H
 
-//(*Headers(encIDEFrame)
 #include <wx/menu.h>
-#include <wx/statusbr.h>
 #include <wx/frame.h>
-//*)
-
-#include <wx/button.h>
-#include <wx/choice.h>
+#include <wx/statusbr.h>
 #include <wx/stc/stc.h>
-#include <wx/sizer.h>
-#include <wx/file.h>
-#include <wx/filedlg.h>
-#include <wx/textfile.h>
-#include <wx/textdlg.h>
-#include <wx/textctrl.h>
-#include <wx/string.h>
 
-#include "encIDEenc.h"
-
-//std::string compStr;
 class encIDEFrame: public wxFrame
 {
     public:
 
-        encIDEFrame(wxWindow* parent,wxWindowID id = -1);
+        encIDEFrame(wxWindow* parent, wxWindowID id = -1);
         virtual ~encIDEFrame();
 
     private:
+        double screenRatio;
 
-        //(*Handlers(encIDEFrame)
-        void OnQuit(wxCommandEvent& event);
-        void OnAbout(wxCommandEvent& event);
-        void OnClose(wxCloseEvent& event);
-        //*)
+        long windowWidth;
+        long windowHeight;
 
-        void OnSave(wxCommandEvent& event);
-        void OnOpenFile(wxCommandEvent& event);
-        void OnCompile(wxCommandEvent& event);
-        void OnSetCompPath(wxCommandEvent& event);
-        void OnSetRiscvTarget(wxCommandEvent& event);
-        void OnSetRiscvPath(wxCommandEvent& event);
-        void OnEncrypt(wxCommandEvent& event);
-        void OnCheckCompStr(wxCommandEvent& event);
+        long windowPositionX;
+        long windowPositionY;
 
-        //(*Identifiers(encIDEFrame)
-        static const long ID_MENUITEM1;
+        long zoomLevel;
+
+        wxMenuBar* topMenuBar;
+
+        // File Menu
+        wxMenu* fileMenu;
+
+        wxMenuItem* openFileItem;
+        static const long idMenuOpenFile;
+
+        wxMenuItem* saveFileItem;
+        static const long idMenuSaveFile;
+
+        wxMenuItem* compileFileItem;
+        static const long idMenuCompileFile;
+
+        wxMenuItem* quitItem;
+        static const long idMenuQuit;
+        // End of File Menu
+
+        // View Menu
+        wxMenu* viewMenu;
+
+        wxMenuItem* zoomInItem;
+        static const long idMenuZoomIn;
+
+        wxMenuItem* zoomOutItem;
+        static const long idMenuZoomOut;
+        // End of View Menu
+
+        // Options Menu
+        wxMenu* optionsMenu;
+
+        wxMenuItem* setCompilerPathItem;
+        static const long idMenuSetCompilerPath;
+
+        wxMenuItem* setRiscvPathItem;
+        static const long idMenuSetRiscvPath;
+        
+        wxMenuItem* setRiscvTargetOptionItem;
+        static const long idMenuSetRiscvTargetOption;
+
+        wxMenuItem* addExtraCompilerFlagsItem;
+        static const long idMenuAddExtraCompilerFlags;
+
+        wxMenuItem* checkCompileStringItem;
+        static const long idMenuCheckCompileString;
+
+        wxMenuItem* addCustomEncryptorItem;
+        static const long idMenuAddCustomEncryptor;
+
+        wxMenuItem* encryptItem;
+        static const long idMenuEncrypt;
+        // End of Options Menu
+
+        // Help Menu
+        wxMenu* helpMenu;
+
+        wxMenuItem* aboutItem;
         static const long idMenuAbout;
-        static const long ID_STATUSBAR1;
-        //*)
+        // End of Help Menu
 
-        static const long idSaveFile;
-        static const long idOpenFile;
-        static const long idComp;
-        static const long idCompPath;
-        static const long idRiscvTarget;
-        static const long idRiscvPath;
-        static const long idEncrypt;
-        static const long idCheckCompStr;
+        wxStatusBar* statusBar;
+        static const long idStatusBar;
 
-        static const long ID_CHOICE1;
-        static const long ID_CHOICE2;
+        wxStyledTextCtrl* textEditor;
+        static const long idTextEditor;
 
-        static const long ID_STYLEDTEXTCTRL1;
+        wxString filePath;
+        wxString compilerPath;
+        wxString riscvRootPath;
+        wxString riscvTargetOption;
+        wxString extraCompilerFlags;
+        wxString lastOpenedFile;
+        wxString customEncryptorPath;
 
+        void setTextEditorAndStyle();
 
+        void onOpenFile(wxCommandEvent& event);
+        void onSaveFile(wxCommandEvent& event);
+        void onCompileFile(wxCommandEvent& event);
+        void onQuit(wxCommandEvent& event);
 
-        //(*Declarations(encIDEFrame)
-        wxStatusBar* StatusBar1;
-        //*)
+        void onZoomIn(wxCommandEvent& event);
+        void onZoomOut(wxCommandEvent& event);
 
-        wxChoice* Choice1;
-        wxChoice* Choice2;
+        void onSetCompilerPath(wxCommandEvent& event);
+        void onSetRiscvPath(wxCommandEvent& event);
+        void onSetRiscvTargetOption(wxCommandEvent& event);
+        void onAddExtraCompilerFlags(wxCommandEvent& event);
+        void onCheckCompileString(wxCommandEvent& event);
+        void onAddCustomEncryptor(wxCommandEvent& event);
+        void onEncrypt(wxCommandEvent& event);
 
-        wxStyledTextCtrl* StyledTextCtrl1;
+        void onAbout(wxCommandEvent& event);
+
+        void onClose(wxCloseEvent& event);
+
+        void readConfigs();
+        void resetConfigs();
+
+        void whileAppClosing();
+        void animateWindowWhileClosing();
 
         DECLARE_EVENT_TABLE()
 };
 
-#endif // encIDEMAIN_H
+#endif
