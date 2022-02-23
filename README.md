@@ -1,4 +1,7 @@
 # ERIC - An Efficient and Practical Software Obfuscation Framework #
+
+![image](screenshots/idecollage1.png)
+
 ERIC (Encryption tool for RISCV with Compiler) has an LLVM-based compiler that provides many encryption options for riscv-based systems.
 
 By using ERIC, you can make the programs you compile run on authorized hardware. For this, you need to have a key or password synthesized in your user processor.
