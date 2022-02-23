@@ -1,32 +1,34 @@
-# ERIC - Encryption tool for RISCV with Compiler #
-ERIC is an LLVM-based compiler that provides many encryption options for riscv-based systems.
+# ERIC - An Efficient and Practical Software Obfuscation Framework #
+
+![image](screenshots/idecollage1.png)
+
+ERIC (Encryption tool for RISCV with Compiler) has an LLVM-based compiler that provides many encryption options for riscv-based systems.
 
 By using ERIC, you can make the programs you compile run on authorized hardware. For this, you need to have a key or password synthesized in your user processor.
 
 In addition, it can be used in cases where you want the data kept in memory to remain encrypted or depending on the needs such as keeping the program securely.
 
-ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported:
+ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported (and also user desired [custom](https://github.com/Celuk/ERIC#how-can-anyone-add-his-own-encryption-method-by-ide-or-internally)):
 
-### [1. Instruction-Level Full Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#1-instruction-level-full-encryption-1) ###
+### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC#1-instruction-level-full-encryption-1) ###
    
    This method encrypts the instructions one by one. It provides encryption of all instructions in the program by entering a specific key.
    
-### [2. Instruction-Level Partial Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#2-instruction-level-partial-encryption-1) ###
+### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC#2-instruction-level-partial-encryption-1) ###
  
    This method supports unlimited customization. You can choose the types of instructions you think are critical to your program and only encrypt them. You can also encrypt each instruction to correspond to different bits within itself.
- 
-### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption-1) ###
- 
-   In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can manually give the public and private key pairs to the system yourself, or you can ask ERIC to automatically generate a public key.
 
+### [3. Memory-Level Encryption](https://github.com/Celuk/ERIC#3-memory-level-encryption) ###
+
+In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can give `--rsa` flag to use 32 bit RSA encryption and manually give the public and private key pairs to the system yourself [internally](https://github.com/Celuk/ERIC/blob/main/clangport-and-elf2encryptedhex/src/elf2encryptedhex/elf2encryptedhex.cpp#L84).
 
 The thing to remember is that ERIC is a compiler with an interface developed for encryption. In order to run the encrypted programs you have compiled here, you need at least some hardware that does decryption. We will soon publish our hardware module that can work in integration with ERIC.
 
-
-# Requirements #
+# Dependencies #
 
 * [LLVM library](https://github.com/llvm/llvm-project) built for RISCV target (LLVM installation)
 * [wxWidgets library](https://github.com/wxWidgets/wxWidgets) built for IDE (wxWidgets installation)
+* [riscv-gnu-toolchain library](https://github.com/riscv-collab/riscv-gnu-toolchain) built for using standard headers (e.g. stdio.h) (riscv-gnu-toolchain installation)
 
 # Required Installations For Linux #
 
@@ -47,10 +49,19 @@ sudo apt install ninja-build
 ### 1.2 LLVM Installation ###
 
 #### Recommended Installation ####
+Here normally you can clone LLVM library as:
+
 ```bash
-git clone https://github.com/llvm/llvm-project.git && \
-cd llvm-project && \
-mkdir build && \ cd build && \
+git clone https://github.com/llvm/llvm-project.git
+```
+
+However we are using LLVM 11.1.0, so download from: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-11.1.0.zip
+unzip and after that for build (We think that we will update for newer versions of LLVM and Clang such as 13 version):
+
+```bash
+cd llvm-project-llvmorg-11.1.0 && \
+mkdir build && \ 
+cd build && \
 cmake -G Ninja \
 -DLLVM_ENABLE_PROJECTS=clang \ 
 -DLLVM_TARGETS_TO_BUILD=all \
@@ -66,9 +77,9 @@ cmake --build .
 ```
 
 #### Recommended Light Installation ####
+
 ```bash
-git clone https://github.com/llvm/llvm-project.git && \
-cd llvm-project && \
+cd llvm-project-llvmorg-11.1.0 && \
 mkdir build && \
 cd build && \
 cmake -G Ninja \
@@ -93,6 +104,7 @@ sudo apt install libgtk-3-dev
 #### 2.2 wxWidgets Installation ####
 ```bash
 git clone https://github.com/wxWidgets/wxWidgets && \
+cd wxWidgets && \
 mkdir gtk-build && \
 cd gtk-build && \
 ../configure && \
@@ -103,37 +115,37 @@ sudo ldconfig
 
 # Cloning Repository #
 ```bash
-git clone https://github.com/kasirgalabs/ERIC
+git clone https://github.com/Celuk/ERIC
 ```
 
 # Building Repository #
 
-### 1. Building kasirga Compiler and alp Encryption Tool ###
+### 1. Building clangport Compiler and elf2encryptedhex Encryption Tool ###
 
-**1-)** Go to **kasirga-compiler-and-alp** directory. Then create a build directory and change directory:
+**1-)** Go to **clangport-and-elf2encryptedhex** directory. Then create a build directory and change directory:
 ```bash
-cd kasirga-compiler-and-alp
+cd clangport-and-elf2encryptedhex
 mkdir build
 cd build
 ```
 
-**2-)** Export your LLVM directories:
+**2-)** Export your LLVM directories(LLVM build and main directory are seperated because build directory can be anywhere):
 
 ```bash
-export LLVM_PROJECT_DIR={your-llvm-project-directory}
-export LLVM_BUILD_DIR={your-llvm-install-or-build-directory}
+export LLVM_PROJECT_DIR={your-llvm-project-directory} # LLVM main directory
+export LLVM_DIR={your-llvm-install-or-build-directory} # LLVM build directory
 ```
 
 Example:
 ```bash
 export LLVM_PROJECT_DIR=~/llvm/llvm-project
-export LLVM_BUILD_DIR=~/llvm/llvm-project/build
+export LLVM_DIR=~/llvm/llvm-project/build
 ```
 
 **3-)** Configure with cmake:
 
 ```bash
-cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
+cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
 ```
 
 **4-)** Build with cmake or make:
@@ -162,14 +174,14 @@ Even if this does not change your compiler, you can try set your compilers at 3.
 cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
 ```
 
-Further information, you can look for changing compiler that I answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
+Further information, you can look for changing compiler that answered on [stackoverflow](https://stackoverflow.com/questions/68349442/how-to-fix-undefined-reference-llvm-error-while-linking-cxx-executable/68568867#68568867).
 
-**Now you can find your executables in /kasirga-compiler-and-alp/build/bin folder as alp and kasirga variants.**
+**Now you can find your executables in /clangport-and-elf2encryptedhex/build/bin folder as elf2encryptedhex and clangport variants.**
 
-### 2. Building kasirgaIDE ###
-**1-)** Go to **kasirgaIDE** directory. Then create a build directory and change directory:
+### 2. Building encIDE ###
+**1-)** Go to **encIDE** directory. Then create a build directory and change directory:
 ```bash
-cd kasirgaIDE
+cd encIDE
 mkdir build
 cd build
 ```
@@ -192,11 +204,11 @@ make
 
 # Usage of Tools, Compiler and IDE #
 
-## alp LLVM Based Encryptor and Hex Generator ##
+## elf2encryptedhex LLVM Based Encryptor and Hex Generator ##
 
-You can use 'alp' to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
+You can use 'elf2encryptedhex' to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
-### [1. Instruction-Level Full Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#1-instruction-level-full-encryption) ###
+### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC#1-instruction-level-full-encryption) ###
 
 We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rv64i, rv64m, rv64a, rv64f, rv64d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions. (Not supported RSA encryption for now.)
 
@@ -207,7 +219,7 @@ We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, 
 
 **Example usage:** 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp --enckeyall="10100100101000000000001000000101" -d example.o
+/home/shc/ERIC/clangport-and-elf2encryptedhex/build/bin/elf2encryptedhex --enckeyall="10100100101000000000001000000101" -d example.o
 ```
 
 This will xor all instructions (all of hex code) with given enckeyall.
@@ -223,11 +235,11 @@ In example
 )
 
 
-### [2. Instruction-Level Partial Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#2-instruction-level-partial-encryption) ###
+### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC#2-instruction-level-partial-encryption) ###
 
 We have two options to encrypt hex code partially, extension specific and instruction specific. 
 
-#### [2.1. Instruction-Level Partial Extension Specific Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#21-instruction-level-partial-extension-specific-encryption) ####
+#### [2.1. Instruction-Level Partial Extension Specific Encryption](https://github.com/Celuk/ERIC#21-instruction-level-partial-extension-specific-encryption) ####
 
 We have 15 flags (+2 unsupported rvq extension flags) to extension specific instruction encryption:
 
@@ -849,7 +861,7 @@ Also we have instruction flags as seperately instead of instruction bit lists. (
 We can encrypt (xor) given instructions with given keys by combining them. Here is an example:
 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp \
+/home/shc/ERIC/clangport-and-elf2encryptedhex/build/bin/elf2encryptedhex \
 --ienc32key=11011010110100010001101001100001 \
 --ienc32insts=10000010000001100000010000000000100100001000000 \
 --cencq1key=0000111010100010 \
@@ -876,7 +888,7 @@ c.addi16sp  ^  0000111010100010
 ```
 Xoring with 1 means flipping corresponding bit. So for example above, 3. 4. 5. 7. 9. and 13. bits (assume that most left bit is 0.) of `c.addi` instructions in the compiled program will flip.
 
-#### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/kasirgalabs/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
+#### [2.2. Instruction-Level Partial Instruction Specific Encryption](https://github.com/Celuk/ERIC#22-instruction-level-partial-instruction-specific-encryption) ####
 
 For any instruction, we can encrypt (xor) each instruction with the given key that given for a specific instruction. Instruction partial encryption flags can be seen as spoilers below. Every flag has ```b_p_``` prefix that means ```bits partial```.
 
@@ -1228,7 +1240,7 @@ For any instruction, we can encrypt (xor) each instruction with the given key th
 We can partially encrypt (xor) given instructions with given keys. Here is an example:
 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/alp \
+/home/shc/ERIC/clangport-and-elf2encryptedhex/build/bin/elf2encryptedhex \
 --b_p_auipc=00010001100111000001110000000101 \
 --b_p_c_add=1001000000000100 \
 -d example.o
@@ -1244,62 +1256,58 @@ c.add  ^  1001000000000100
 ```
 Xoring with 1 means flipping corresponding bit. This encryption will flip 3. 7. 8. 11. 12. 13. 19. 20. 21. 29. 31. bits (assume that most left bit is 0.) of `auipc` instructions and 0. 3. 13. bits of `c.add` instructions in the compiled program. 
 
-### [3. Memory-Level Encryption](https://github.com/kasirgalabs/ERIC/blob/main/README.md#3-memory-level-encryption) ###
+## clangport LLVM Based Compiler ##
 
-**Work In Progress**
-
-## kasirga LLVM Based Compiler ##
-
-You can use kasirga as clang-like compiler. If you compile a .c code to object code and give `--alp="<alp-encryption options>"` flag it will also run alp obfuscator and give encrypted or non-encrypted hex code.
-
+`clangport` is a `c/c++` compiler that ported from `clang` compiler driver to compile c/c++ files and drive `hex code obfuscator`. So, you can use `clangport` with full-featured as `clang` or `gcc` like compiler. If you compile a .c code to object code and give `--elf2encryptedhex="<elf2encryptedhex-encryption options>"` flag it will also run elf2encryptedhex obfuscator and give encrypted or non-encrypted hex code according to your choices.
+   
 **Example usages:**
 
-Host pc executable (when `kasirga` is in path):
+Host pc executable (when `clangport` is in path):
 
 ```bash
-kasirga example.c -o example
+clangport example.c -o example
 ```
 
-Host pc assembly code (when in /home/shc/ERIC/kasirga-compiler-and-alp/build/bin directory):
+Host pc assembly code (when in /home/shc/ERIC/clangport-and-elf2encryptedhex/build/bin directory):
 
 ```bash
-./kasirga -S example.c -o example.s 
+./clangport -S example.c -o example.s 
 ```
 
 Host pc llvm ir code:
 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/kasirga -S -emit-llvm example.c -o example.ll 
+/home/shc/ERIC/clangport-and-elf2encryptedhex/build/bin/clangport -S -emit-llvm example.c -o example.ll 
 ```
 
 Host pc object code:
 
 ```bash
-/home/shc/ERIC/kasirga-compiler-and-alp/build/bin/kasirga -c example.c -o example.o
+/home/shc/ERIC/clangport-and-elf2encryptedhex/build/bin/clangport -c example.c -o example.o
 ```
 
 riscv32 object code:
 
 ```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga -c -target riscv32-unknown-elf --sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new/_install/ example.c -o example.o
+/home/shc/Desktop/clangport/build/bin/clangport -c -target riscv32-unknown-elf --sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf --gcc-toolchain=/home/shc/riscv-new/_install/ example.c -o example.o
 ```
 
 I am using --sysroot and --gcc-toolchain flags to compile for riscv. You need to have riscv-gnu-toolchain pre installed.
-For --sysroot and --gcc-toolchain flags you can look here that I answered on [stackoverflow](https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v).
+For --sysroot and --gcc-toolchain flags you can look here that answered on [stackoverflow](https://stackoverflow.com/questions/68580399/using-clang-to-compile-for-risc-v).
 
-riscv32 object code (also `--alp="<alp-encryption options>"` flag given, so driver will run alp obfuscator and also give .hex file output):
+riscv32 object code (also `--elf2encryptedhex="<elf2encryptedhex-encryption options>"` flag given, so driver will run elf2encryptedhex obfuscator and also give .hex file output):
 
 ```bash
-/home/shc/Desktop/kasirga-compiler/build/bin/kasirga \
+/home/shc/Desktop/clangport/build/bin/clangport \
 -c \
 -target riscv32-unknown-elf \
 --sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf \
 --gcc-toolchain=/home/shc/riscv-new/_install/ \
 example.c -o example.o \
---alp=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
+--elf2encryptedhex=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
 ```
 
-As seen above, `kasirga` compiler driver compiles `example.c` code to `example.o` object code, then drives `alp` obfuscator with the given encryption options and gives encrypted .hex code.
+As seen above, `clangport` compiler driver compiles `example.c` code to `example.o` object code, then drives `elf2encryptedhex` obfuscator with the given encryption options and gives encrypted .hex code.
 This will **not** encrypt all instructions because there is no `1` in the given `--enckeyall` bits but will encrypt `lw` instructions in the compiled program with the given key.
 
 To illustrate more, this encryption will be performed (for each corresponding instruction in the compiled program):
@@ -1307,11 +1315,54 @@ To illustrate more, this encryption will be performed (for each corresponding in
 lw  ^  10100100101000000000001000000100
 ```
 Xoring with 1 means flipping corresponding bit. This encryption will flip 0. 2. 5. 8. 10. 22. 29. bits (assume that most left bit is 0.) of `lw` instructions in the compiled program.
+   
+   
+**Attention:** For using standard headers export your build path
 
-## kasirgaIDE wxWidgets Based User Interface For kasirga-compiler ##   
-**Work In Progress**
+```bash
+export LLVM_BUILD_DIR={your-llvm-install-or-build-directory}
+```
 
+and give this path in every compilation:
+   
+```bash
+-I${LLVM_BUILD_DIR}/lib/clang/11.1.0/include
+```
+
+For example:
+   
+```bash
+export LLVM_BUILD_DIR=/home/shc/llvm/llvm-project/build
+```
+
+```bash
+/home/shc/Desktop/clangport/build/bin/clangport \
+-c \
+-I${LLVM_BUILD_DIR}/lib/clang/11.1.0/include \
+-target riscv32-unknown-elf \
+--sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf \
+--gcc-toolchain=/home/shc/riscv-new/_install/ \
+example.c -o example.o \
+--elf2encryptedhex=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
+```
+
+We think that we can fix by cmake in the future for not giving include flag in every compilation.
+   
+# How can anyone add his own encryption method by IDE or internally? #
+
+For this, [custom-encryptor.h](https://github.com/Celuk/ERIC/blob/main/clangport-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) in `ERIC/clangport-and-elf2encryptedhex/src/elf2encryptedhex` directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/clangport-and-elf2encryptedhex/build`)
+
+Your second option is using IDE. After you gave your `clangport` compiler path, open IDE(with `./encIDE` command) and then go to `Add Custom Encryptor` Tab above in `Options` (Ctrl+H), then you can see `custom_encryptor.h` file in the editor. Edit file as you desired and then select `Push Custom Encryptor` (Ctrl+J) option. After that in all compilations your encryption method will be used. To disable custom method again you need to edit file and set `custom` flag to `false` in the same ways.
+   
+## encIDE wxWidgets Based User Interface For clangport ##   
+
+`encIDE` is an easy to use `c/c++ IDE` to run `clangport` compiler on desired c/c++ files to encrypt them desired choices that as we mentioned above options. It automatically generates `compilation string` and give encrypted or non-encrypted hex code according to your choices. It prompts also a command prompt when the compilation steps are done successfully, like any other IDE but the difference is that it can be usable as cross-platform. (Although we didn't mentioned build steps for MacOS and Windows, both compiler and IDE can be built similar way in Linux, MacOS or Windows)
+   
+You can run IDE after built in your built binary directory (`ERIC/encIDE/build/bin`) with just `./encIDE` command.
+   
 # Screenshots #
+These screenshots are relatively old but we didn't want to remove. The new appearance with new features can be seen in the collage that is in head of README. (Also, the appearance depends on your OS actually.)
+   
 ![image](screenshots/ide1editor.png)
 
 ![image](screenshots/ide2menubar.png)
