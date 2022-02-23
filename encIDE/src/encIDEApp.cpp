@@ -1,20 +1,19 @@
 #include "encIDEApp.h"
-
 #include "encIDEMain.h"
-#include <wx/image.h>
 
-IMPLEMENT_APP(encIDEApp);
+#include <wx/image.h>
 
 bool encIDEApp::OnInit()
 {
     bool wxsOK = true;
     wxInitAllImageHandlers();
-    if ( wxsOK )
+    if (wxsOK)
     {
-    	encIDEFrame* Frame = new encIDEFrame(0);
-    	Frame->Show();
-    	SetTopWindow(Frame);
+    	encIDEFrame* mainFrame = new encIDEFrame(0);
+    	mainFrame->Show();
+    	SetTopWindow(mainFrame);
     }
     return wxsOK;
-
 }
+
+IMPLEMENT_APP(encIDEApp);
