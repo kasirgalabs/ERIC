@@ -1,40 +1,42 @@
-#ifndef encIDESELBITS_H
-#define encIDESELBITS_H
+#ifndef ENCIDESELBITS_H
+#define ENCIDESELBITS_H
 
-//(*Headers(encIDEselBits)
 #include <wx/frame.h>
 #include <wx/stattext.h>
 #include <wx/choice.h>
-//*)
 
 #include <wx/button.h>
 #include <wx/stattext.h>
-#include "encIDEenc.h"
+#include <wx/combobox.h>
 
-class encIDEselBits: public wxFrame
+#include <wx/textctrl.h>
+
+#include "encIDEEnc.h"
+
+class encIDESelBits: public wxFrame
 {
 	public:
 
-		encIDEselBits(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
-		virtual ~encIDEselBits();
+		encIDESelBits(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		virtual ~encIDESelBits();
 
-		//(*Declarations(encIDEselBits)
 		wxStaticText* StaticText1;
-		wxChoice* Choice1;
-		//*)
+		//wxChoice* Choice1;
+		wxComboBox* Choice1;
 
 		wxButton* goBckBtn;
 		wxButton* addAlp;
 		wxStaticText* lbl1;
+		wxStaticText *instTypeLbl;
 
 		void OnBitButtons(wxCommandEvent& event);
+		void OnBlockButtons(wxCommandEvent& event);
+		std::string CreateDynamicButtons(std::string inst);
 
 	protected:
 
-		//(*Identifiers(encIDEselBits)
 		static const long ID_CHOICE1;
 		static const long ID_STATICTEXT1;
-		//*)
 
 		static const long ID_BUTTON1;
 		static const long ID_BUTTON3;
@@ -42,10 +44,10 @@ class encIDEselBits: public wxFrame
 
 	private:
 
-		//(*Handlers(encIDEselBits)
 		void OnClose(wxCloseEvent& event);
 		void OnChoice1Select(wxCommandEvent& event);
-		//*)
+
+		void OnChoiceTextUpdated(wxCommandEvent& event);
 
 		void OngoBckBtnClick(wxCommandEvent& event);
 		void OnaddAlpBtnClick(wxCommandEvent& event);
