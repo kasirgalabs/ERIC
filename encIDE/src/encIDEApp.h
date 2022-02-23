@@ -1,15 +1,16 @@
-#ifndef encIDEAPP_H
-#define encIDEAPP_H
+#ifndef ENCIDEAPP_H
+#define ENCIDEAPP_H
 
 #include <wx/app.h>
-#include <string.h>
 
 class encIDEApp : public wxApp
 {
     public:
         virtual bool OnInit();
-        std::string compStr;
-        std::string alpStr;
+
+        // Global string variables which are reachable within wxGetApp().stringName
+        wxString compileString;
+        wxString compileOptionsString;
 };
 
 DECLARE_APP(encIDEApp);
