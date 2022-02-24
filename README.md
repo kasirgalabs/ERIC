@@ -22,10 +22,11 @@ ERIC offers fully customizable encryption. There are currently 2 different encry
 The thing to remember is that ERIC is a compiler with an interface developed for encryption. In order to run the encrypted programs you have compiled here, you need at least some hardware that does decryption. We will soon publish our hardware module that can work in integration with ERIC.
 
 
-# Requirements #
+# Dependencies #
 
 * [LLVM library](https://github.com/llvm/llvm-project) built for RISCV target (LLVM installation)
 * [wxWidgets library](https://github.com/wxWidgets/wxWidgets) built for IDE (wxWidgets installation)
+* [riscv-gnu-toolchain library](https://github.com/riscv-collab/riscv-gnu-toolchain) built for using standard headers (e.g. stdio.h) (riscv-gnu-toolchain installation)
 
 # Required Installations For Linux #
 
@@ -57,7 +58,8 @@ unzip and after that for build:
 
 ```bash
 cd llvm-project-llvmorg-11.1.0 && \
-mkdir build && \ cd build && \
+mkdir build && \ 
+cd build && \
 cmake -G Ninja \
 -DLLVM_ENABLE_PROJECTS=clang \ 
 -DLLVM_TARGETS_TO_BUILD=all \
