@@ -412,7 +412,7 @@ void encIDEFrame::onCompileFile(wxCommandEvent& event)
     }
 
     #if defined(_WIN32)
-        wxExecute("start cmd.exe /k \"" + wxGetApp().compileString) + "\"";
+        wxExecute("start cmd.exe /k \"" + wxGetApp().compileString + "\"");
     #elif defined(__APPLE__)
         wxExecute(" osascript -e 'tell application \"Terminal\" to activate' -e 'tell application \"Terminal\" to do script \"" + wxGetApp().compileString + " " + "\"'");    
     #else
@@ -556,7 +556,7 @@ void encIDEFrame::onAddCustomEncryptor(wxCommandEvent& event)
         #endif
 
         #if defined(_WIN32)
-            wxExecute("start cmd.exe /k \"cd " + cmakeBuildPath + ";cmake --build .\"";
+            wxExecute("start cmd.exe /k \"cd " + cmakeBuildPath + ";cmake --build .\"");
         #elif defined(__APPLE__)
             wxExecute("osascript -e 'tell application \"Terminal\" to activate' -e 'tell application \"Terminal\" to do script \" cd " + cmakeBuildPath + ";cmake --build .\"'");
         #else
