@@ -1361,6 +1361,8 @@ Your second option is using IDE. After you gave your `clangport` compiler path, 
 You can run IDE after built in your built binary directory (`ERIC/encIDE/build/bin`) with just `./encIDE` command.
    
 # Screenshots #
+This screenshots are relatively old but we didn't want to remove. The new appearance with new features can be seen in the collage that is in head of README.
+   
 ![image](screenshots/ide1editor.png)
 
 ![image](screenshots/ide2menubar.png)
