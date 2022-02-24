@@ -1360,7 +1360,8 @@ Wrote Encryption Algorithm In C++ In encIDE --> Generate Encryptor cpp File with
    
 ## encIDE wxWidgets Based User Interface For clangport ##   
 
-
+`encIDE` is an easy to use `c/c++ IDE` to run `clangport` compiler on desired c/c++ files to encrypt them desired choices that as we mentioned above options. It automatically generates `compilation string` and give encrypted or non-encrypted hex code according to your choices. It prompts also a command prompt when the compilation steps are done successfully, like any other IDE but the difference is that it can be usable as cross-platform. (Although we didn't mentioned build steps for MacOS and Windows, both compiler and IDE can be built similar way in Linux, MacOS or Windows)
+   
 # Screenshots #
 ![image](screenshots/ide1editor.png)
 
