@@ -586,8 +586,9 @@ int main(int argc_, const char **argv_) {
   std::string fileName = "";
   
   for(int i=0; i<argv.size(); i++){
-    if(!StringRef(argv[i]).startswith("-c"))
-      isC = false;
+    // TODO make a design decision here
+    //if(!StringRef(argv[i]).startswith("-c"))
+      //isC = false;
   
     if(StringRef(argv[i]).endswith(".c"))
       fileName = std::string(StringRef(argv[i]).rtrim('c').rtrim('.'));
