@@ -101,8 +101,7 @@ encIDEFrame::encIDEFrame(wxWindow* parent, wxWindowID id)
     extraCompilerFlags = "";
     lastOpenedFile = "";
 
-    // TODO Get custom-encryptor.h file location from cmake or config file
-    customEncryptorPath = "/Users/shc/Downloads/objdump-main/ericyap/src/alp/custom-encryptor.h";
+    customEncryptorPath = "";
     
     screenRatio = DEFAULT_SCREEN_RATIO;
 
@@ -446,8 +445,25 @@ void encIDEFrame::onSetCompilerPath(wxCommandEvent& event)
     wxTextEntryDialog setCompilerPathDlg(this, wxEmptyString, "Set Compiler Path", 
         compilerPath/*TODO add compiler path from config file*/, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
     
-    if(setCompilerPathDlg.ShowModal() == wxID_OK)
+    if(setCompilerPathDlg.ShowModal() == wxID_OK){
         compilerPath = setCompilerPathDlg.GetValue();
+        
+        #if defined(_WIN32)
+            wxString tempStr = compilerPath;
+            compilerPath = compilerPath.erase(compilerPath.rfind('\\'));
+            compilerPath = compilerPath.erase(compilerPath.rfind('\\'));
+            compilerPath = compilerPath.erase(compilerPath.rfind('\\'));
+            customEncryptorPath = compilerPath + "\\src\\elf2encryptedhex\\custom-encryptor.h"
+            compilerPath = tempStr; 
+        #else
+            wxString tempStr = compilerPath;
+            compilerPath = compilerPath.erase(compilerPath.rfind('/')); // delete compiler name
+            compilerPath = compilerPath.erase(compilerPath.rfind('/')); // delete bin path
+            compilerPath = compilerPath.erase(compilerPath.rfind('/')); // delete build path
+            customEncryptorPath = compilerPath + "/src/elf2encryptedhex/custom-encryptor.h"
+            compilerPath = tempStr; 
+        #endif
+    }
 }
 
 void encIDEFrame::onSetRiscvPath(wxCommandEvent& event)
@@ -509,10 +525,6 @@ void encIDEFrame::onAddCustomEncryptor(wxCommandEvent& event)
     if(addCustomEncryptorItem->GetHelp() == "Add custom encryptor to hex obfuscator"){
         // TODO make a decision here to get default text from customEncryptorPath or set default textEditor
         // TODO make a decision to add config file whether custom encryptor added before or not
-
-        //textEditor->SetText();
-
-        // /Users/shc/Downloads/objdump-main/ericyap/build
 
         wxTextFile openTextFile;
         openTextFile.Open(customEncryptorPath);
