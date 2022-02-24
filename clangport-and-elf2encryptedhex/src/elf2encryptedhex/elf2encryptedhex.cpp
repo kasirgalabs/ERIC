@@ -2448,13 +2448,12 @@ namespace portedDump {
   }
 
   std::string binArr = "";
-  for(unsigned i=0;i<strlen(hexArr);i++)
+  for(int i=0;i<strlen(hexArr);i++)
     binArr += hex_char_to_bin(hexArr[i]);
 
   counter++;
 
   // Here we can add desired encryption method
-  // Also we can add desired encryption method into custom-encryptor.h and set custom flag to true
 
   if(custom == true){
     OSS << custom_encrypt(binArr);
@@ -3909,7 +3908,7 @@ int main(int argc, char **argv) {
 
   SmallVector<const char *, 256> argv2(argv, argv + argc);
   std::string fileName = "";
-  for(unsigned i=0; i<argv2.size(); i++){
+  for(int i=0; i<argv2.size(); i++){
     if(StringRef(argv[i]).endswith(".o"))
       fileName = std::string(StringRef(argv[i]).rtrim(".o"));
   }
@@ -3952,122 +3951,122 @@ int main(int argc, char **argv) {
   const int cencq2instsSize = 17;
   
   int ienc32instsArr[ienc32instsSize];
-  for(unsigned i=ienc32instsSize-1; i>=0; i--){
+  for(int i=ienc32instsSize-1; i>=0; i--){
     ienc32instsArr[i] = 0;
   }
-  for(unsigned i=0; i<ienc32insts.length(); i++){
+  for(int i=0; i<ienc32insts.length(); i++){
     ienc32instsArr[i] = ienc32insts[i] - '0';
   }
   
   int menc32instsArr[menc32instsSize];
-  for(unsigned i=menc32instsSize-1; i>=0; i--){
+  for(int i=menc32instsSize-1; i>=0; i--){
     menc32instsArr[i] = 0;
   }
-  for(unsigned i=0; i<menc32insts.length(); i++){
+  for(int i=0; i<menc32insts.length(); i++){
     menc32instsArr[i] = menc32insts[i] - '0';
   }
   
   int aenc32instsArr[aenc32instsSize];
-  for(unsigned i=aenc32instsSize-1; i>=0; i--){
+  for(int i=aenc32instsSize-1; i>=0; i--){
     aenc32instsArr[i] = 0;
   }
-  for(unsigned i=0; i<aenc32insts.length(); i++){
+  for(int i=0; i<aenc32insts.length(); i++){
     aenc32instsArr[i] = aenc32insts[i] - '0';
   }
   
   int fenc32instsArr[fenc32instsSize];
-  for(unsigned i=fenc32instsSize-1; i>=0; i--){
+  for(int i=fenc32instsSize-1; i>=0; i--){
     fenc32instsArr[i] = 0;
   }
-  for(unsigned i=0; i<fenc32insts.length(); i++){
+  for(int i=0; i<fenc32insts.length(); i++){
     fenc32instsArr[i] = fenc32insts[i] - '0';
   }
   
   int denc32instsArr[denc32instsSize];
-  for(unsigned i=denc32instsSize-1; i>=0; i--){
+  for(int i=denc32instsSize-1; i>=0; i--){
     denc32instsArr[i] = 0;
   }
-  for(unsigned i=0; i<denc32insts.length(); i++){
+  for(int i=0; i<denc32insts.length(); i++){
     denc32instsArr[i] = denc32insts[i] - '0';
   }
   
   int qenc32instsArr[qenc32instsSize];
-  for(unsigned i=qenc32instsSize-1; i>=0; i--){
+  for(int i=qenc32instsSize-1; i>=0; i--){
     qenc32instsArr[i] = 0;
   }
-  for(unsigned i=0; i<qenc32insts.length(); i++){
+  for(int i=0; i<qenc32insts.length(); i++){
     qenc32instsArr[i] = qenc32insts[i] - '0';
   }
   
   int ienc64instsArr[ienc64instsSize];
-  for(unsigned i=ienc64instsSize-1; i>=0; i--){
+  for(int i=ienc64instsSize-1; i>=0; i--){
     ienc64instsArr[i] = 0;
   }
-  for(unsigned i=0; i<ienc64insts.length(); i++){
+  for(int i=0; i<ienc64insts.length(); i++){
     ienc64instsArr[i] = ienc64insts[i] - '0';
   }
   
   int menc64instsArr[menc64instsSize];
-  for(unsigned i=menc64instsSize-1; i>=0; i--){
+  for(int i=menc64instsSize-1; i>=0; i--){
     menc64instsArr[i] = 0;
   }
-  for(unsigned i=0; i<menc64insts.length(); i++){
+  for(int i=0; i<menc64insts.length(); i++){
     menc64instsArr[i] = menc64insts[i] - '0';
   }
   
   int aenc64instsArr[aenc64instsSize];
-  for(unsigned i=aenc64instsSize-1; i>=0; i--){
+  for(int i=aenc64instsSize-1; i>=0; i--){
     aenc64instsArr[i] = 0;
   }
-  for(unsigned i=0; i<aenc64insts.length(); i++){
+  for(int i=0; i<aenc64insts.length(); i++){
     aenc64instsArr[i] = aenc64insts[i] - '0';
   }
   
   int fenc64instsArr[fenc64instsSize];
-  for(unsigned i=fenc64instsSize-1; i>=0; i--){
+  for(int i=fenc64instsSize-1; i>=0; i--){
     fenc64instsArr[i] = 0;
   }
-  for(unsigned i=0; i<fenc64insts.length(); i++){
+  for(int i=0; i<fenc64insts.length(); i++){
     fenc64instsArr[i] = fenc64insts[i] - '0';
   }
   
   int denc64instsArr[denc64instsSize];
-  for(unsigned i=denc64instsSize-1; i>=0; i--){
+  for(int i=denc64instsSize-1; i>=0; i--){
     denc64instsArr[i] = 0;
   }
-  for(unsigned i=0; i<denc64insts.length(); i++){
+  for(int i=0; i<denc64insts.length(); i++){
     denc64instsArr[i] = denc64insts[i] - '0';
   }
   
   int qenc64instsArr[qenc64instsSize];
-  for(unsigned i=qenc64instsSize-1; i>=0; i--){
+  for(int i=qenc64instsSize-1; i>=0; i--){
     qenc64instsArr[i] = 0;
   }
-  for(unsigned i=0; i<qenc64insts.length(); i++){
+  for(int i=0; i<qenc64insts.length(); i++){
     qenc64instsArr[i] = qenc64insts[i] - '0';
   }
   
   int cencq0instsArr[cencq0instsSize];
-  for(unsigned i=cencq0instsSize-1; i>=0; i--){
+  for(int i=cencq0instsSize-1; i>=0; i--){
     cencq0instsArr[i] = 0;
   }
-  for(unsigned i=0; i<cencq0insts.length(); i++){
+  for(int i=0; i<cencq0insts.length(); i++){
     cencq0instsArr[i] = cencq0insts[i] - '0';
   }
   
   int cencq1instsArr[cencq1instsSize];
-  for(unsigned i=cencq1instsSize-1; i>=0; i--){
+  for(int i=cencq1instsSize-1; i>=0; i--){
     cencq1instsArr[i] = 0;
   }
-  for(unsigned i=0; i<cencq1insts.length(); i++){
+  for(int i=0; i<cencq1insts.length(); i++){
     cencq1instsArr[i] = cencq1insts[i] - '0';
   }
   
   int cencq2instsArr[cencq2instsSize];
-  for(unsigned i=cencq2instsSize-1; i>=0; i--){
+  for(int i=cencq2instsSize-1; i>=0; i--){
     cencq2instsArr[i] = 0;
   }
-  for(unsigned i=0; i<cencq2insts.length(); i++){
+  for(int i=0; i<cencq2insts.length(); i++){
     cencq2instsArr[i] = cencq2insts[i] - '0';
   }
   
@@ -4358,7 +4357,7 @@ int main(int argc, char **argv) {
       binArr = "";
       int_to_hex(line);
   if(line.length()<=8){
-      for(unsigned i=0; i<line.length(); i++)
+      for(int i=0; i<line.length(); i++)
         binArr += hex_char_to_bin((char)line.at(i));
   
       if(binArr.length() < 32){
