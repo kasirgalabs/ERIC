@@ -45,14 +45,9 @@
 
 #include "llvm/Object/Archive.h"
 
-
 #include "llvm/Object/ELFObjectFile.h"
 
-
-
-
 #include "llvm/Support/Casting.h"
-
 
 #include "llvm/Support/Errc.h"
 #include "llvm/Support/FileSystem.h"
@@ -77,6 +72,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include "picosha2.h"
 #include "custom-encryptor.h"
 
