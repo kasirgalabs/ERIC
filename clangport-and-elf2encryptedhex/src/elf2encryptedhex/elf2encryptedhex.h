@@ -29,17 +29,14 @@ extern cl::opt<bool> Demangle;
 extern cl::opt<bool> Disassemble;
 extern cl::opt<bool> DisassembleAll;
 
-
 extern cl::list<std::string> MAttrs;
 extern cl::opt<std::string> MCPU;
 
 extern cl::opt<bool> NoLeadingAddr;
 
-
-
-
 extern cl::opt<std::string> TripleName;
 
+extern cl::opt<bool> rsa;
 
 // rv32i
 extern cl::opt<bool> lui;
