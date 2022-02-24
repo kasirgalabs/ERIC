@@ -453,14 +453,14 @@ void encIDEFrame::onSetCompilerPath(wxCommandEvent& event)
             compilerPath = compilerPath.erase(compilerPath.rfind('\\'));
             compilerPath = compilerPath.erase(compilerPath.rfind('\\'));
             compilerPath = compilerPath.erase(compilerPath.rfind('\\'));
-            customEncryptorPath = compilerPath + "\\src\\elf2encryptedhex\\custom-encryptor.h"
+            customEncryptorPath = compilerPath + "\\src\\elf2encryptedhex\\custom-encryptor.h";
             compilerPath = tempStr; 
         #else
             wxString tempStr = compilerPath;
             compilerPath = compilerPath.erase(compilerPath.rfind('/')); // delete compiler name
             compilerPath = compilerPath.erase(compilerPath.rfind('/')); // delete bin path
             compilerPath = compilerPath.erase(compilerPath.rfind('/')); // delete build path
-            customEncryptorPath = compilerPath + "/src/elf2encryptedhex/custom-encryptor.h"
+            customEncryptorPath = compilerPath + "/src/elf2encryptedhex/custom-encryptor.h";
             compilerPath = tempStr; 
         #endif
     }
