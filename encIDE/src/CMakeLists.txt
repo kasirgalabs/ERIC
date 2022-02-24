@@ -1,29 +1,29 @@
-find_package(wxWidgets COMPONENTS stc core base REQUIRED)
+find_package(wxWidgets COMPONENTS aui adv html xml net richtext stc core base REQUIRED)
 
 include( "${wxWidgets_USE_FILE}" )
 
-set(encIDEApp_SOURCE_FILES encIDEApp.h encIDEApp.cpp encIDEMain.h encIDEMain.cpp encIDEEnc.h encIDEEnc.cpp encIDESelBits.h encIDESelBits.cpp)
+set(encIDE_SOURCE_FILES encIDEApp.cpp encIDEApp.h encIDEEnc.cpp encIDEEnc.h encIDEMain.cpp encIDEMain.h encIDESelBits.cpp encIDESelBits.h)
 
-if(WIN32)
- set(encIDEApp_SOURCE_FILES ${encIDE_SOURCE_FILES} icon.rc)
-endif(WIN32)
+#if(WIN32)
+# set(encIDE_SOURCE_FILES ${encIDE_SOURCE_FILES} icon.rc)
+#endif(WIN32)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_executable(${CMAKE_PROJECT_NAME} WIN32 ${encIDEApp_SOURCE_FILES})
+add_executable(${CMAKE_PROJECT_NAME} WIN32 ${encIDE_SOURCE_FILES})
 
 target_link_libraries(${CMAKE_PROJECT_NAME} ${wxWidgets_LIBRARIES})
 
 
-if(NOT CONFIG)
-    set(CONFIG "")
+if(NOT CONFIGS)
+    set(CONFIGS "")
 endif()
 
-set(CONFIGSTR ${CONFIG})
+set(CONFIGSTR ${CONFIGS})
 
-unset(CONFIG CACHE)
+unset(CONFIGS CACHE)
 
 # TODO Fix corresponding strings
 if("${CONFIGSTR}" STREQUAL "")
