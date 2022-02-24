@@ -74,15 +74,26 @@
 #include <sstream>
 #include <iomanip>
 #include "picosha2.h"
+#include "RSA32.h"
 #include "custom-encryptor.h"
 
 using namespace llvm;
 using namespace llvm::object;
 using namespace llvm::objdump;
 
+// RSA keys are set internally for 32 bit rsa encryption
+// Here keys should be set big enough to encrypt 32 bit data (each instruction has 32 or 16 bit)
+const unsigned long long int pkey = 65537;
+const unsigned long long int qkey = 65543;
+const unsigned long long int ekey = 65537; //459226363;
 
 static cl::OptionCategory ObjdumpCat("llvm-objdump Options");
 
+cl::opt<bool> objdump::rsa("rsa",
+    cl::desc("encrypt all instructions with rsa, usage: --rsa"),
+    cl::cat(ObjdumpCat));
+
+// encrypt with the given key option for all over hex
 
 cl::opt<std::string> objdump::enckeyall("enckeyall",
     cl::desc("32 bit key option to encrypt all instructions, usage: --enckeyall=\"<your32bitkeyasbinary>(for 16 bit compressed instructions it uses most significant(left) 16 bit of this as key)\""),
@@ -2458,6 +2469,11 @@ namespace portedDump {
   if(custom == true){
     OSS << custom_encrypt(binArr);
   }
+  else if(rsa){
+      RSA32 rsa;
+      
+      OSS << std::hex << std::setfill('0') << std::setw(8) << int_to_hex(rsa.Encrypta(std::stoll(binArr, NULL, 2), pkey, qkey, ekey));
+  }
   else{
     if(instnum != ""){
         if(enckeyall != "" && enckeyall != "00000000000000000000000000000000"  && (counter <= num)){
@@ -4376,6 +4392,7 @@ int main(int argc, char **argv) {
   OOS << hex_str << "\n";
 
   std::string instkeys =
+  std::to_string(rsa)+
   std::to_string(lui)+
   std::to_string(auipc)+
   std::to_string(jal)+
