@@ -1,5 +1,5 @@
 # ERIC - An Efficient and Practical Software Obfuscation Framework #
-
+See you at DSN 2022 for the presentation of our paper about ERIC.
 ![image](screenshots/idecollage1.png)
 
 ERIC (Encryption tool for RISCV with Compiler) has an LLVM-based compiler that provides many encryption options for riscv-based systems.
@@ -8,7 +8,7 @@ By using ERIC, you can make the programs you compile run on authorized hardware.
 
 In addition, it can be used in cases where you want the data kept in memory to remain encrypted or depending on the needs such as keeping the program securely.
 
-ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported (and also user desired [custom](https://github.com/Celuk/ERIC#how-can-anyone-add-his-own-encryption-method-by-ide-or-internally)):
+ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported (and also user desired [custom encryption](https://github.com/Celuk/ERIC#how-can-anyone-add-his-own-encryption-method-by-ide-or-internally)):
 
 ### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC#1-instruction-level-full-encryption-1) ###
    
@@ -115,7 +115,7 @@ sudo ldconfig
 
 # Cloning Repository #
 ```bash
-git clone https://github.com/Celuk/ERIC
+git clone https://github.com/kasirgalabs/ERIC
 ```
 
 # Building Repository #
