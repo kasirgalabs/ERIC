@@ -18,7 +18,7 @@ ERIC offers fully customizable encryption. There are currently 2 different encry
  
    This method supports unlimited customization. You can choose the types of instructions you think are critical to your program and only encrypt them. You can also encrypt each instruction to correspond to different bits within itself.
 
-### 3. Memory-Level Encryption
+### [3. Memory-Level Encryption](https://github.com/Celuk/ERIC#3-memory-level-encryption) ###
 
 In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can give `--rsa` flag to use 32 bit RSA encryption and manually give the public and private key pairs to the system yourself internally.
 
