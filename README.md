@@ -126,23 +126,23 @@ mkdir build
 cd build
 ```
 
-**2-)** Export your LLVM directories:
+**2-)** Export your LLVM directories(LLVM build and main directory are seperated because build directory can be anywhere):
 
 ```bash
-export LLVM_PROJECT_DIR={your-llvm-project-directory}
-export LLVM_BUILD_DIR={your-llvm-install-or-build-directory}
+export LLVM_PROJECT_DIR={your-llvm-project-directory} # LLVM main directory
+export LLVM_DIR={your-llvm-install-or-build-directory} # LLVM build directory
 ```
 
 Example:
 ```bash
 export LLVM_PROJECT_DIR=~/llvm/llvm-project
-export LLVM_BUILD_DIR=~/llvm/llvm-project/build
+export LLVM_DIR=~/llvm/llvm-project/build
 ```
 
 **3-)** Configure with cmake:
 
 ```bash
-cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_BUILD_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
+cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR -DCMAKE_MODULE_PATH=$LLVM_PROJECT_DIR/clang/cmake/modules ..
 ```
 
 **4-)** Build with cmake or make:
