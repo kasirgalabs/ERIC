@@ -1350,7 +1350,7 @@ We think that we can fix by cmake in the future for not giving include flag in e
    
 # How can anyone add his own encryption method by IDE or internally? #
 
-For this, `custom-encryptor.h` in [ERIC/clangport-and-elf2encryptedhex/src/elf2encryptedhex](https://github.com/Celuk/ERIC/blob/main/clangport-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/clangport-and-elf2encryptedhex/build`)
+For this, [custom-encryptor.h]((https://github.com/Celuk/ERIC/blob/main/clangport-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) in `ERIC/clangport-and-elf2encryptedhex/src/elf2encryptedhex` directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/clangport-and-elf2encryptedhex/build`)
 
 Your second option is using IDE. After you gave your `clangport` compiler path, open IDE(with `./encIDE` command) and then go to `Add Custom Encryptor` Tab above in `Options` (Ctrl+H), then you can see `custom_encryptor.h` file in the editor. Edit file as you desired and then select `Push Custom Encryptor` (Ctrl+J) option. After that in all compilations your encryption method will be used. To disable custom method again you need to edit file and set `custom` flag to `false` in the same ways.
    
