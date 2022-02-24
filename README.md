@@ -1255,7 +1255,7 @@ Xoring with 1 means flipping corresponding bit. This encryption will flip 3. 7. 
 
 ## clangport LLVM Based Compiler ##
 
-You can use clangport as clang-like compiler. If you compile a .c code to object code and give `--elf2encryptedhex="<elf2encryptedhex-encryption options>"` flag it will also run elf2encryptedhex obfuscator and give encrypted or non-encrypted hex code.
+`clangport` is a `c/c++` compiler that ported from `clang` compiler driver to compile c/c++ files and drive `hex code obfuscator`. So, you can use `clangport` with full-featured as `clang` or `gcc` like compiler. If you compile a .c code to object code and give `--elf2encryptedhex="<elf2encryptedhex-encryption options>"` flag it will also run elf2encryptedhex obfuscator and give encrypted or non-encrypted hex code according to your choices.
    
 **Example usages:**
 
