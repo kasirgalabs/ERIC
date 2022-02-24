@@ -160,12 +160,11 @@ encIDEEnc::encIDEEnc(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxS
 
 	goBckBtn = new wxButton(this, ID_BUTTON1, _("Go back"), wxPoint(8,8), wxSize(88,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
 	Button1 = new wxButton(this, ID_BUTTON2, _("Select bits"), wxPoint(104,8), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON2"));
-    //addAlp = new wxButton(this, ID_BUTTON3, _("Add flag"), wxPoint(826,2), wxSize(88,29), 0, wxDefaultValidator, _T("ID_BUTTON3"));
-    addAlp = new wxButton(this, ID_BUTTON3, _("Add flag"), wxPoint(1300,2), wxSize(88,29), 0, wxDefaultValidator, _T("ID_BUTTON3"));
 
-    //lbl1 = new wxStaticText(this, ID_STATICTEXT1, _("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"), wxPoint(192,32), wxSize(768,32), 0, _T("ID_STATICTEXT1"));
+	addAlp = new wxButton(this, ID_BUTTON3, _("Add flag"), wxPoint(1300,2), wxSize(88,29), 0, wxDefaultValidator, _T("ID_BUTTON3"));
 
-    LBL_ienc32insts = new wxStaticText(this, ID_LBL_ienc32insts, std::string(47, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_ienc32insts"));
+
+	LBL_ienc32insts = new wxStaticText(this, ID_LBL_ienc32insts, std::string(47, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_ienc32insts"));
 	LBL_menc32insts = new wxStaticText(this, ID_LBL_menc32insts, std::string(8 , '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_menc32insts"));
 	LBL_aenc32insts = new wxStaticText(this, ID_LBL_aenc32insts, std::string(11, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_aenc32insts"));
 	LBL_fenc32insts = new wxStaticText(this, ID_LBL_fenc32insts, std::string(26, '0'), wxPoint(192,32), wxSize(768,32), 0, _T("ID_LBL_fenc32insts"));
@@ -209,28 +208,7 @@ encIDEEnc::encIDEEnc(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxS
 	Connect(ID_BUTTON3,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnaddAlpBtnClick);
 	Connect(wxID_ANY,wxEVT_SHOW,(wxObjectEventFunction)&encIDEEnc::OnShow);
 
-	//Connect(ID_STATICTEXT1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnButtons);
-	//Connect(ID_STATICTEXT1,wxEVT_BUTTON,(wxObjectEventFunction)&encIDEEnc::OnButtons);
-
-	//CheckBox1->Connect(ID_CHECKBOX1,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox2->Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox3->Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox4->Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox5->Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-
-    //CheckBox1->Connect(ID_CHECKBOX1,wxEVT_CHECKBOX,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox2->Connect(ID_CHECKBOX2,wxEVT_CHECKBOX,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox3->Connect(ID_CHECKBOX2,wxEVT_CHECKBOX,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox4->Connect(ID_CHECKBOX2,wxEVT_CHECKBOX,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-	//CheckBox5->Connect(ID_CHECKBOX2,wxEVT_CHECKBOX,(wxObjectEventFunction)&encIDEEnc::OnCheckBoxes);
-
-	//CheckBox1->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes, this);
-	//CheckBox2->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes, this);
-	//CheckBox3->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes, this);
-	//CheckBox4->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes, this);
-	//CheckBox5->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes, this);
-
-    CHK_ienc32insts->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes,this);
+        CHK_ienc32insts->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes,this);
 	CHK_menc32insts->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes,this);
 	CHK_aenc32insts->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes,this);
 	CHK_fenc32insts->Bind(wxEVT_CHECKBOX, &encIDEEnc::OnCheckBoxes,this);
@@ -250,15 +228,15 @@ encIDEEnc::encIDEEnc(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxS
 
 
 	wxFont font = LBL_ienc32insts->GetFont();
-    font.SetPointSize(14);
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    LBL_ienc32insts->SetFont(font);
+        font.SetPointSize(14);
+        font.SetWeight(wxFONTWEIGHT_BOLD);
+        LBL_ienc32insts->SetFont(font);
 
-    key_text = new wxTextCtrl(this, ID_key_text, "00000000000000000000000000000000", wxPoint(1050,2), wxSize(250,30), 0, wxDefaultValidator, _T("ID_key_text"));
-    keyall_text = new wxTextCtrl(this, ID_keyall_text, "00000000000000000000000000000000", wxPoint(1050,800), wxSize(250,30), 0, wxDefaultValidator, _T("ID_keyall_text"));
+        key_text = new wxTextCtrl(this, ID_key_text, "00000000000000000000000000000000", wxPoint(1050,2), wxSize(250,30), 0, wxDefaultValidator, _T("ID_key_text"));
+        keyall_text = new wxTextCtrl(this, ID_keyall_text, "00000000000000000000000000000000", wxPoint(1050,800), wxSize(250,30), 0, wxDefaultValidator, _T("ID_keyall_text"));
 
 
-    wxStaticText* LBL_enckeyall = new wxStaticText(this, 3344, "enckeyall: ", wxPoint(970,800), wxSize(768,32), 0, _T("enckeyall"));
+        wxStaticText* LBL_enckeyall = new wxStaticText(this, 3344, "enckeyall: ", wxPoint(970,800), wxSize(768,32), 0, _T("enckeyall"));
 	//Connect(wxID_ANY,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&encIDEEnc::OnButtons);
 }
 
@@ -642,23 +620,9 @@ vector1.erase( remove_if( begin(vector1),end(vector1),
 
 void encIDEEnc::OngoBckBtnClick(wxCommandEvent& event)
 {
-    //wxApp2frame2* Frame = new wxApp2frame2(0);
-    //wxMessageBox(opcodes[1]);
-
-    //kasirgaIDEFrame* Frame = new kasirgaIDEFrame(0);//(this, wxID_ANY);
-    //Frame->CenterOnParent();
-    //Frame->Show();
-    //kasirgaIDEApp::GetTopWindow()->Show();
-    //kasirgaIDEFrame->Show();
-    //kasirgaIDEApp::wxGetApp().kasirgaIDEFrame->Show();
-    //wxGetApp().Frame->Show();
-    //wxGetApp().compileString = "";//wxT("abcd").ToStdString();
-
     wxGetApp().compileOptionsString = " --alp=\" " + wxGetApp().compileOptionsString + "\" ";
     wxGetApp().GetTopWindow()->Show();
-    //wxMessageBox(wxGetApp().compileString);
 
-    //SetTopWindow(Frame);
     this->Close();
 }
 
@@ -697,62 +661,16 @@ void RemoveAllDynamicButtons(encIDEEnc *thisWindow, std::vector<std::string> opc
 
 void encIDEEnc::OnShow(wxShowEvent & event)
 {
-    //opcodes_all = opcodes;
-    //opcodes_all.erase( remove_if( begin(opcodes_all),end(opcodes_all),
-    //[&](auto x){return find(begin(opcodes_rv32i),end(opcodes_rv32i),x)!=end(opcodes_rv32i);}), end(opcodes_all) );
-
     CreateDynamicButtons(this, opcodes_all);
 }
 
 void encIDEEnc::OnButtons(wxCommandEvent & event)
 {
-    /*
-    switch(event.GetId())
-    {
-        case wxID_BUTTON1:
-            DoSomething();
-            break;
-        case wxID_BUTTON2:
-            DoSomethingElse();*
-            break;
-        ....
-    }
-    */
-
-    //wxButton* btn = dynamic_cast<wxButton*> (event.GetEventObject());
     wxButton *btn = wxDynamicCast( event.GetEventObject(), wxButton);
-    //btn->SetBackgroundColour(*wxRED);
-    //static bool click;
-    //if(click){
-    //click = false;
-    //btn->SetBackgroundColour(*wxRED);
-    //}
-    //else
-    //{
-    //click = true;
-    //btn->SetBackgroundColour(*wxGREEN);
-    //}
 
     wxString lbl = LBL_ienc32insts->GetLabel();
-    //wxMessageBox(lbl);
-    //lbl1->SetLabel("100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-
-    //auto index = 0;
-    //auto it = std::find(opcodes.begin(), opcodes.end(), btn->GetLabelText().ToStdString());
-    //if (it != opcodes.end())
-    //{
-    //index = std::distance(opcodes.begin(), it);
-    //}
 
     auto index = btn->GetId() - 1000;
-
-//lbl.replace(index,1,'0');
-    //std::string lbl = lbl1->GetLabel().ToStdString();
-    //wxMessageBox();
-    //if(lbl1->GetLabel().Find("0") != wxNOT_FOUND)
-    //wxString lbl(lbl1->GetLabel());
-    //wxString str = lbl1->GetLabel();
-    //wxMessageBox(lbl1->GetLabel());
 
     if(lbl[index].GetValue() == '0'){
         lbl.replace(index,1,"1");
@@ -763,11 +681,6 @@ void encIDEEnc::OnButtons(wxCommandEvent & event)
         btn->SetBackgroundColour(*wxRED);
     }
     LBL_ienc32insts->SetLabel(lbl);
-
-    //wxMessageBox(wxString::Format(wxT("%i"),btn->GetId()));
-
-    //idsini vererek yeni wxStaticText* oluşturmayi dene.
-
 
     if(Button1->GetBackgroundColour() == wxColor(150,150,150)){
         encIDESelBits* Frame = new encIDESelBits(0);
@@ -788,13 +701,7 @@ void encIDEEnc::OnCheckBoxes(wxCommandEvent & event)
 {
     wxCheckBox *chk = wxDynamicCast( event.GetEventObject(), wxCheckBox);
 
-
-    //wxButton* btns[opcodes.size()];
-
-    //for(wxInt8 i=0; i<opcodes.size(); i++){
-    //    btns[i]->Unbind(wxEVT_BUTTON, &encIDEEnc::OnButtons, this);
-    //}
-RemoveAllDynamicButtons(this, opcodes_all);
+    RemoveAllDynamicButtons(this, opcodes_all);
     if(chk->GetValue()==true){
         if(chk->GetId() == ID_CHK_ienc32insts){
             CHK_menc32insts->SetValue(false);
@@ -1050,50 +957,13 @@ RemoveAllDynamicButtons(this, opcodes_all);
 
 
     if(chk->GetValue()==true){
-
-            /*
-        switch(chk->GetId()){
-            case ID_CHECKBOX1: opcodes_all = opcodes_rv32i; //vectorAdd(opcodes_all, opcodes_rv32i);
-            break;
-            case ID_CHECKBOX2: opcodes_all = opcodes_rv32m; //vectorAdd(opcodes_all, opcodes_rv32m);
-            break;
-            case ID_CHECKBOX3: opcodes_all = opcodes_rv32a; //vectorAdd(opcodes_all, opcodes_rv32a);
-            break;
-            case ID_CHECKBOX4: opcodes_all = opcodes_rv32f; //vectorAdd(opcodes_all, opcodes_rv32f);
-            break;
-            case ID_CHECKBOX5: opcodes_all = opcodes_rv32c; //vectorAdd(opcodes_all, opcodes_rv32c);
-            break;
-            //case ID_CHECKBOX1: vectorAdd(opcodes_all, opcodes_rv32i);
-            //case ID_CHECKBOX2: vectorAdd(opcodes_all, opcodes_rv32m);
-            //case ID_CHECKBOX3: vectorAdd(opcodes_all, opcodes_rv32a);
-            //case ID_CHECKBOX4: vectorAdd(opcodes_all, opcodes_rv32f);
-            //case ID_CHECKBOX5: vectorAdd(opcodes_all, opcodes_rv32c);
-        }*/
-
         CreateDynamicButtons(this, opcodes_all);
     }
 
     else{
         RemoveAllDynamicButtons(this, opcodes_all);
         opcodes_all = {}; //empty_vector;
-        /*
-        switch(chk->GetId()){
-            case 350: vectorRemove(opcodes_all, opcodes_rv32i);
-            break;
-            case 351: vectorRemove(opcodes_all, opcodes_rv32m);
-            break;
-            case 352: vectorRemove(opcodes_all, opcodes_rv32a);
-            break;
-            case 353: vectorRemove(opcodes_all, opcodes_rv32f);
-            break;
-            case 354: vectorRemove(opcodes_all, opcodes_rv32c);
-            break;
-        }*/
-
     }
-
-
-
 }
 
 void encIDEEnc::OnSelBitsBtnClick(wxCommandEvent& event)
@@ -1102,16 +972,6 @@ void encIDEEnc::OnSelBitsBtnClick(wxCommandEvent& event)
         Button1->SetBackgroundColour(wxColor(150,150,150));
     else
         Button1->SetBackgroundColour(wxColour(249,249,248));
-    
-
-    
-
-    //Button1->SetBackgroundColour(*wxLIGHT_GREY);
-
-    //encIDESelBits* Frame = new encIDESelBits(0);
-    //Frame->CenterOnParent();
-    //Frame->Show();
-    //this->Close();
 }
 
 std::string addflagrv32i = "";
