@@ -24,7 +24,76 @@ In this method, you can completely encrypt the program with a public key that we
 
 The thing to remember is that ERIC is a compiler with an interface developed for encryption. In order to run the encrypted programs you have compiled here, you need at least some hardware that does decryption. We will soon publish our hardware module that can work in integration with ERIC.
 
-
+<details> <summary> <b> Project Structure </b> </summary>
+ERIC/
+    ├── clangport-and-elf2encryptedhex/
+    │   │   └── src/
+    │   │       ├── clangport/
+    │   │       │   ├── cmake_install.cmake
+    │   │       │   └── CMakeFiles/
+    │   │       │       └── clangport.dir/
+    │   │       │           ├── cc1_main.cpp.o
+    │   │       │           ├── cc1as_main.cpp.o
+    │   │       │           ├── cc1gen_reproducer_main.cpp.o
+    │   │       │           └── driver.cpp.o
+    │   │       ├── cmake_install.cmake
+    │   │       ├── CMakeFiles/
+    │   │       └── elf2encryptedhex/
+    │   │           ├── cmake_install.cmake
+    │   │           └── CMakeFiles/
+    │   │               └── elf2encryptedhex.dir/
+    │   │                   ├── elf2encryptedhex.cpp.o
+    │   │                   └── ELFDump.cpp.o
+    │   ├── CMakeLists.txt
+    │   └── src/
+    │       ├── clangport/
+    │       │   ├── cc1_main.cpp
+    │       │   ├── cc1as_main.cpp
+    │       │   ├── cc1gen_reproducer_main.cpp
+    │       │   ├── CMakeLists.txt
+    │       │   ├── driver.cpp
+    │       │   ├── Info.plist.in
+    │       │   ├── InputInfo.h
+    │       │   └── LLVMBuild.txt
+    │       ├── CMakeLists.txt
+    │       └── elf2encryptedhex/
+    │           ├── CMakeLists.txt
+    │           ├── custom-encryptor.h
+    │           ├── elf2encryptedhex.cpp
+    │           ├── elf2encryptedhex.h
+    │           ├── ELFDump.cpp
+    │           ├── ELFDump.h
+    │           ├── LLVMBuild.txt
+    │           ├── picosha2.h
+    │           └── RSA32.h
+    ├── encIDE/
+    │   ├── CMakeLists.txt
+    │   └── src/
+    │       ├── CMakeLists.txt
+    │       ├── encIDEApp.cpp
+    │       ├── encIDEApp.h
+    │       ├── encIDEEnc.cpp
+    │       ├── encIDEEnc.h
+    │       ├── encIDEMain.cpp
+    │       ├── encIDEMain.h
+    │       ├── encIDESelBits.cpp
+    │       ├── encIDESelBits.h
+    │       ├── icon.ico
+    │       ├── icon.rc
+    │       └── icon.xpm
+    ├── LICENSE
+    ├── README.md
+    ├── screenshots/
+    │   ├── ide1editor.png
+    │   ├── ide2menubar.png
+    │   ├── ide3menubar.png
+    │   ├── ide4enc.png
+    │   ├── ide5enc.png
+    │   ├── ide6parenc.png
+    │   ├── ide7parenc.png
+    │   └── idecollage1.png
+</details>
+   
 # Dependencies #
 
 * [LLVM library](https://github.com/llvm/llvm-project) built for RISCV target (LLVM installation)
