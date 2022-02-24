@@ -8,13 +8,13 @@ By using ERIC, you can make the programs you compile run on authorized hardware.
 
 In addition, it can be used in cases where you want the data kept in memory to remain encrypted or depending on the needs such as keeping the program securely.
 
-ERIC offers fully customizable encryption. There are currently 2 different encryption methods supported:
+ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported (and also user desired [custom](https://github.com/Celuk/ERIC#how-can-anyone-add-his-own-encryption-method-by-ide-or-internally)):
 
-### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#1-instruction-level-full-encryption-1) ###
+### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC#1-instruction-level-full-encryption-1) ###
    
    This method encrypts the instructions one by one. It provides encryption of all instructions in the program by entering a specific key.
    
-### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#2-instruction-level-partial-encryption-1) ###
+### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC#2-instruction-level-partial-encryption-1) ###
  
    This method supports unlimited customization. You can choose the types of instructions you think are critical to your program and only encrypt them. You can also encrypt each instruction to correspond to different bits within itself.
 
@@ -208,7 +208,7 @@ make
 
 You can use 'elf2encryptedhex' to obfuscate any compiled object code to non-encrypted or encrypted hex code. For encryption you have three options:
 
-### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#1-instruction-level-full-encryption) ###
+### [1. Instruction-Level Full Encryption](https://github.com/Celuk/ERIC#1-instruction-level-full-encryption) ###
 
 We can use `--enckeyall` flag to encrypt all rv32i, rv32m, rv32a, rv32f, rv32d, rv64i, rv64m, rv64a, rv64f, rv64d, rvc quadrant 0, rvc quadrant 1 and rvc quadrant 2 instructions. (Not supported RSA encryption for now.)
 
@@ -235,11 +235,11 @@ In example
 )
 
 
-### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#2-instruction-level-partial-encryption) ###
+### [2. Instruction-Level Partial Encryption](https://github.com/Celuk/ERIC#2-instruction-level-partial-encryption) ###
 
 We have two options to encrypt hex code partially, extension specific and instruction specific. 
 
-#### [2.1. Instruction-Level Partial Extension Specific Encryption](https://github.com/Celuk/ERIC/blob/main/README.md#21-instruction-level-partial-extension-specific-encryption) ####
+#### [2.1. Instruction-Level Partial Extension Specific Encryption](https://github.com/Celuk/ERIC#21-instruction-level-partial-extension-specific-encryption) ####
 
 We have 15 flags (+2 unsupported rvq extension flags) to extension specific instruction encryption:
 
