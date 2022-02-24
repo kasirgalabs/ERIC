@@ -82,7 +82,7 @@ using namespace llvm::object;
 using namespace llvm::objdump;
 
 // RSA keys are set internally for 32 bit rsa encryption
-// Here, keys should be set big enough to encrypt 32 bit data correctly (each instruction has 32 or 16 bit)
+// Here, keys should be set big enough and suitable for rsa to encrypt 32 bit data correctly (each instruction has 32 or 16 bit)
 const unsigned long long int pkey = 65537;
 const unsigned long long int qkey = 65543;
 const unsigned long long int ekey = 65537; //459226363;
