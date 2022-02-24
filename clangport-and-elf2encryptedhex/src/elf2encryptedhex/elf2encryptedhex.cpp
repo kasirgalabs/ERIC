@@ -4327,23 +4327,23 @@ int main(int argc, char **argv) {
   if(cencq1instsArr[20] == 1) c_bnez     = true;
   
   // rvc quadrant 2
-  if(cencq1instsArr[0 ] == 1) c_slli   = true;
-  if(cencq1instsArr[1 ] == 1) c_slli64 = true;
-  if(cencq1instsArr[2 ] == 1) c_fldsp  = true;
-  if(cencq1instsArr[3 ] == 1) c_lqsp   = true;
-  if(cencq1instsArr[4 ] == 1) c_lwsp   = true;
-  if(cencq1instsArr[5 ] == 1) c_flwsp  = true;
-  if(cencq1instsArr[6 ] == 1) c_ldsp   = true;
-  if(cencq1instsArr[7 ] == 1) c_jr     = true;
-  if(cencq1instsArr[8 ] == 1) c_mv     = true;
-  if(cencq1instsArr[9 ] == 1) c_ebreak = true;
-  if(cencq1instsArr[10] == 1) c_jalr   = true;
-  if(cencq1instsArr[11] == 1) c_add    = true;
-  if(cencq1instsArr[12] == 1) c_fsdsp  = true;
-  if(cencq1instsArr[13] == 1) c_sqsp   = true;
-  if(cencq1instsArr[14] == 1) c_swsp   = true;
-  if(cencq1instsArr[15] == 1) c_fswsp  = true;
-  if(cencq1instsArr[16] == 1) c_sdsp   = true;
+  if(cencq2instsArr[0 ] == 1) c_slli   = true;
+  if(cencq2instsArr[1 ] == 1) c_slli64 = true;
+  if(cencq2instsArr[2 ] == 1) c_fldsp  = true;
+  if(cencq2instsArr[3 ] == 1) c_lqsp   = true;
+  if(cencq2instsArr[4 ] == 1) c_lwsp   = true;
+  if(cencq2instsArr[5 ] == 1) c_flwsp  = true;
+  if(cencq2instsArr[6 ] == 1) c_ldsp   = true;
+  if(cencq2instsArr[7 ] == 1) c_jr     = true;
+  if(cencq2instsArr[8 ] == 1) c_mv     = true;
+  if(cencq2instsArr[9 ] == 1) c_ebreak = true;
+  if(cencq2instsArr[10] == 1) c_jalr   = true;
+  if(cencq2instsArr[11] == 1) c_add    = true;
+  if(cencq2instsArr[12] == 1) c_fsdsp  = true;
+  if(cencq2instsArr[13] == 1) c_sqsp   = true;
+  if(cencq2instsArr[14] == 1) c_swsp   = true;
+  if(cencq2instsArr[15] == 1) c_fswsp  = true;
+  if(cencq2instsArr[16] == 1) c_sdsp   = true;
 
   llvm::for_each(InputFilenames, dumpInput);
 
