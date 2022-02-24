@@ -2465,6 +2465,7 @@ namespace portedDump {
   counter++;
 
   // Here we can add desired encryption method
+  // Also we can add desired encryption method into custom-encryptor.h and set custom flag to true
 
   if(custom == true){
     OSS << custom_encrypt(binArr);
