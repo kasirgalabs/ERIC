@@ -56,7 +56,7 @@ git clone https://github.com/llvm/llvm-project.git
 ```
 
 However we are using LLVM 11.1.0, so download from: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-11.1.0.zip
-unzip and after that for build:
+unzip and after that for build (We think that we will update newer versions of LLVM and Clang such as 13 version):
 
 ```bash
 cd llvm-project-llvmorg-11.1.0 && \
