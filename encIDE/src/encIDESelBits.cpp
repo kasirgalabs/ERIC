@@ -15,7 +15,7 @@ const long encIDESelBits::ID_CHOICE1 = wxNewId();
 const long encIDESelBits::ID_STATICTEXT1 = wxNewId();
 
 int getInstType(std::string inst);
-//std::string CreateDynamicButtons(encIDESelBits *thisWindow, std::string inst);
+
 void RemoveAllDynamicButtons(encIDESelBits *thisWindow, std::string inst);
 
 const long encIDESelBits::ID_BUTTON1 = wxNewId();
@@ -841,16 +841,6 @@ encIDESelBits::encIDESelBits(wxWindow* parent,wxWindowID id,const wxPoint& pos,c
     instTypeLbl = new wxStaticText(this, 1500, _(""), wxPoint(8,190), wxDefaultSize, 0, _T("ID_STATICTEXT"));
 
     instTypeLbl->SetLabel("");
-
-    // , wxT("Tahoma")
-
-    //wxFont font(5, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
-    //wxFont font(16, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxT("Tahoma"));
-
-    //wxGetActiveWindow()->SetFont(wxGetActiveWindow()->GetFont().Scale(0.5));
-
-    //this->SetFont(this->GetFont().Scale(3));
-    //this->SetFont(font);
 }
 
 encIDESelBits::~encIDESelBits()
@@ -1415,11 +1405,6 @@ void RemoveAllDynamicButtons(encIDESelBits *thisWindow, std::string inst){
         }
     }
 }
-
-
-
-
-// "rs1'"
 
 int getInstType(std::string inst){
     if (std::find(Rtypes.begin(), Rtypes.end(), inst) != Rtypes.end())
