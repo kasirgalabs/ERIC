@@ -20,10 +20,10 @@ class encIDEEnc: public wxFrame
 {
 	public:
 
-		encIDEEnc(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
-		virtual ~encIDEEnc();
+	encIDEEnc(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+	virtual ~encIDEEnc();
 
-		wxCheckBox* CHK_ienc32insts;
+	wxCheckBox* CHK_ienc32insts;
         wxCheckBox* CHK_menc32insts;
         wxCheckBox* CHK_aenc32insts;
         wxCheckBox* CHK_fenc32insts;
@@ -42,11 +42,11 @@ class encIDEEnc: public wxFrame
         wxCheckBox* CHK_cencq0insts;
 
 
-		wxButton* Button1;
-		wxButton* goBckBtn;
-		wxButton* addAlp;
-		//wxStaticText* lbl1;
-		wxStaticText* LBL_ienc32insts;
+	wxButton* Button1;
+	wxButton* goBckBtn;
+	wxButton* addAlp;
+	
+	wxStaticText* LBL_ienc32insts;
         wxStaticText* LBL_menc32insts;
         wxStaticText* LBL_aenc32insts;
         wxStaticText* LBL_fenc32insts;
@@ -67,11 +67,11 @@ class encIDEEnc: public wxFrame
         wxTextCtrl* key_text;
         wxTextCtrl* keyall_text;
 
-		void OnButtons(wxCommandEvent& event);
-		void OnCheckBoxes(wxCommandEvent& event);
+	void OnButtons(wxCommandEvent& event);
+	void OnCheckBoxes(wxCommandEvent& event);
 
 	protected:
-		static const long ID_CHK_ienc32insts;
+	static const long ID_CHK_ienc32insts;
         static const long ID_CHK_menc32insts;
         static const long ID_CHK_aenc32insts;
         static const long ID_CHK_fenc32insts;
@@ -89,11 +89,11 @@ class encIDEEnc: public wxFrame
         static const long ID_CHK_cencq1insts;
         static const long ID_CHK_cencq0insts;
 
-		static const long ID_BUTTON1;
-		static const long ID_BUTTON2;
-		static const long ID_BUTTON3;
-		//static const long ID_STATICTEXT1;
-		static const long ID_LBL_ienc32insts;
+	static const long ID_BUTTON1;
+	static const long ID_BUTTON2;
+	static const long ID_BUTTON3;
+	
+	static const long ID_LBL_ienc32insts;
         static const long ID_LBL_menc32insts;
         static const long ID_LBL_aenc32insts;
         static const long ID_LBL_fenc32insts;
@@ -114,13 +114,11 @@ class encIDEEnc: public wxFrame
         static const long ID_key_text;
         static const long ID_keyall_text;
 
-
 	private:
 		void OngoBckBtnClick(wxCommandEvent& event);
 		void OnSelBitsBtnClick(wxCommandEvent& event);
 		void OnaddAlpBtnClick(wxCommandEvent& event);
 		void OnShow(wxShowEvent& event);
-
 
 		DECLARE_EVENT_TABLE()
 };
