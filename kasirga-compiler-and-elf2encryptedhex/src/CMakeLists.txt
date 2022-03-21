@@ -11,7 +11,7 @@ if(CYGWIN OR NOT LLVM_ENABLE_PIC)
 endif()
 
 add_subdirectory(elf2encryptedhex)
-add_subdirectory(clangport)
+add_subdirectory(kasirga)
 
 add_llvm_implicit_projects()
 

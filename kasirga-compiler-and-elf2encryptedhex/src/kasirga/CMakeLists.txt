@@ -33,7 +33,7 @@ set( LLVM_LINK_COMPONENTS
   )
 
   
-option(CLANG_PLUGIN_SUPPORT "Build clangport with plugin support" ON)
+option(CLANG_PLUGIN_SUPPORT "Build kasirga with plugin support" ON)
 
 # Support plugins.
 if(CLANG_PLUGIN_SUPPORT)
@@ -44,7 +44,7 @@ if(NOT CLANG_BUILT_STANDALONE)
   set(tablegen_deps intrinsics_gen)
 endif()
 
-add_llvm_executable(clangport
+add_llvm_executable(kasirga
   driver.cpp
   cc1_main.cpp
   cc1as_main.cpp
@@ -56,7 +56,7 @@ add_llvm_executable(clangport
   ${support_plugins}
   )
 
-clang_target_link_libraries(clangport
+clang_target_link_libraries(kasirga
   PRIVATE
   clangBasic
   clangCodeGen
@@ -69,31 +69,31 @@ clang_target_link_libraries(clangport
 if(WIN32 AND NOT CYGWIN)
   # Prevent versioning if the buildhost is targeting for Win32.
 else()
-  set_target_properties(clangport PROPERTIES VERSION "${CLANG_EXECUTABLE_VERSION}")
+  set_target_properties(kasirga PROPERTIES VERSION "${CLANG_EXECUTABLE_VERSION}")
 endif()
 
 # Support plugins.
 if(CLANG_PLUGIN_SUPPORT)
-  export_executable_symbols_for_plugins(clangport)
+  export_executable_symbols_for_plugins(kasirga)
 endif()
 
-#add_dependencies(clangport clang-resource-headers)
+#add_dependencies(kasirga clang-resource-headers)
 
 if(NOT CLANG_LINKS_TO_CREATE)
-  set(CLANG_LINKS_TO_CREATE clangport++ clangport-cl clangport-cpp)
+  set(CLANG_LINKS_TO_CREATE kasirga++ kasirga-cl kasirga-cpp)
 endif()
 
 foreach(link ${CLANG_LINKS_TO_CREATE})
-  add_clang_symlink(${link} clangport)
+  add_clang_symlink(${link} kasirga)
 endforeach()
 
 # Configure plist creation for OS X.
 set (TOOL_INFO_PLIST "Info.plist" CACHE STRING "Plist name")
 if (APPLE)
   if (CLANG_VENDOR)
-    set(TOOL_INFO_NAME "${CLANG_VENDOR} clangport")
+    set(TOOL_INFO_NAME "${CLANG_VENDOR} kasirga")
   else()
-    set(TOOL_INFO_NAME "clangport")
+    set(TOOL_INFO_NAME "kasirga")
   endif()
 
   set(TOOL_INFO_UTI "${CLANG_VENDOR_UTI}")
@@ -101,7 +101,7 @@ if (APPLE)
   set(TOOL_INFO_BUILD_VERSION "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}")
 
   set(TOOL_INFO_PLIST_OUT "${CMAKE_CURRENT_BINARY_DIR}/${TOOL_INFO_PLIST}")
-  target_link_libraries(clangport ############
+  target_link_libraries(kasirga ############
     PRIVATE
     "-Wl,-sectcreate,__TEXT,__info_plist,${TOOL_INFO_PLIST_OUT}")
   configure_file("${TOOL_INFO_PLIST}.in" "${TOOL_INFO_PLIST_OUT}" @ONLY)
@@ -135,8 +135,8 @@ if(CLANG_ORDER_FILE AND
   if("${ORDER_FILE}" STREQUAL "\n")
     set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${CLANG_ORDER_FILE})
   elseif(LINKER_ORDER_FILE_WORKS)
-    target_link_libraries(clangport PRIVATE ${LINKER_ORDER_FILE_OPTION})
-    set_target_properties(clangport PROPERTIES LINK_DEPENDS ${CLANG_ORDER_FILE})
+    target_link_libraries(kasirga PRIVATE ${LINKER_ORDER_FILE_OPTION})
+    set_target_properties(kasirga PROPERTIES LINK_DEPENDS ${CLANG_ORDER_FILE})
   endif()
 endif()
 

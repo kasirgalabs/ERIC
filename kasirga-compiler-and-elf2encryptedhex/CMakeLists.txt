@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13.4)
-project(clangport)
+project(kasirga)
 
 
 set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")

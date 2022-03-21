@@ -1,4 +1,4 @@
-//===------------ driver.cpp - clangport GCC-Compatible Driver ------------===//
+//===------------ driver.cpp - kasirga GCC-Compatible Driver ------------===//
 //===----------------- Ported From Clang Compiler Driver ------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -358,8 +358,8 @@ int main(int argc_, const char **argv_) {
   bool isC = false;
 
   for(int i=0; i<argv.size(); i++){
-    if(StringRef(argv[i]).endswith("clangport") || StringRef(argv[i]).endswith("clangport++")){
-      elf2encryptedhex = std::string(StringRef(argv[i]).rtrim("clangport"));
+    if(StringRef(argv[i]).endswith("kasirga") || StringRef(argv[i]).endswith("kasirga++")){
+      elf2encryptedhex = std::string(StringRef(argv[i]).rtrim("kasirga"));
       elf2encryptedhex = elf2encryptedhex + "elf2encryptedhex -d  ";
     }
 
