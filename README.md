@@ -1,5 +1,5 @@
 # ERIC - An Efficient and Practical Software Obfuscation Framework #
-
+See you at DNS 2022 for the presentation of our paper about ERIC.
 ![image](screenshots/idecollage1.png)
 
 ERIC (Encryption tool for RISCV with Compiler) has an LLVM-based compiler that provides many encryption options for riscv-based systems.
