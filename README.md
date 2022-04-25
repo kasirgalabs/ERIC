@@ -115,7 +115,7 @@ sudo ldconfig
 
 # Cloning Repository #
 ```bash
-git clone https://github.com/Celuk/ERIC
+git clone https://github.com/kasirgalabs/ERIC
 ```
 
 # Building Repository #
