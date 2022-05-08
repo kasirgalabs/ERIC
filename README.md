@@ -20,7 +20,7 @@ ERIC offers fully customizable encryption. There are currently 3 different encry
 
 ### [3. Memory-Level Encryption](#3-memory-level-encryption) ###
 
-In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can give `--rsa` flag to use 32 bit RSA encryption and manually give the public and private key pairs to the system yourself [internally](https://github.com/kasirgalabs/ERIC/blob/main/kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex/elf2encryptedhex.cpp#L84).
+In this method, you can completely encrypt the program with a public key that we will use in ERIC. Unlike the previous options, all data expected to be in memory here is encrypted with the RSA encryption method. There is encryption not at the instruction level, but as much as the size of the program in memory. You can give `--rsa` flag to use 32 bit RSA encryption and manually give the public and private key pairs to the system yourself [internally](kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex/elf2encryptedhex.cpp#L84).
 
 The thing to remember is that ERIC is a compiler with an interface developed for encryption. In order to run the encrypted programs you have compiled here, you need at least some hardware that does decryption. We will soon publish our hardware module that can work in integration with ERIC.
 
@@ -1350,7 +1350,7 @@ We think that we can fix by cmake in the future for not giving include flag in e
    
 # How can anyone add his own encryption method by IDE or internally? #
 
-For this, [custom-encryptor.h](https://github.com/kasirgalabs/ERIC/blob/main/kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) in `ERIC/kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex` directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/kasirga-compiler-and-elf2encryptedhex/build`)
+For this, [custom-encryptor.h](kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) in `ERIC/kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex` directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/kasirga-compiler-and-elf2encryptedhex/build`)
 
 Your second option is using IDE. After you gave your `kasirga` compiler path, open IDE(with `./encIDE` command) and then go to `Add Custom Encryptor` Tab above in `Options` (Ctrl+H), then you can see `custom_encryptor.h` file in the editor. Edit file as you desired and then select `Push Custom Encryptor` (Ctrl+J) option. After that in all compilations your encryption method will be used. To disable custom method again you need to edit file and set `custom` flag to `false` in the same ways.
    
