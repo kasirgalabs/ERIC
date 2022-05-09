@@ -43,8 +43,8 @@ if("${CONFIGSTR}" STREQUAL "")
         )
     elseif(APPLE)
         file(WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/encide.conf
-            "compilerpath=/usr/bin/clang\n"
-            "riscvrootpath=/Users/shc/wx/encIDE/CMakeLists.txt\n"
+            "compilerpath=/Users/shc/llvm/llvm-project/build/bin/clang\n"
+            "riscvrootpath=/Users/shc/riscv/_install/riscv64-unknown-elf\n"
             "riscvtargetoption=--riscv32\n"
             "extracompilerflags=-fnoaddrsig\n"
             "lastopenedfile=\n"
@@ -57,8 +57,8 @@ if("${CONFIGSTR}" STREQUAL "")
         )
     else()
         file(WRITE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/encide.conf
-            "compilerpath=/usr/bin/clang\n"
-            "riscvrootpath=/home/shc/wx/encIDE/CMakeLists.txt\n"
+            "compilerpath=/home/shc/llvm/llvm-project/build/bin/clang\n"
+            "riscvrootpath=/home/shc/riscv/_install/riscv64-unknown-elf\n"
             "riscvtargetoption=--riscv32\n"
             "extracompilerflags=-fnoaddrsig\n"
             "lastopenedfile=\n"

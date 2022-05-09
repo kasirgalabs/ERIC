@@ -2481,7 +2481,7 @@ namespace portedDump {
           std::stringstream enckeyallaligned;
           enckeyallaligned << std::setfill('0') << std::setw(32) << enckeyall; // std::setw should 32 or 8*j this is the choice but if this we should select least significant 16 bit of enckeyall
     
-          OSS << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
+          OSS << "1" << std::hex << std::setfill('0') << std::setw(2*j) << std::stoll(strBitArrXor(binArr, std::string(enckeyallaligned.str()), j),NULL,  2);
         }
     
         else if(encryptInstParKey != ""){
@@ -2792,9 +2792,6 @@ namespace portedDump {
   }
   OS << OSS.str();
   OSS.str("");
-  //OS<<"dene";
-  //OSS.clear();
-  //OS << std::stoll(binArr,NULL,  2);
  } // end of dumpBytes function
 } // end of namespace portedDump
 
