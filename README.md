@@ -1393,7 +1393,7 @@ example.c -o example.o \
 --elf2encryptedhex=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
 ```
 
-# How can anyone add his own encryption method by IDE or internally? #
+## How can anyone add his own encryption method by IDE or internally? ##
 
 For this, [custom-encryptor.h](kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) in `ERIC/kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex` directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/kasirga-compiler-and-elf2encryptedhex/build`)
 
