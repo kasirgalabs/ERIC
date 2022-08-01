@@ -4,6 +4,8 @@ Compiler Level RISC-V Encryption Tool
 
 This is a prototype for the paper called ["ERIC: An Efficient and Practical Software Obfuscation Framework"](https://ieeexplore.ieee.org/document/9833625) which is published in [2022 52nd Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN)](https://ieeexplore.ieee.org/xpl/conhome/9833551/proceeding).
 
+The tool is designed for academic research needs, therefore there can be still bugs, issues, so feel free to ask and help us to improve.
+
 ![image](screenshots/idecollage1.png)
 
 ERIC (Encryption tool for RISCV with Compiler) has an LLVM-based compiler that provides many encryption options for riscv-based systems.
