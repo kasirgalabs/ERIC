@@ -1385,19 +1385,14 @@ Your second option is using IDE. After you gave your `kasirga` compiler path, op
    
 You can run IDE after built in your built binary directory (`ERIC/encIDE/build/bin`) with just `./encIDE` command.
    
-# Screenshots #
-These screenshots are relatively old but we didn't want to remove. The new appearance with new features can be seen in the collage that is in head of README. (Also, the appearance depends on your OS actually.)
+# Code Transformation Flow and An Example Usage of ERIC #
    
-![image](screenshots/ide1editor.png)
+![image](screenshots/code-transformation-flow.png)
 
-![image](screenshots/ide2menubar.png)
+![image](screenshots/an-example-1.png)
 
-![image](screenshots/ide3menubar.png)
+![image](screenshots/an-example-2.png)
 
-![image](screenshots/ide4enc.png)
+![image](screenshots/an-example-3.png)
 
-![image](screenshots/ide5enc.png)
-
-![image](screenshots/ide6parenc.png)
-
-![image](screenshots/ide7parenc.png)
+![image](screenshots/an-example-4.png)
