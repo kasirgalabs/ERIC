@@ -1373,7 +1373,7 @@ example.c -o example.o \
 
 We think that we can fix by cmake in the future for not giving include flag in every compilation.
 
-**Note:** Here also you may need to use following flags (link.ld will be your linker script) when using _kasirga_:
+**Note:** Here also you may need to use following flags (link.ld will be your linker script according to your hardware) when using _kasirga_:
 
 ```bash
 -nostartfiles -nostdlib -Wl,-T,link.ld
