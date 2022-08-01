@@ -16,7 +16,7 @@ In addition, it can be used in cases where you want the data kept in memory to r
 
 ERIC can work as cross platform (OS independent, ISA independent) and consists of the following parts:
 
-* **kasirga** compiler --> This is LLVM/Clang based custom full C/C++ cross compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line. The compiler is ISA independent (depends on your LLVM built that depends on '-DLLVM_TARGETS_TO_BUILD={your-isa-target}' flag) like clang but here we focused on RISC-V ISA.
+* **kasirga** compiler --> This is LLVM/Clang based custom full C/C++ cross compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line. The compiler is ISA independent (depends on your LLVM built that depends on _-DLLVM_TARGETS_TO_BUILD={your-isa-target}_ flag) like clang but here we focused on RISC-V ISA. Also, you can use most of the clang features, as adding your optimization passes with _-Xclang_ flag.
 
 * **elf2encryptedhex** tool --> This tool disassembles the object (risc-v elf) code to hex code and does all the encryption operations. Driven by **kasirga** compiler. Has over 500 special flags to use from command-line.
 
