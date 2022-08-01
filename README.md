@@ -14,9 +14,9 @@ By using ERIC, you can make the programs you compile run on authorized hardware.
 
 In addition, it can be used in cases where you want the data kept in memory to remain encrypted or depending on the needs such as keeping the program securely.
 
-ERIC consists of the following parts:
+ERIC can work as cross platform (OS independent, ISA independent) and consists of the following parts:
 
-* **kasirga** compiler --> This is LLVM/Clang based custom full C/C++ compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line.
+* **kasirga** compiler --> This is LLVM/Clang based custom full C/C++ cross compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line. The compiler is ISA independent (depends on your LLVM built that depends on '-DLLVM_TARGETS_TO_BUILD=<your-isa-target>' flag) like clang but here we focused on RISC-V ISA.
 
 * **elf2encryptedhex** tool --> This tool disassembles the object (risc-v elf) code to hex code and does all the encryption operations. Driven by **kasirga** compiler. Has over 500 special flags to use from command-line.
 
