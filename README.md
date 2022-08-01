@@ -1442,3 +1442,23 @@ You can run IDE after built in your built binary directory (`ERIC/encIDE/build/b
 ![image](screenshots/an-example-3.png)
 
 ![image](screenshots/an-example-4.png)
+
+# Cloning, Building and Usage GIFs #
+
+![image](screenshots/clone.gif)
+
+![image](screenshots/build.gif)
+
+![image](screenshots/ide-1.gif)
+
+![image](screenshots/ide-2.gif)
+
+![image](screenshots/enc-1.gif)
+
+![image](screenshots/enc-2.gif)
+
+![image](screenshots/ide-3.gif)
+
+![image](screenshots/ide-4.gif)
+
+![image](screenshots/hex-output.gif)
