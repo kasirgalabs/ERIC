@@ -6,20 +6,6 @@ This is a prototype for the paper called ["ERIC: An Efficient and Practical Soft
 
 The tool is designed for academic research needs, therefore there can be still bugs, issues, so feel free to ask and help us to improve.
 
-# The Problem #
-
-![image](screenshots/the-problem-1.png)
-![image](screenshots/the-problem-2.png)
-
-# Proposed Architecture #
-
-![image](screenshots/architecture-1.png)
-
-
-# Implemented Architecture #
-
-![image](screenshots/architecture-2.png)
-
 # ERIC #
 
 ![image](screenshots/idecollage1.png)
@@ -1420,7 +1406,21 @@ Your second option is using IDE. After you gave your `kasirga` compiler path, op
 `encIDE` is an easy to use `c/c++ IDE` to run `kasirga` compiler on desired c/c++ files to encrypt them desired choices that as we mentioned above options. It automatically generates `compilation string` and give encrypted or non-encrypted hex code according to your choices. It prompts also a command prompt when the compilation steps are done successfully, like any other IDE but the difference is that it can be usable as cross-platform. (Although we didn't mentioned build steps for MacOS and Windows, both compiler and IDE can be built similar way in Linux, MacOS or Windows)
    
 You can run IDE after built in your built binary directory (`ERIC/encIDE/build/bin`) with just `./encIDE` command.
-   
+
+# The Problem #
+
+![image](screenshots/the-problem-1.png)
+![image](screenshots/the-problem-2.png)
+
+# Proposed Architecture #
+
+![image](screenshots/architecture-1.png)
+
+
+# Implemented Architecture #
+
+![image](screenshots/architecture-2.png)
+
 # Code Transformation Flow and An Example Usage of ERIC #
    
 ![image](screenshots/code-transformation-flow.png)
