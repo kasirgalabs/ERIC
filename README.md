@@ -6,6 +6,18 @@ This is a prototype for the paper called ["ERIC: An Efficient and Practical Soft
 
 The tool is designed for academic research needs, therefore there can be still bugs, issues, so feel free to ask and help us to improve.
 
+# The Problem #
+
+![image](screenshots/the-problem-1.png)
+![image](screenshots/the-problem-2.png)
+
+# Proposed Architecture #
+
+![image](screenshots/architecture-1.png)
+![image](screenshots/architecture-2.png)
+
+# ERIC #
+
 ![image](screenshots/idecollage1.png)
 
 ERIC (Encryption tool for RISCV with Compiler) has an LLVM-based compiler that provides many encryption options for riscv-based systems.
