@@ -1,9 +1,0 @@
-{
-  "name": "ERIC",
-  "version": "1.0.0",
-  "dependencies": {
-      "LLVM": "llvm/llvm-project",
-      "wxWidgets": "wxWidgets/wxWidgets",
-      "riscv-gnu-toolchain": "riscv-collab/riscv-gnu-toolchain"
-  }
-}
