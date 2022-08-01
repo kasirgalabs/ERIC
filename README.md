@@ -1443,7 +1443,7 @@ You can run IDE after built in your built binary directory (`ERIC/encIDE/build/b
 
 ![image](screenshots/an-example-4.png)
 
-# Cloning, Building and Usage GIFs #
+# Cloning, Building and Usage of ERIC GIFs #
 
 ![image](screenshots/clone.gif)
 
