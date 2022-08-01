@@ -70,10 +70,22 @@ git clone https://github.com/llvm/llvm-project.git
 ```
 
 However we are using LLVM 11.1.0, so download from: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-11.1.0.zip
-unzip and after that for build (We think that we will update for newer versions of LLVM and Clang such as 13 version):
+unzip and change directory:
 
 ```bash
-cd llvm-project-llvmorg-11.1.0 && \
+cd llvm-project-llvmorg-11.1.0
+```
+
+or after cloned the library from github:
+
+```bash
+cd llvm-project
+git checkout 1fdec59bffc11ae37eb51a1b9869f0696bfd5312
+```
+
+and after that for build (We think that we will update for newer versions of LLVM and Clang such as 14 version):
+
+```bash
 mkdir build && \ 
 cd build && \
 cmake -G Ninja \
@@ -93,7 +105,6 @@ cmake --build .
 #### Recommended Light Installation ####
 
 ```bash
-cd llvm-project-llvmorg-11.1.0 && \
 mkdir build && \
 cd build && \
 cmake -G Ninja \
