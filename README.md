@@ -6,7 +6,7 @@ This is a prototype for the paper called ["ERIC: An Efficient and Practical Soft
 
 The tool is designed for academic research needs, therefore there can be still bugs, issues, so feel free to ask and help us to improve.
 
-To understand quickly what we have tried to achieve please go to sections:
+To understand quickly what we have tried to achieve, please go to sections:
 
 [The Problem](#the-problem)
 
