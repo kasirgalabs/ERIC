@@ -1445,6 +1445,8 @@ You can run IDE after built in your built binary directory (`ERIC/encIDE/build/b
 
 # Cloning, Building and Usage of ERIC GIFs #
 
+Sorry for the gif qualities. (also example std::cout with stdio.h :P) Maybe one day I will fix it.
+
 ![image](screenshots/clone.gif)
 
 ![image](screenshots/build.gif)
