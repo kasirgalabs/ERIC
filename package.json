@@ -1,8 +1,8 @@
 {
   "name": "ERIC",
   "dependencies": {
-      "LLVM": "git://github.com/llvm/llvm-project",
-      "wxWidgets": "git://github.com/wxWidgets/wxWidgets",
-      "riscv-gnu-toolchain": "git://github.com/riscv-collab/riscv-gnu-toolchain"
+      "LLVM": "git+https://github.com/llvm/llvm-project",
+      "wxWidgets": "git+https://github.com/wxWidgets/wxWidgets",
+      "riscv-gnu-toolchain": "git+https://github.com/riscv-collab/riscv-gnu-toolchain"
   }
 }
