@@ -9,8 +9,11 @@ The tool is designed for academic research needs, therefore there can be still b
 To understand quickly what we have tried to achieve please go to sections:
 
 [The Problem](#the-problem)
+
 [Proposed Architecture](#proposed-architecture)
+
 [Implemented Architecture](#implemented-architecture)
+
 [Code Transformation Flow and An Example Usage of ERIC](#code-transformation-flow-and-an-example-usage-of-eric)
 
 # ERIC #
