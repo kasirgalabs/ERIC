@@ -1378,6 +1378,20 @@ We think that we can fix by cmake in the future for not giving include flag in e
 ```bash
 -nostartfiles -nostdlib -Wl,-T,link.ld
 ```
+   
+```bash
+/home/shc/Desktop/kasirga/build/bin/kasirga \
+-c \
+-I${LLVM_BUILD_DIR}/lib/clang/11.1.0/include \
+-target riscv32-unknown-elf \
+--sysroot=/home/shc/riscv-new/_install/riscv64-unknown-elf \
+--gcc-toolchain=/home/shc/riscv-new/_install/ \
+-nostartfiles \
+-nostdlib \
+-Wl,-T,link.ld \
+example.c -o example.o \
+--elf2encryptedhex=" --enckeyall=00000000000000000000000000000000 --b_p_lw=10100100101000000000001000000100 "
+```
 
 # How can anyone add his own encryption method by IDE or internally? #
 
