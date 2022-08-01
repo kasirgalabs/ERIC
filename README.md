@@ -14,6 +14,14 @@ By using ERIC, you can make the programs you compile run on authorized hardware.
 
 In addition, it can be used in cases where you want the data kept in memory to remain encrypted or depending on the needs such as keeping the program securely.
 
+ERIC consists of the following parts:
+
+* **kasirga** compiler --> This is LLVM/Clang based custom C/C++ compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line.
+
+* elf2encryptedhex tool --> This tool disassembles the object (risc-v elf) code to hex code and does all the encryption operations. Driven by **kasirga** compiler. Has over 500 special flags to use from command-line.
+
+* encIDE user interface --> This is an C/C++ IDE and encryption GUI for **kasirga** compiler to write your codes and generate compiler flags easily to get rid of command-line pain.
+
 ERIC offers fully customizable encryption. There are currently 3 different encryption methods supported (and also user desired [custom encryption](#how-can-anyone-add-his-own-encryption-method-by-ide-or-internally)):
 
 ### [1. Instruction-Level Full Encryption](#1-instruction-level-full-encryption-1) ###
