@@ -14,6 +14,10 @@ The tool is designed for academic research needs, therefore there can be still b
 # Proposed Architecture #
 
 ![image](screenshots/architecture-1.png)
+
+
+# Implemented Architecture #
+
 ![image](screenshots/architecture-2.png)
 
 # ERIC #
