@@ -16,7 +16,7 @@ In addition, it can be used in cases where you want the data kept in memory to r
 
 ERIC consists of the following parts:
 
-* **kasirga** compiler --> This is LLVM/Clang based custom C/C++ compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line.
+* **kasirga** compiler --> This is LLVM/Clang based custom full C/C++ compiler that drives **elf2encryptedhex** tool. Has special flags to use from command-line.
 
 * **elf2encryptedhex** tool --> This tool disassembles the object (risc-v elf) code to hex code and does all the encryption operations. Driven by **kasirga** compiler. Has over 500 special flags to use from command-line.
 
