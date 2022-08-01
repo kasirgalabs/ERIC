@@ -1372,7 +1372,13 @@ example.c -o example.o \
 ```
 
 We think that we can fix by cmake in the future for not giving include flag in every compilation.
-   
+
+**Note: ** Here also you may need to use following flags (link.ld will be your linker script) when using _kasirga_:
+
+```bash
+-nostartfiles -nostdlib -Wl,-T,link.ld
+```
+
 # How can anyone add his own encryption method by IDE or internally? #
 
 For this, [custom-encryptor.h](kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex/custom-encryptor.h) in `ERIC/kasirga-compiler-and-elf2encryptedhex/src/elf2encryptedhex` directory can be editable according to instructions and after that you need to build library again in your build directory (with `cmake -- build .` command in `ERIC/kasirga-compiler-and-elf2encryptedhex/build`)
