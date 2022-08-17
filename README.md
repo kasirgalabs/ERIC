@@ -4,6 +4,12 @@ Compiler Level RISC-V Encryption Tool
 
 This is a prototype for the paper called ["ERIC: An Efficient and Practical Software Obfuscation Framework"](https://ieeexplore.ieee.org/document/9833625) which is published in [2022 52nd Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN)](https://ieeexplore.ieee.org/xpl/conhome/9833551/proceeding).
 
+Lightning Talk: https://youtu.be/gXg0IwlOKBY
+
+Presentation: https://youtu.be/xYSnzC4jRCQ
+
+Presentation in Turkish: https://youtu.be/0enI-P7ck0s?t=1379
+
 The tool is designed for academic research needs, therefore there can be still bugs, issues, so feel free to ask and help us to improve.
 
 To understand quickly what we have tried to achieve, please go to sections:
