@@ -22,6 +22,21 @@ To understand quickly what we have tried to achieve, please go to sections:
 
 [Code Transformation Flow and An Example Usage of ERIC](#code-transformation-flow-and-an-example-usage-of-eric)
 
+# Citation #
+
+Please cite ERIC as:
+
+```
+@inproceedings{bolat2022eric,
+  title={ERIC: An Efficient and Practical Software Obfuscation Framework},
+  author={Bolat, Alperen and Celik, Seyyid Hikmet and Olgun, Ataberk and Ergin, O{\u{g}}uz and Ottavi, Marco},
+  booktitle={2022 52nd Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN)},
+  pages={466--474},
+  year={2022},
+  organization={IEEE}
+}
+```
+
 # ERIC #
 
 ![image](screenshots/idecollage1.png)
